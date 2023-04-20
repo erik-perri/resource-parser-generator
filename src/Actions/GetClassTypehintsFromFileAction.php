@@ -6,17 +6,15 @@ namespace ResourceParserGenerator\Actions;
 
 use phpDocumentor\Reflection\DocBlock;
 use phpDocumentor\Reflection\DocBlockFactory;
-use phpDocumentor\Reflection\Type;
-use phpDocumentor\Reflection\Types\Compound;
 use ReflectionClass;
 use ReflectionException;
-use RuntimeException;
 
 class GetClassTypehintsFromFileAction
 {
     public function __construct(
         private readonly GetUseStatementsFromFileAction $getImportsFromFile,
         private readonly DocBlockFactory $docBlockFactory,
+        private readonly ConvertDocblockTagTypesAction $convertDocblockTagTypes,
     ) {
         //
     }
@@ -38,35 +36,20 @@ class GetClassTypehintsFromFileAction
 
         foreach ($docBlock->getTags() as $tag) {
             if ($tag instanceof DocBlock\Tags\Property || $tag instanceof DocBlock\Tags\PropertyRead) {
-                $type = $tag->getType();
+                $typehints[$tag->getVariableName()] = $this->convertDocblockTagTypes->execute(
+                    $tag->getType(),
+                    $imports,
+                );
+            }
 
-                if ($type instanceof Compound) {
-                    $typehint = [];
-
-                    foreach ($type as $subType) {
-                        $typehint[] = $this->getTypehint($subType, $imports);
-                    }
-                } else {
-                    $typehint = $this->getTypehint($type, $imports);
-                }
-
-                $typehints[$tag->getVariableName()] = $typehint;
+            if ($tag instanceof DocBlock\Tags\Method) {
+                $typehints[$tag->getMethodName() . '()'] = $this->convertDocblockTagTypes->execute(
+                    $tag->getReturnType(),
+                    $imports,
+                );
             }
         }
 
         return $typehints;
-    }
-
-    public function getTypehint(Type $type, array $imports): string
-    {
-        if (!method_exists($type, '__toString')) {
-            throw new RuntimeException('Unexpected non-stringable property type: ' . get_class($type));
-        }
-
-        $type = ltrim($type->__toString(), '\\');
-
-        return array_key_exists($type, $imports)
-            ? $imports[$type]
-            : $type;
     }
 }

@@ -42,6 +42,7 @@ class GetClassTypehintsFromFileActionTest extends TestCase
 
         // Assert
         $this->assertEquals([
+            'getRouteKey()' => 'string',
             'id' => 'int',
             'ulid' => 'string',
             'email' => 'string',

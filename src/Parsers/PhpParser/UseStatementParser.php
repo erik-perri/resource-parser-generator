@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace ResourceParserGenerator\Actions;
+namespace ResourceParserGenerator\Parsers\PhpParser;
 
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\File;
@@ -12,7 +12,7 @@ use PhpParser\NodeVisitorAbstract;
 use PhpParser\Parser;
 use RuntimeException;
 
-class GetUseStatementsFromFileAction
+class UseStatementParser
 {
     public function __construct(private readonly Parser $parser)
     {
@@ -23,7 +23,7 @@ class GetUseStatementsFromFileAction
      * @param string $file
      * @return array<string, string>
      */
-    public function execute(string $file): array
+    public function parse(string $file): array
     {
         $ast = $this->parser->parse(File::get($file));
 

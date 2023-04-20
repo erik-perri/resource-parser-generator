@@ -2,30 +2,31 @@
 
 declare(strict_types=1);
 
-namespace ResourceParserGenerator\Actions;
+namespace ResourceParserGenerator\Parsers\DocBlock;
 
 use phpDocumentor\Reflection\Type;
 use phpDocumentor\Reflection\Types\Compound;
+use ResourceParserGenerator\Parsers\ResolveScope;
 use RuntimeException;
 
-class ConvertDocblockTagTypesAction
+class DocBlockTagTypeConverter
 {
-    public function execute(?Type $type, array $imports): string|array
+    public function convert(?Type $type, ResolveScope $scope): string|array
     {
         if ($type instanceof Compound) {
             $typehint = [];
 
             foreach ($type as $subType) {
-                $typehint[] = $this->getTypehint($subType, $imports);
+                $typehint[] = $this->getTypehint($subType, $scope);
             }
 
             return $typehint;
         }
 
-        return $this->getTypehint($type, $imports);
+        return $this->getTypehint($type, $scope);
     }
 
-    private function getTypehint(?Type $type, array $imports): string
+    private function getTypehint(?Type $type, ResolveScope $scope): string
     {
         if (!method_exists($type, '__toString')) {
             throw new RuntimeException('Unexpected non-stringable property type: ' . get_class($type));
@@ -33,8 +34,6 @@ class ConvertDocblockTagTypesAction
 
         $typeString = ltrim($type->__toString(), '\\');
 
-        return array_key_exists($typeString, $imports)
-            ? $imports[$typeString]
-            : $typeString;
+        return $scope->resolveClass($typeString);
     }
 }

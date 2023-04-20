@@ -4,19 +4,19 @@
 
 declare(strict_types=1);
 
-namespace ResourceParserGenerator\Tests\Unit\Actions;
+namespace ResourceParserGenerator\Tests\Unit\Parsers\PhpParser;
 
 use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Model;
 use PHPUnit\Framework\Attributes\DataProvider;
-use ResourceParserGenerator\Actions\GetUseStatementsFromFileAction;
+use ResourceParserGenerator\Parsers\PhpParser\UseStatementParser;
 use ResourceParserGenerator\Tests\Stubs\Models\User;
 use ResourceParserGenerator\Tests\TestCase;
 
 /**
- * @covers GetUseStatementsFromFileAction
+ * @covers UseStatementParser
  */
-class GetUseStatementsFromFileActionTest extends TestCase
+class UseStatementsParserTest extends TestCase
 {
     #[DataProvider('expectedUseProvider')]
     public function testGetExpectedUseStatements(string $classFile, array $expectedResult): void
@@ -35,13 +35,13 @@ class GetUseStatementsFromFileActionTest extends TestCase
     {
         return [
             'normal use' => [
-                'classFile' => dirname(__DIR__, 2) . '/Stubs/UserResource.php',
+                'classFile' => dirname(__DIR__, 3) . '/Stubs/UserResource.php',
                 'expectedResult' => [
                     'User' => User::class,
                 ],
             ],
             'aliased use' => [
-                'classFile' => dirname(__DIR__, 2) . '/Stubs/Models/User.php',
+                'classFile' => dirname(__DIR__, 3) . '/Stubs/Models/User.php',
                 'expectedResult' => [
                     'AliasedLaravelModel' => Model::class,
                     'CarbonImmutable' => CarbonImmutable::class,
@@ -56,9 +56,9 @@ class GetUseStatementsFromFileActionTest extends TestCase
      */
     private function performAction(string $classFile): array
     {
-        /** @var GetUseStatementsFromFileAction $action */
-        $action = app(GetUseStatementsFromFileAction::class);
+        /** @var UseStatementParser $parser */
+        $parser = app(UseStatementParser::class);
 
-        return $action->execute($classFile);
+        return $parser->parse($classFile);
     }
 }

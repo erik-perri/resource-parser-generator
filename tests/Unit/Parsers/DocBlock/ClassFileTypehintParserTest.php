@@ -4,24 +4,24 @@
 
 declare(strict_types=1);
 
-namespace ResourceParserGenerator\Tests\Unit\Actions;
+namespace ResourceParserGenerator\Tests\Unit\Parsers\DocBlock;
 
 use Carbon\CarbonImmutable;
 use ReflectionException;
-use ResourceParserGenerator\Actions\GetClassTypehintsFromFileAction;
+use ResourceParserGenerator\Parsers\DocBlock\ClassFileTypehintParser;
 use ResourceParserGenerator\Tests\Stubs\Models\User;
 use ResourceParserGenerator\Tests\Stubs\UserResource;
 use ResourceParserGenerator\Tests\TestCase;
 
 /**
- * @covers GetClassTypehintsFromFileAction
+ * @covers ClassFileTypehintParser
  */
-class GetClassTypehintsFromFileActionTest extends TestCase
+class ClassFileTypehintParserTest extends TestCase
 {
     public function testGetsFullClassFromImportedClass(): void
     {
         // Arrange
-        $classFile = dirname(__DIR__, 2) . '/Stubs/UserResource.php';
+        $classFile = dirname(__DIR__, 3) . '/Stubs/UserResource.php';
 
         // Act
         $typehints = $this->performAction(UserResource::class, $classFile);
@@ -35,7 +35,7 @@ class GetClassTypehintsFromFileActionTest extends TestCase
     public function testGetsCompoundTypesFromRegularAndReadOnlyProperties(): void
     {
         // Arrange
-        $classFile = dirname(__DIR__, 2) . '/Stubs/Models/User.php';
+        $classFile = dirname(__DIR__, 3) . '/Stubs/Models/User.php';
 
         // Act
         $typehints = $this->performAction(User::class, $classFile);
@@ -60,9 +60,9 @@ class GetClassTypehintsFromFileActionTest extends TestCase
      */
     private function performAction(string $className, string $classFile): array
     {
-        /** @var GetClassTypehintsFromFileAction $action */
-        $action = app(GetClassTypehintsFromFileAction::class);
+        /** @var ClassFileTypehintParser $parser */
+        $parser = app(ClassFileTypehintParser::class);
 
-        return $action->execute($className, $classFile);
+        return $parser->parse($className, $classFile);
     }
 }

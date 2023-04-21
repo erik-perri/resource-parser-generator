@@ -10,7 +10,7 @@ use PhpParser\Node;
 use PhpParser\NodeTraverser;
 use PhpParser\NodeVisitorAbstract;
 use PhpParser\Parser;
-use RuntimeException;
+use ResourceParserGenerator\Exceptions\UnhandledParseResultException;
 
 class UseStatementParser
 {
@@ -41,7 +41,7 @@ class UseStatementParser
                 if ($node instanceof Node\Stmt\Use_) {
                     foreach ($node->uses as $use) {
                         if (!($use instanceof Node\Stmt\UseUse)) {
-                            throw new RuntimeException('Unexpected "use" statement type.');
+                            throw new UnhandledParseResultException('Unexpected "use" statement type.', $use);
                         }
 
                         $this->importedClasses->put($use->getAlias()->name, $use->name->toString());

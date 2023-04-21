@@ -8,16 +8,16 @@ use phpDocumentor\Reflection\Type;
 use phpDocumentor\Reflection\Types\Compound;
 use phpDocumentor\Reflection\Types\Integer;
 use phpDocumentor\Reflection\Types\String_;
+use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\Attributes\UsesClass;
 use ResourceParserGenerator\Parsers\DocBlock\DocBlockTagTypeConverter;
 use ResourceParserGenerator\Parsers\ResolveScope;
 use ResourceParserGenerator\ResourceParserGeneratorServiceProvider;
 use ResourceParserGenerator\Tests\TestCase;
 
-/**
- * @covers DocBlockTagTypeConverter
- * @covers ResourceParserGeneratorServiceProvider
- */
+#[CoversClass(DocBlockTagTypeConverter::class)]
+#[UsesClass(ResourceParserGeneratorServiceProvider::class)]
 class DocBlockTagTypeConverterTest extends TestCase
 {
     #[DataProvider('convertsTypeProvider')]

@@ -7,15 +7,23 @@ declare(strict_types=1);
 namespace ResourceParserGenerator\Tests\Unit\Parsers\DocBlock;
 
 use Carbon\CarbonImmutable;
+use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\UsesClass;
 use ReflectionException;
 use ResourceParserGenerator\Parsers\DocBlock\ClassFileTypehintParser;
+use ResourceParserGenerator\Parsers\DocBlock\DocBlockTagTypeConverter;
+use ResourceParserGenerator\Parsers\PhpParser\UseStatementParser;
+use ResourceParserGenerator\Parsers\ResolveScope;
+use ResourceParserGenerator\ResourceParserGeneratorServiceProvider;
 use ResourceParserGenerator\Tests\Stubs\Models\User;
 use ResourceParserGenerator\Tests\Stubs\UserResource;
 use ResourceParserGenerator\Tests\TestCase;
 
-/**
- * @covers ClassFileTypehintParser
- */
+#[CoversClass(ClassFileTypehintParser::class)]
+#[UsesClass(DocBlockTagTypeConverter::class)]
+#[UsesClass(UseStatementParser::class)]
+#[UsesClass(ResolveScope::class)]
+#[UsesClass(ResourceParserGeneratorServiceProvider::class)]
 class ClassFileTypehintParserTest extends TestCase
 {
     public function testGetsFullClassFromImportedClass(): void

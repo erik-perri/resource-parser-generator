@@ -31,5 +31,10 @@
         "ResourceParserGenerator\\ResourceParserGeneratorServiceProvider"
       ]
     }
+  },
+  "scripts": {
+    "test": [
+      "@php vendor/bin/phpunit"
+    ]
   }
 }

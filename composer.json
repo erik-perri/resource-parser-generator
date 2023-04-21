@@ -33,6 +33,12 @@
     }
   },
   "scripts": {
+    "check-style": [
+      "@php vendor/bin/phpcs src/ tests/"
+    ],
+    "fix-style": [
+      "@php vendor/bin/phpcbf src/ tests/"
+    ],
     "test": [
       "@php vendor/bin/phpunit"
     ]

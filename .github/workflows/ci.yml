@@ -25,7 +25,7 @@ jobs:
           restore-keys: ${{ runner.os }}-composer-
 
       - run: composer install --no-interaction --no-progress --no-suggest --prefer-dist
-      #- run: composer check-style
+      - run: composer check-style
       #- run: composer check-code
       - run: composer test -- --coverage-text --path-coverage
       - run: composer validate --strict

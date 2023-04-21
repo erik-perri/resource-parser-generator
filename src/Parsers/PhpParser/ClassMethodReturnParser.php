@@ -28,27 +28,28 @@ class ClassMethodReturnParser
      * @param string[] $methodsToCheck
      * @param string $className
      * @param string|null $classFile
-     * @return array<string, string|string[]>
+     * @return ClassTypehints
      * @throws ReflectionException
      */
-    public function parse(array $methodsToCheck, string $className, string|null $classFile): array
+    public function parse(array|null $methodsToCheck, string $className, string|null $classFile): ClassTypehints
     {
         $reflectionClass = new ReflectionClass($className);
 
-        $methods = [];
+        $methods = new ClassTypehints($className);
+
         $classTypehints = $classFile
             ? $this->classFileTypehintParser->parse($className, $classFile)
-            : new ClassTypehints();
+            : new ClassTypehints($className);
 
         foreach ($reflectionClass->getMethods() as $method) {
-            if (!in_array($method->getName(), $methodsToCheck, true)) {
+            if ($methodsToCheck !== null && !in_array($method->getName(), $methodsToCheck, true)) {
                 continue;
             }
 
             // Check the class typehints first since they were theoretically specified by the user as overrides
             $hintedTypes = $classTypehints->getMethodTypes($method->getName());
             if ($hintedTypes) {
-                $methods[$method->getName()] = $hintedTypes;
+                $methods = $methods->addMethod($method->getName(), $hintedTypes);
                 continue;
             }
 
@@ -64,9 +65,12 @@ class ClassMethodReturnParser
                         ? $this->resolveScope->loadImports($classFile)
                         : null;
 
-                    $methods[$method->getName()] = $this->convertDocblockTagTypes->convert(
-                        $return->getType(),
-                        $scope,
+                    $methods = $methods->addMethod(
+                        $method->getName(),
+                        $this->convertDocblockTagTypes->convert(
+                            $return->getType(),
+                            $scope,
+                        ),
                     );
                     continue;
                 }
@@ -79,13 +83,11 @@ class ClassMethodReturnParser
                 foreach ($returnType->getTypes() as $type) {
                     $types[] = $type->getName();
                 }
-                $methods[$method->getName()] = $types;
+                $methods = $methods->addMethod($method->getName(), $types);
             } else {
-                if ($returnType) {
-                    $methods[$method->getName()] = [$returnType->getName()];
-                } else {
-                    $methods[$method->getName()] = ['mixed', 'void'];
-                }
+                $methods = $returnType
+                    ? $methods->addMethod($method->getName(), [$returnType->getName()])
+                    : $methods->addMethod($method->getName(), ['mixed', 'void']);
             }
         }
 

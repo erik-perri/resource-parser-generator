@@ -7,6 +7,7 @@ namespace ResourceParserGenerator\DataObjects;
 class ClassTypehints
 {
     public function __construct(
+        public readonly string $className,
         public readonly array $properties = [],
         public readonly array $methods = [],
     ) {
@@ -16,6 +17,7 @@ class ClassTypehints
     public function addMethod(string $methodName, array $returnTypes): ClassTypehints
     {
         return new self(
+            $this->className,
             $this->properties,
             array_merge($this->methods, [$methodName => $returnTypes]),
         );
@@ -24,6 +26,7 @@ class ClassTypehints
     public function addProperty(string $propertyName, array $types): ClassTypehints
     {
         return new self(
+            $this->className,
             array_merge($this->properties, [$propertyName => $types]),
             $this->methods,
         );

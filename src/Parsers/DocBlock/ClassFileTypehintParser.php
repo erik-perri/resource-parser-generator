@@ -26,7 +26,7 @@ class ClassFileTypehintParser
      */
     public function parse(string $className, string $classFile): ClassTypehints
     {
-        $typehints = new ClassTypehints();
+        $typehints = new ClassTypehints($className);
 
         $reflectionClass = new ReflectionClass($className);
         $docComment = $reflectionClass->getDocComment();

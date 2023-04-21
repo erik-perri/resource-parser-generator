@@ -10,6 +10,7 @@ use Carbon\CarbonImmutable;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\UsesClass;
 use ReflectionException;
+use ResourceParserGenerator\DataObjects\ClassTypehints;
 use ResourceParserGenerator\Parsers\DocBlock\ClassFileTypehintParser;
 use ResourceParserGenerator\Parsers\DocBlock\DocBlockTagTypeConverter;
 use ResourceParserGenerator\Parsers\PhpParser\UseStatementParser;
@@ -20,6 +21,7 @@ use ResourceParserGenerator\Tests\Stubs\UserResource;
 use ResourceParserGenerator\Tests\TestCase;
 
 #[CoversClass(ClassFileTypehintParser::class)]
+#[UsesClass(ClassTypehints::class)]
 #[UsesClass(DocBlockTagTypeConverter::class)]
 #[UsesClass(ResolveScope::class)]
 #[UsesClass(ResourceParserGeneratorServiceProvider::class)]
@@ -35,9 +37,16 @@ class ClassFileTypehintParserTest extends TestCase
         $typehints = $this->performAction(UserResource::class, $classFile);
 
         // Assert
-        $this->assertEquals([
-            'resource' => User::class,
-        ], $typehints);
+        $this->assertEquals(
+            [],
+            $typehints->methods,
+        );
+        $this->assertEquals(
+            [
+                'resource' => [User::class],
+            ],
+            $typehints->properties,
+        );
     }
 
     public function testGetsCompoundTypesFromRegularAndReadOnlyProperties(): void
@@ -49,24 +58,32 @@ class ClassFileTypehintParserTest extends TestCase
         $typehints = $this->performAction(User::class, $classFile);
 
         // Assert
-        $this->assertEquals([
-            'getRouteKey()' => 'string',
-            'id' => 'int',
-            'ulid' => 'string',
-            'email' => 'string',
-            'name' => 'string',
-            'created_at' => [CarbonImmutable::class, 'null'],
-            'updated_at' => [CarbonImmutable::class, 'null'],
-        ], $typehints);
+        $this->assertEquals(
+            [
+                'getRouteKey' => ['string'],
+            ],
+            $typehints->methods,
+        );
+        $this->assertEquals(
+            [
+                'id' => ['int'],
+                'ulid' => ['string'],
+                'email' => ['string'],
+                'name' => ['string'],
+                'created_at' => [CarbonImmutable::class, 'null'],
+                'updated_at' => [CarbonImmutable::class, 'null'],
+            ],
+            $typehints->properties,
+        );
     }
 
     /**
      * @param class-string $className
      * @param string $classFile
-     * @return array<string, string|string[]>
+     * @return ClassTypehints
      * @throws ReflectionException
      */
-    private function performAction(string $className, string $classFile): array
+    private function performAction(string $className, string $classFile): ClassTypehints
     {
         /** @var ClassFileTypehintParser $parser */
         $parser = app(ClassFileTypehintParser::class);

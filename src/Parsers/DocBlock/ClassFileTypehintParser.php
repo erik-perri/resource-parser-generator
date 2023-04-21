@@ -8,6 +8,7 @@ use phpDocumentor\Reflection\DocBlock;
 use phpDocumentor\Reflection\DocBlockFactory;
 use ReflectionClass;
 use ReflectionException;
+use ResourceParserGenerator\DataObjects\ClassTypehints;
 use ResourceParserGenerator\Parsers\ResolveScope;
 
 class ClassFileTypehintParser
@@ -23,31 +24,38 @@ class ClassFileTypehintParser
     /**
      * @throws ReflectionException
      */
-    public function parse(string $className, string $classFile): array
+    public function parse(string $className, string $classFile): ClassTypehints
     {
+        $typehints = new ClassTypehints();
+
         $reflectionClass = new ReflectionClass($className);
         $docComment = $reflectionClass->getDocComment();
         if (!$docComment) {
-            return [];
+            return $typehints;
         }
 
         $this->resolveScope->loadImports($classFile);
 
         $docBlock = $this->docBlockFactory->create($docComment);
-        $typehints = [];
 
         foreach ($docBlock->getTags() as $tag) {
             if ($tag instanceof DocBlock\Tags\Property || $tag instanceof DocBlock\Tags\PropertyRead) {
-                $typehints[$tag->getVariableName()] = $this->convertDocblockTagTypes->convert(
-                    $tag->getType(),
-                    $this->resolveScope,
+                $typehints = $typehints->addProperty(
+                    $tag->getVariableName(),
+                    $this->convertDocblockTagTypes->convert(
+                        $tag->getType(),
+                        $this->resolveScope,
+                    ),
                 );
             }
 
             if ($tag instanceof DocBlock\Tags\Method) {
-                $typehints[$tag->getMethodName() . '()'] = $this->convertDocblockTagTypes->convert(
-                    $tag->getReturnType(),
-                    $this->resolveScope,
+                $typehints = $typehints->addMethod(
+                    $tag->getMethodName(),
+                    $this->convertDocblockTagTypes->convert(
+                        $tag->getReturnType(),
+                        $this->resolveScope,
+                    ),
                 );
             }
         }

@@ -8,6 +8,7 @@ use phpDocumentor\Reflection\DocBlockFactory;
 use ReflectionClass;
 use ReflectionException;
 use ReflectionUnionType;
+use ResourceParserGenerator\DataObjects\ClassTypehints;
 use ResourceParserGenerator\Parsers\DocBlock\ClassFileTypehintParser;
 use ResourceParserGenerator\Parsers\DocBlock\DocBlockTagTypeConverter;
 use ResourceParserGenerator\Parsers\ResolveScope;
@@ -37,7 +38,7 @@ class ClassMethodReturnParser
         $methods = [];
         $classTypehints = $classFile
             ? $this->classFileTypehintParser->parse($className, $classFile)
-            : [];
+            : new ClassTypehints();
 
         foreach ($reflectionClass->getMethods() as $method) {
             if (!in_array($method->getName(), $methodsToCheck, true)) {
@@ -45,8 +46,9 @@ class ClassMethodReturnParser
             }
 
             // Check the class typehints first since they were theoretically specified by the user as overrides
-            if (isset($classTypehints[$method->getName() . '()'])) {
-                $methods[$method->getName()] = $classTypehints[$method->getName() . '()'];
+            $hintedTypes = $classTypehints->getMethodTypes($method->getName());
+            if ($hintedTypes) {
+                $methods[$method->getName()] = $hintedTypes;
                 continue;
             }
 

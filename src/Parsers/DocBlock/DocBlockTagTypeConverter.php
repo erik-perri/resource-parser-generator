@@ -11,7 +11,7 @@ use RuntimeException;
 
 class DocBlockTagTypeConverter
 {
-    public function convert(?Type $type, ResolveScope $scope): string|array
+    public function convert(?Type $type, ResolveScope $scope): array
     {
         if ($type instanceof Compound) {
             $typehint = [];
@@ -23,7 +23,7 @@ class DocBlockTagTypeConverter
             return $typehint;
         }
 
-        return $this->getTypehint($type, $scope);
+        return [$this->getTypehint($type, $scope)];
     }
 
     private function getTypehint(?Type $type, ResolveScope $scope): string

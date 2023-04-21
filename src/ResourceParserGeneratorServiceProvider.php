@@ -24,8 +24,8 @@ class ResourceParserGeneratorServiceProvider extends ServiceProvider
             $this->app->singleton(ClassFileFinder::class, fn() => new ClassFileFinder(
                 Env::get('COMPOSER_VENDOR_DIR') ?: $this->app->basePath('vendor')
             ));
-            $this->app->bind(Parser::class, fn() => (new ParserFactory)->create(ParserFactory::ONLY_PHP7));
-            $this->app->bind(DocBlockFactory::class, fn() => DocBlockFactory::createInstance());
+            $this->app->singleton(Parser::class, fn() => (new ParserFactory)->create(ParserFactory::ONLY_PHP7));
+            $this->app->singleton(DocBlockFactory::class, fn() => DocBlockFactory::createInstance());
         }
     }
 }

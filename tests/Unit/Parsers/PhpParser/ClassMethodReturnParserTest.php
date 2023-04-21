@@ -30,11 +30,7 @@ class ClassMethodReturnParserTest extends TestCase
         // Arrange
         $classFile = dirname(__DIR__, 3) . '/Stubs/Models/User.php';
 
-        /**
-         * phpDocumentor uses final classes making mocking more of a pain than it's worth, so we just use make.
-         *
-         * @var ClassMethodReturnParser $parser
-         */
+        /** @var ClassMethodReturnParser $parser */
         $parser = $this->app->make(ClassMethodReturnParser::class);
 
         // Act

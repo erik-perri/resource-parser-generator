@@ -82,7 +82,7 @@ class ClassMethodReturnParser
                 $methods[$method->getName()] = $types;
             } else {
                 if ($returnType) {
-                    $methods[$method->getName()] = $returnType->getName();
+                    $methods[$method->getName()] = [$returnType->getName()];
                 } else {
                     $methods[$method->getName()] = ['mixed', 'void'];
                 }

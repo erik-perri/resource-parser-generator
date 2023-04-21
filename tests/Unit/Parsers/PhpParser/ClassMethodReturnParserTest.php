@@ -18,9 +18,9 @@ use ResourceParserGenerator\Tests\TestCase;
 #[CoversClass(ClassMethodReturnParser::class)]
 #[UsesClass(ClassFileTypehintParser::class)]
 #[UsesClass(DocBlockTagTypeConverter::class)]
-#[UsesClass(UseStatementParser::class)]
 #[UsesClass(ResolveScope::class)]
 #[UsesClass(ResourceParserGeneratorServiceProvider::class)]
+#[UsesClass(UseStatementParser::class)]
 class ClassMethodReturnParserTest extends TestCase
 {
     public function testParsesClassMethodReturn(): void

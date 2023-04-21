@@ -21,9 +21,9 @@ use ResourceParserGenerator\Tests\TestCase;
 
 #[CoversClass(ClassFileTypehintParser::class)]
 #[UsesClass(DocBlockTagTypeConverter::class)]
-#[UsesClass(UseStatementParser::class)]
 #[UsesClass(ResolveScope::class)]
 #[UsesClass(ResourceParserGeneratorServiceProvider::class)]
+#[UsesClass(UseStatementParser::class)]
 class ClassFileTypehintParserTest extends TestCase
 {
     public function testGetsFullClassFromImportedClass(): void

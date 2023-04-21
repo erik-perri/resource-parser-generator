@@ -50,10 +50,10 @@ class ClassMethodReturnParserTest extends TestCase
 
         // Assert
         $this->assertEquals([
-            'getRouteKey' => 'string',
-            'typedMethod' => 'int',
+            'getRouteKey' => ['string'],
+            'typedMethod' => ['int'],
             'typedUnionMethod' => ['string', 'int'],
-            'untypedWithDocMethod' => 'string',
+            'untypedWithDocMethod' => ['string'],
             'untypedWithoutDocMethod' => ['mixed', 'void'],
         ], $result);
     }

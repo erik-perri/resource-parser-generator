@@ -46,7 +46,7 @@ class DocBlockTagTypeConverterTest extends TestCase
         return [
             'string' => [
                 'type' => new String_(),
-                'expectedResult' => 'string',
+                'expectedResult' => ['string'],
             ],
             'compound' => [
                 'type' => new Compound([new String_(), new Integer()]),

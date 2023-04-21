@@ -24,8 +24,13 @@ class DocBlockTagTypeConverterTest extends TestCase
     public function testConvertsType(Type $type, string|array $expectedResult): void
     {
         // Arrange
-        $scope = $this->createMock(ResolveScope::class);
-        $scope->method('resolveClass')->willReturnArgument(0);
+        /** @var ResolveScope $scope */
+        $scope = $this->mock(ResolveScope::class)
+            ->expects('resolveClass')
+            ->atLeast()
+            ->once()
+            ->andReturnArg(0)
+            ->getMock();
 
         $converter = new DocBlockTagTypeConverter();
 

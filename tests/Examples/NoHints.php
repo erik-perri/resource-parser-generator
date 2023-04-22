@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace ResourceParserGenerator\Tests\Stubs;
+namespace ResourceParserGenerator\Tests\Examples;
 
 class NoHints
 {

@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace ResourceParserGenerator\Tests\Stubs\Models;
+namespace ResourceParserGenerator\Tests\Examples\Models;
 
 use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Model as AliasedLaravelModel;

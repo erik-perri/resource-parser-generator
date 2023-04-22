@@ -11,7 +11,7 @@ use Illuminate\Database\Eloquent\Model;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\DataProvider;
 use ResourceParserGenerator\Parsers\PhpParser\UseStatementParser;
-use ResourceParserGenerator\Tests\Stubs\Models\User;
+use ResourceParserGenerator\Tests\Examples\Models\User;
 use ResourceParserGenerator\Tests\TestCase;
 
 #[CoversClass(UseStatementParser::class)]
@@ -34,13 +34,13 @@ class UseStatementsParserTest extends TestCase
     {
         return [
             'normal use' => [
-                'classFile' => dirname(__DIR__, 3) . '/Stubs/UserResource.php',
+                'classFile' => dirname(__DIR__, 3) . '/Examples/UserResource.php',
                 'expectedResult' => [
                     'User' => User::class,
                 ],
             ],
             'aliased use' => [
-                'classFile' => dirname(__DIR__, 3) . '/Stubs/Models/User.php',
+                'classFile' => dirname(__DIR__, 3) . '/Examples/Models/User.php',
                 'expectedResult' => [
                     'AliasedLaravelModel' => Model::class,
                     'CarbonImmutable' => CarbonImmutable::class,

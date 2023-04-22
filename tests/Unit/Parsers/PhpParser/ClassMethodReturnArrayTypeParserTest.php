@@ -7,7 +7,7 @@ namespace ResourceParserGenerator\Tests\Unit\Parsers\PhpParser;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\DataProvider;
 use ResourceParserGenerator\Parsers\PhpParser\ClassMethodReturnArrayTypeParser;
-use ResourceParserGenerator\Tests\Stubs\UserResource;
+use ResourceParserGenerator\Tests\Examples\UserResource;
 use ResourceParserGenerator\Tests\TestCase;
 
 #[CoversClass(ClassMethodReturnArrayTypeParser::class)]
@@ -35,7 +35,7 @@ class ClassMethodReturnArrayTypeParserTest extends TestCase
     {
         return [
             'authentication' => [
-                'classFile' => dirname(__DIR__, 3) . '/Stubs/UserResource.php',
+                'classFile' => dirname(__DIR__, 3) . '/Examples/UserResource.php',
                 'className' => UserResource::class,
                 'methodName' => 'authentication',
                 'expectedReturns' => [
@@ -45,7 +45,7 @@ class ClassMethodReturnArrayTypeParserTest extends TestCase
                 ],
             ],
             'adminList' => [
-                'classFile' => dirname(__DIR__, 3) . '/Stubs/UserResource.php',
+                'classFile' => dirname(__DIR__, 3) . '/Examples/UserResource.php',
                 'className' => UserResource::class,
                 'methodName' => 'adminList',
                 'expectedReturns' => [
@@ -57,7 +57,7 @@ class ClassMethodReturnArrayTypeParserTest extends TestCase
                 ],
             ],
             'combined' => [
-                'classFile' => dirname(__DIR__, 3) . '/Stubs/UserResource.php',
+                'classFile' => dirname(__DIR__, 3) . '/Examples/UserResource.php',
                 'className' => UserResource::class,
                 'methodName' => 'combined',
                 'expectedReturns' => [
@@ -66,7 +66,7 @@ class ClassMethodReturnArrayTypeParserTest extends TestCase
                 ],
             ],
             'ternaries' => [
-                'classFile' => dirname(__DIR__, 3) . '/Stubs/UserResource.php',
+                'classFile' => dirname(__DIR__, 3) . '/Examples/UserResource.php',
                 'className' => UserResource::class,
                 'methodName' => 'ternaries',
                 'expectedReturns' => [
@@ -75,7 +75,7 @@ class ClassMethodReturnArrayTypeParserTest extends TestCase
                 ],
             ],
             'scalars' => [
-                'classFile' => dirname(__DIR__, 3) . '/Stubs/UserResource.php',
+                'classFile' => dirname(__DIR__, 3) . '/Examples/UserResource.php',
                 'className' => UserResource::class,
                 'methodName' => 'scalars',
                 'expectedReturns' => [

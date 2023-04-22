@@ -8,7 +8,7 @@ use Closure;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\DataProvider;
 use ResourceParserGenerator\Commands\GenerateResourceParserCommand;
-use ResourceParserGenerator\Tests\Stubs\UserResource;
+use ResourceParserGenerator\Tests\Examples\UserResource;
 use ResourceParserGenerator\Tests\TestCase;
 
 #[CoversClass(GenerateResourceParserCommand::class)]
@@ -62,14 +62,14 @@ class GenerateResourceParserCommandTest extends TestCase
                 'className' => UserResource::class,
                 'methodName' => 'authentication',
                 'outputFactory' => fn() => file_get_contents(
-                    dirname(__DIR__, 2) . '/Stubs/userResourceAuthenticationParser.ts.stub',
+                    dirname(__DIR__, 2) . '/Output/userResourceAuthenticationParser.ts.txt',
                 ),
             ],
             'UserResource adminList format' => [
                 'className' => UserResource::class,
                 'methodName' => 'adminList',
                 'outputFactory' => fn() => file_get_contents(
-                    dirname(__DIR__, 2) . '/Stubs/userResourceAdminListParser.ts.stub',
+                    dirname(__DIR__, 2) . '/Output/userResourceAdminListParser.ts.txt',
                 ),
             ],
         ];

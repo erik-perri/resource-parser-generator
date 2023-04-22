@@ -6,7 +6,7 @@ namespace ResourceParserGenerator\Tests\Unit\Parsers\PhpParser;
 
 use PHPUnit\Framework\Attributes\CoversClass;
 use ResourceParserGenerator\Parsers\PhpParser\ClassMethodReturnParser;
-use ResourceParserGenerator\Tests\Stubs\Models\User;
+use ResourceParserGenerator\Tests\Examples\Models\User;
 use ResourceParserGenerator\Tests\TestCase;
 
 #[CoversClass(ClassMethodReturnParser::class)]
@@ -15,7 +15,7 @@ class ClassMethodReturnParserTest extends TestCase
     public function testParsesClassMethodReturn(): void
     {
         // Arrange
-        $classFile = dirname(__DIR__, 3) . '/Stubs/Models/User.php';
+        $classFile = dirname(__DIR__, 3) . '/Examples/Models/User.php';
 
         /** @var ClassMethodReturnParser $parser */
         $parser = $this->app->make(ClassMethodReturnParser::class);

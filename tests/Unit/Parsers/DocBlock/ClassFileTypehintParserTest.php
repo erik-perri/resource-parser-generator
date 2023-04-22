@@ -11,8 +11,8 @@ use PHPUnit\Framework\Attributes\CoversClass;
 use ReflectionException;
 use ResourceParserGenerator\DataObjects\ClassTypehints;
 use ResourceParserGenerator\Parsers\DocBlock\ClassFileTypehintParser;
-use ResourceParserGenerator\Tests\Stubs\Models\User;
-use ResourceParserGenerator\Tests\Stubs\UserResource;
+use ResourceParserGenerator\Tests\Examples\Models\User;
+use ResourceParserGenerator\Tests\Examples\UserResource;
 use ResourceParserGenerator\Tests\TestCase;
 
 #[CoversClass(ClassFileTypehintParser::class)]
@@ -21,7 +21,7 @@ class ClassFileTypehintParserTest extends TestCase
     public function testGetsFullClassFromImportedClass(): void
     {
         // Arrange
-        $classFile = dirname(__DIR__, 3) . '/Stubs/UserResource.php';
+        $classFile = dirname(__DIR__, 3) . '/Examples/UserResource.php';
 
         // Act
         $typehints = $this->performAction(UserResource::class, $classFile);
@@ -43,7 +43,7 @@ class ClassFileTypehintParserTest extends TestCase
     public function testGetsCompoundTypesFromRegularAndReadOnlyProperties(): void
     {
         // Arrange
-        $classFile = dirname(__DIR__, 3) . '/Stubs/Models/User.php';
+        $classFile = dirname(__DIR__, 3) . '/Examples/Models/User.php';
 
         // Act
         $typehints = $this->performAction(User::class, $classFile);

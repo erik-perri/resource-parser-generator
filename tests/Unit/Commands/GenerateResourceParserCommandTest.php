@@ -8,6 +8,12 @@ use Closure;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\UsesClass;
+use ResourceParserGenerator\Builders\Constraints\CompoundConstraint;
+use ResourceParserGenerator\Builders\Constraints\NullConstraint;
+use ResourceParserGenerator\Builders\Constraints\StringConstraint;
+use ResourceParserGenerator\Builders\ParserBuilder;
+use ResourceParserGenerator\Builders\ParserConstraintBuilder;
+use ResourceParserGenerator\Builders\ParserFileBuilder;
 use ResourceParserGenerator\Commands\GenerateResourceParserCommand;
 use ResourceParserGenerator\DataObjects\ClassTypehints;
 use ResourceParserGenerator\Filesystem\ClassFileFinder;
@@ -34,12 +40,18 @@ use ResourceParserGenerator\Visitors\FindClassMethodWithNameVisitor;
 #[UsesClass(ClassMethodReturnArrayTypeParser::class)]
 #[UsesClass(ClassMethodReturnParser::class)]
 #[UsesClass(ClassTypehints::class)]
+#[UsesClass(CompoundConstraint::class)]
 #[UsesClass(DocBlockTagTypeConverter::class)]
 #[UsesClass(ExpressionObjectTypeParser::class)]
 #[UsesClass(FindArrayReturnVisitor::class)]
 #[UsesClass(FindClassMethodWithNameVisitor::class)]
+#[UsesClass(NullConstraint::class)]
+#[UsesClass(ParserBuilder::class)]
+#[UsesClass(ParserConstraintBuilder::class)]
+#[UsesClass(ParserFileBuilder::class)]
 #[UsesClass(ResolveScope::class)]
 #[UsesClass(ResourceParserGeneratorServiceProvider::class)]
+#[UsesClass(StringConstraint::class)]
 #[UsesClass(UseStatementParser::class)]
 class GenerateResourceParserCommandTest extends TestCase
 {

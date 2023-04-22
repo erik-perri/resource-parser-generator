@@ -66,11 +66,9 @@ class ClassMethodReturnArrayTypeParserTest extends TestCase
                 'className' => UserResource::class,
                 'methodName' => 'authentication',
                 'expectedReturns' => [
-                    [
-                        'id' => ['string'],
-                        'email' => ['string'],
-                        'name' => ['string'],
-                    ]
+                    'id' => ['string'],
+                    'email' => ['string'],
+                    'name' => ['string'],
                 ],
             ],
             'adminList' => [
@@ -78,13 +76,20 @@ class ClassMethodReturnArrayTypeParserTest extends TestCase
                 'className' => UserResource::class,
                 'methodName' => 'adminList',
                 'expectedReturns' => [
-                    [
-                        'id' => ['string'],
-                        'email' => ['string'],
-                        'name' => ['string'],
-                        'created_at' => ['string', 'null'],
-                        'updated_at' => ['string', 'null'],
-                    ]
+                    'id' => ['string'],
+                    'email' => ['string'],
+                    'name' => ['string'],
+                    'created_at' => ['null', 'string'],
+                    'updated_at' => ['null', 'string'],
+                ],
+            ],
+            'combined' => [
+                'classFile' => dirname(__DIR__, 3) . '/Stubs/UserResource.php',
+                'className' => UserResource::class,
+                'methodName' => 'combined',
+                'expectedReturns' => [
+                    'email' => ['null', 'string'],
+                    'name' => ['string', 'undefined'],
                 ],
             ],
         ];

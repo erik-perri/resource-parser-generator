@@ -30,6 +30,23 @@ class ClassMethodReturnArrayTypeParser
             },
         );
 
-        return $returns;
+        return $this->mergeReturnTypes($returns);
+    }
+
+    private function mergeReturnTypes(array $returns): array
+    {
+        $returns = collect($returns);
+        $keys = $returns->flatMap(fn(array $properties) => array_keys($properties))->unique();
+
+        return $keys->mapWithKeys(function ($key) use ($returns) {
+            $values = $returns->map(fn(array $properties) => $properties[$key] ?? ['undefined'])
+                ->flatten()
+                ->unique()
+                ->sort()
+                ->values()
+                ->toArray();
+
+            return [$key => $values];
+        })->toArray();
     }
 }

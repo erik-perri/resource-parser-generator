@@ -30,4 +30,18 @@ class UserResource
             'name' => $this->resource->name,
         ];
     }
+
+    public function combined(): array
+    {
+        if ($this->resource->created_at) {
+            return [
+                'email' => $this->resource->email,
+                'name' => $this->resource->name,
+            ];
+        } else {
+            return [
+                'email' => null,
+            ];
+        }
+    }
 }

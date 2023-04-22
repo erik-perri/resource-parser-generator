@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace ResourceParserGenerator\Builders\Constraints;
 
-class IntegerConstraint implements ConstraintContract
+class NumberConstraint implements ConstraintContract
 {
     public function constraint(): string
     {

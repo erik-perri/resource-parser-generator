@@ -6,7 +6,7 @@ namespace ResourceParserGenerator\Builders\Constraints;
 
 use Illuminate\Support\Collection;
 
-class CompoundConstraint implements ConstraintContract
+class UnionConstraint implements ConstraintContract
 {
     /**
      * @var ConstraintContract[]

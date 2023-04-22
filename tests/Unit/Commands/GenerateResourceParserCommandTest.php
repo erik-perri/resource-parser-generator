@@ -8,9 +8,9 @@ use Closure;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\UsesClass;
-use ResourceParserGenerator\Builders\Constraints\CompoundConstraint;
 use ResourceParserGenerator\Builders\Constraints\NullConstraint;
 use ResourceParserGenerator\Builders\Constraints\StringConstraint;
+use ResourceParserGenerator\Builders\Constraints\UnionConstraint;
 use ResourceParserGenerator\Builders\ParserBuilder;
 use ResourceParserGenerator\Builders\ParserConstraintBuilder;
 use ResourceParserGenerator\Builders\ParserFileBuilder;
@@ -40,7 +40,7 @@ use ResourceParserGenerator\Visitors\FindClassMethodWithNameVisitor;
 #[UsesClass(ClassMethodReturnArrayTypeParser::class)]
 #[UsesClass(ClassMethodReturnParser::class)]
 #[UsesClass(ClassTypehints::class)]
-#[UsesClass(CompoundConstraint::class)]
+#[UsesClass(UnionConstraint::class)]
 #[UsesClass(DocBlockTagTypeConverter::class)]
 #[UsesClass(ExpressionObjectTypeParser::class)]
 #[UsesClass(FindArrayReturnVisitor::class)]

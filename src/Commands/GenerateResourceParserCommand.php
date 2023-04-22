@@ -5,10 +5,11 @@ declare(strict_types=1);
 namespace ResourceParserGenerator\Commands;
 
 use Illuminate\Console\Command;
-use Illuminate\Support\Str;
+use ResourceParserGenerator\Builders\ParserBuilder;
+use ResourceParserGenerator\Builders\ParserConstraintBuilder;
+use ResourceParserGenerator\Builders\ParserFileBuilder;
 use ResourceParserGenerator\Filesystem\ClassFileFinder;
 use ResourceParserGenerator\Parsers\PhpParser\ClassMethodReturnArrayTypeParser;
-use RuntimeException;
 use Throwable;
 
 class GenerateResourceParserCommand extends Command
@@ -33,61 +34,27 @@ class GenerateResourceParserCommand extends Command
         }
 
         try {
-            $classFile = $this->getClassFileFinder()->find($className);
+            $classFile = $this->make(ClassFileFinder::class)->find($className);
+            $returns = $this->make(ClassMethodReturnArrayTypeParser::class)->parse($className, $classFile, $methodName);
 
-            $returns = $this->getClassMethodReturnArrayTypeParser()->parse($className, $classFile, $methodName);
-            $mergedReturns = [];
+            $constraintBuilder = $this->make(ParserConstraintBuilder::class);
+            $parserFile = $this->make(ParserFileBuilder::class);
+            $parserBuilder = $this->make(ParserBuilder::class, [
+                'className' => $className,
+                'methodName' => $methodName,
+            ]);
 
-            foreach ($returns as $returnGroup) {
-                foreach ($returnGroup as $property => $returnTypes) {
-                    $mergedReturns[$property] = array_unique(array_merge(
-                        $mergedReturns[$property] ?? [],
-                        $returnTypes
-                    ));
-                }
+            foreach ($returns as $property => $returnTypes) {
+                $constraint = $constraintBuilder->create($returnTypes);
+
+                $parserBuilder->addProperty($property, $constraint);
             }
 
-            $shortClassName = class_basename($className);
-            $parserName = Str::camel($shortClassName) . Str::studly($methodName) . 'Parser';
+            $parserFile->addParser($parserBuilder);
 
-            $imports = [];
-            $shapes = [];
+            $template = trim($parserFile->create()) . "\n";
 
-            foreach ($mergedReturns as $property => $returnTypes) {
-                [$zodImports, $zodShapes] = $this->getZodType($returnTypes);
-                $imports = array_unique(array_merge($imports, $zodImports));
-
-                if (count($zodShapes) > 1) {
-                    $imports[] = 'union';
-                }
-
-                $shapePart = count($zodShapes) > 1
-                    ? 'union(' . implode(', ', $zodShapes) . ')'
-                    : $zodShapes[0];
-
-                $shapes[] = "    $property: $shapePart,";
-            }
-
-            $imports[] = 'object';
-            $imports[] = 'output';
-            sort($imports);
-            $imports = array_unique($imports);
-
-            $shapeText = implode(PHP_EOL, $shapes);
-            $importText = implode(', ', $imports);
-
-            $template = <<<EOT
-import {{$importText}} from 'zod';
-
-export const $parserName = object({
-{$shapeText}
-});
-
-export type $shortClassName = output<typeof $parserName>;
-
-EOT;
-
-            $this->output->write($template);
+            $this->output->writeln($template);
         } catch (Throwable $error) {
             $this->components->error(
                 'Failed to generate parser for "' . $className . '": ' . $error->getMessage(),
@@ -98,43 +65,15 @@ EOT;
         return static::SUCCESS;
     }
 
-    private function getZodType(array $phpTypes): array
+    /**
+     * @template T
+     *
+     * @param class-string<T> $class
+     * @param array $parameters
+     * @return T
+     */
+    private function make(string $class, array $parameters = [])
     {
-        $zodImports = [];
-        $zodShapes = [];
-
-        foreach ($phpTypes as $phpType) {
-            switch ($phpType) {
-                case 'string':
-                case 'null':
-                    $zodImports[] = $phpType;
-                    $zodShapes[] = $phpType . '()';
-                    break;
-                case 'int':
-                    $zodImports[] = 'number';
-                    $zodShapes[] = 'number()';
-                    break;
-                default:
-                    throw new RuntimeException('Unhandled type "' . $phpType . '"');
-            }
-        }
-
-        return [$zodImports, $zodShapes];
-    }
-
-    private function getClassFileFinder(): ClassFileFinder
-    {
-        /** @var ClassFileFinder $finder */
-        $finder = resolve(ClassFileFinder::class);
-
-        return $finder;
-    }
-
-    private function getClassMethodReturnArrayTypeParser(): ClassMethodReturnArrayTypeParser
-    {
-        /** @var ClassMethodReturnArrayTypeParser $parser */
-        $parser = resolve(ClassMethodReturnArrayTypeParser::class);
-
-        return $parser;
+        return resolve($class, $parameters);
     }
 }

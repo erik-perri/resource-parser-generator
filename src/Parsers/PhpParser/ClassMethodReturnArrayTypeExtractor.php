@@ -22,7 +22,7 @@ class ClassMethodReturnArrayTypeExtractor
         private readonly ClassFileFinder $classFileFinder,
         private readonly ClassFileTypehintParser $classFileTypehintParser,
         private readonly ClassMethodReturnParser $classMethodReturnParser,
-        private readonly ExprObjectTypeParser $exprObjectTypeParser,
+        private readonly ExpressionObjectTypeParser $expressionObjectTypeParser,
     ) {
         //
     }
@@ -112,7 +112,7 @@ class ClassMethodReturnArrayTypeExtractor
         PropertyFetch|MethodCall|NullsafeMethodCall $value,
         ClassTypehints $resourceClass,
     ): array {
-        $leftSide = $this->exprObjectTypeParser->parse($value->var, $resourceClass);
+        $leftSide = $this->expressionObjectTypeParser->parse($value->var, $resourceClass);
         if ($value instanceof NullsafeMethodCall) {
             $leftSide = array_filter($leftSide, fn($type) => $type !== 'null');
         }
@@ -124,7 +124,7 @@ class ClassMethodReturnArrayTypeExtractor
         }
 
         $rightSide = $value->name instanceof Expr
-            ? $this->exprObjectTypeParser->parse($value->name, $resourceClass)
+            ? $this->expressionObjectTypeParser->parse($value->name, $resourceClass)
             : [$value->name->name];
         if (count($rightSide) !== 1) {
             throw new ParseResultException(

@@ -13,7 +13,7 @@ use ResourceParserGenerator\Exceptions\ParseResultException;
 use ResourceParserGenerator\Filesystem\ClassFileFinder;
 use ResourceParserGenerator\Parsers\DocBlock\ClassFileTypehintParser;
 
-class ExprObjectTypeParser
+class ExpressionObjectTypeParser
 {
     public function __construct(
         private readonly ClassFileFinder $classFileFinder,

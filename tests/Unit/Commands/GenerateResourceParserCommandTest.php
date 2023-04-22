@@ -17,7 +17,7 @@ use ResourceParserGenerator\Parsers\PhpParser\ClassMethodReturnArrayTypeExtracto
 use ResourceParserGenerator\Parsers\PhpParser\ClassMethodReturnArrayTypeLocator;
 use ResourceParserGenerator\Parsers\PhpParser\ClassMethodReturnArrayTypeParser;
 use ResourceParserGenerator\Parsers\PhpParser\ClassMethodReturnParser;
-use ResourceParserGenerator\Parsers\PhpParser\ExprObjectTypeParser;
+use ResourceParserGenerator\Parsers\PhpParser\ExpressionObjectTypeParser;
 use ResourceParserGenerator\Parsers\PhpParser\UseStatementParser;
 use ResourceParserGenerator\Parsers\ResolveScope;
 use ResourceParserGenerator\ResourceParserGeneratorServiceProvider;
@@ -35,7 +35,7 @@ use ResourceParserGenerator\Visitors\FindClassMethodWithNameVisitor;
 #[UsesClass(ClassMethodReturnParser::class)]
 #[UsesClass(ClassTypehints::class)]
 #[UsesClass(DocBlockTagTypeConverter::class)]
-#[UsesClass(ExprObjectTypeParser::class)]
+#[UsesClass(ExpressionObjectTypeParser::class)]
 #[UsesClass(FindArrayReturnVisitor::class)]
 #[UsesClass(FindClassMethodWithNameVisitor::class)]
 #[UsesClass(ResolveScope::class)]

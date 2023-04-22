@@ -51,7 +51,7 @@ class ClassMethodReturnParser
             }
 
             // Check the class typehints first since they were theoretically specified by the user as overrides
-            $hintedTypes = $classTypehints->getMethodTypes($method->getName());
+            $hintedTypes = $classTypehints->methodTypes($method->getName());
             if ($hintedTypes) {
                 $methods = $methods->addMethod($method->getName(), $hintedTypes);
                 continue;

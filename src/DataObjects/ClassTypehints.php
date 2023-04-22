@@ -51,7 +51,7 @@ class ClassTypehints
      * @param string $methodName
      * @return string[]|null
      */
-    public function getMethodTypes(string $methodName): array|null
+    public function methodTypes(string $methodName): array|null
     {
         return $this->methods[$methodName] ?? null;
     }
@@ -60,7 +60,7 @@ class ClassTypehints
      * @param string $propertyName
      * @return string[]|null
      */
-    public function getPropertyTypes(string $propertyName): array|null
+    public function propertyTypes(string $propertyName): array|null
     {
         return $this->properties[$propertyName] ?? null;
     }

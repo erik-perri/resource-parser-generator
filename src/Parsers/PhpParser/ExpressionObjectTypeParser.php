@@ -104,7 +104,7 @@ class ExpressionObjectTypeParser
         $leftSideFile = $this->classFileFinder->find($leftSideClass);
         $leftSideClass = $this->classFileTypehintParser->parse($leftSideClass, $leftSideFile);
 
-        $types = $leftSideClass->getPropertyTypes($rightSide[0]);
+        $types = $leftSideClass->propertyTypes($rightSide[0]);
         if (!$types) {
             throw new ParseResultException(
                 'Unknown type of "' . $rightSide[0] . '" for property fetch',
@@ -128,7 +128,7 @@ class ExpressionObjectTypeParser
         $leftSideFile = $this->classFileFinder->find($leftSideClass);
         $leftSideClass = $this->classFileTypehintParser->parse($leftSideClass, $leftSideFile);
 
-        $types = $leftSideClass->getMethodTypes($rightSide[0]);
+        $types = $leftSideClass->methodTypes($rightSide[0]);
         if (!$types) {
             throw new ParseResultException(
                 'Unknown type of "' . $rightSide[0] . '" for property fetch',
@@ -152,7 +152,7 @@ class ExpressionObjectTypeParser
         $leftSideFile = $this->classFileFinder->find($leftSideClass);
         $leftSideClass = $this->classMethodReturnParser->parse([$rightSide[0]], $leftSideClass, $leftSideFile);
 
-        $rightSideTypes = $leftSideClass->getMethodTypes($rightSide[0]);
+        $rightSideTypes = $leftSideClass->methodTypes($rightSide[0]);
 
         if ($rightSideTypes === null) {
             throw new ParseResultException(

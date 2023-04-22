@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace ResourceParserGenerator\Filesystem;
 
 use Composer\Autoload\ClassLoader;
+use RuntimeException;
 
 class ClassFileFinder
 {
@@ -17,6 +18,11 @@ class ClassFileFinder
 
     public function find(string $className): string
     {
-        return $this->loader->findFile($className);
+        $file = $this->loader->findFile($className);
+        if (!$file) {
+            throw new RuntimeException('Could not find file for class "' . $className . '"');
+        }
+
+        return $file;
     }
 }

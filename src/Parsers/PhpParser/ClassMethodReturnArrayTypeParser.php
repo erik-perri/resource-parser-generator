@@ -66,6 +66,8 @@ class ClassMethodReturnArrayTypeParser
                 ->toArray();
 
             return [$key => $values];
-        })->toArray();
+        });
+
+        return $merged->all();
     }
 }

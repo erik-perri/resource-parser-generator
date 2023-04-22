@@ -25,17 +25,13 @@ class FindArrayReturnVisitor extends NodeVisitorAbstract
     /** @noinspection PhpMissingReturnTypeInspection */
     public function leaveNode(Node $node)
     {
-        if (!($node instanceof Return_)) {
-            return;
-        }
+        if ($node instanceof Return_) {
+            $expression = $node->expr;
+            if (!($expression instanceof Array_)) {
+                throw new ParseResultException('Unexpected non-array return value', $node->expr);
+            }
 
-        if (!($node->expr instanceof Array_)) {
-            throw new ParseResultException(
-                'Unexpected non-array return value',
-                $node->expr,
-            );
+            call_user_func($this->handler, $expression);
         }
-
-        call_user_func($this->handler, $node->expr);
     }
 }

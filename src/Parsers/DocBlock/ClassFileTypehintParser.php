@@ -10,6 +10,7 @@ use ReflectionClass;
 use ReflectionException;
 use ResourceParserGenerator\DataObjects\ClassTypehints;
 use ResourceParserGenerator\Parsers\ResolveScope;
+use RuntimeException;
 
 class ClassFileTypehintParser
 {
@@ -43,8 +44,13 @@ class ClassFileTypehintParser
 
         foreach ($docBlock->getTags() as $tag) {
             if ($tag instanceof DocBlock\Tags\Property || $tag instanceof DocBlock\Tags\PropertyRead) {
+                $propertyName = $tag->getVariableName();
+                if (!$propertyName) {
+                    throw new RuntimeException('Unexpected null property name');
+                }
+
                 $typehints = $typehints->addProperty(
-                    $tag->getVariableName(),
+                    $propertyName,
                     $this->convertDocblockTagTypes->convert(
                         $tag->getType(),
                         $this->resolveScope,

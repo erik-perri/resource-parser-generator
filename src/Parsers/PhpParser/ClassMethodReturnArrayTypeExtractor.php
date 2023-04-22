@@ -26,12 +26,17 @@ class ClassMethodReturnArrayTypeExtractor
         $properties = [];
 
         foreach ($array->items as $item) {
-            if (!($item->key instanceof String_)) {
+            if (!$item) {
+                throw new ParseResultException('Unexpected null item in resource', $item);
+            }
+
+            $key = $item->key;
+            if (!($key instanceof String_)) {
                 throw new ParseResultException('Unexpected non-string key in resource', $item);
             }
 
             $value = $item->value;
-            $properties[$item->key->value] = $this->expressionObjectTypeParser->parse($value, $resourceClass);
+            $properties[$key->value] = $this->expressionObjectTypeParser->parse($value, $resourceClass);
         }
 
         return $properties;

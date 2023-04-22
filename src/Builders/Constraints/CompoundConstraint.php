@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace ResourceParserGenerator\Builders\Constraints;
 
+use Illuminate\Support\Collection;
+
 class CompoundConstraint implements ConstraintContract
 {
     /**
@@ -30,13 +32,15 @@ class CompoundConstraint implements ConstraintContract
 
     public function imports(): array
     {
-        return collect($this->constraints)
+        /** @var Collection<int, string> $imports */
+        $imports = collect($this->constraints)
             ->map(fn(ConstraintContract $constraint) => $constraint->imports())
             ->flatten()
             ->add('union')
             ->unique()
             ->sort()
-            ->values()
-            ->toArray();
+            ->values();
+
+        return $imports->all();
     }
 }

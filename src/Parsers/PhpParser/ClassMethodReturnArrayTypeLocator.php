@@ -10,8 +10,10 @@ use PhpParser\Node\Expr\Array_;
 use PhpParser\Node\Stmt\ClassMethod;
 use PhpParser\NodeTraverser;
 use PhpParser\Parser;
+use ResourceParserGenerator\Exceptions\ParseResultException;
 use ResourceParserGenerator\Visitors\FindArrayReturnVisitor;
 use ResourceParserGenerator\Visitors\FindClassMethodWithNameVisitor;
+use RuntimeException;
 
 class ClassMethodReturnArrayTypeLocator
 {
@@ -28,11 +30,17 @@ class ClassMethodReturnArrayTypeLocator
     public function locate(string $classFile, string $methodName, Closure $handler): void
     {
         $ast = $this->parser->parse(File::get($classFile));
+        if (!$ast) {
+            throw new RuntimeException('Failed to parse file "' . $classFile . '"');
+        }
 
         $returnTraverser = new NodeTraverser();
         $returnTraverser->addVisitor(new FindClassMethodWithNameVisitor(
             $methodName,
             function (ClassMethod $method) use ($handler) {
+                if (!$method->stmts) {
+                    throw new ParseResultException('Unexpected empty class method', $method);
+                }
                 $arrayTraverser = new NodeTraverser();
                 $arrayTraverser->addVisitor(
                     new FindArrayReturnVisitor(function (Array_ $array) use ($handler) {

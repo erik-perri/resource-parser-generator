@@ -11,6 +11,7 @@ use PhpParser\NodeTraverser;
 use PhpParser\NodeVisitorAbstract;
 use PhpParser\Parser;
 use ResourceParserGenerator\Exceptions\ParseResultException;
+use RuntimeException;
 
 class UseStatementParser
 {
@@ -26,7 +27,13 @@ class UseStatementParser
     public function parse(string $file): array
     {
         $ast = $this->parser->parse(File::get($file));
+        if (!$ast) {
+            throw new RuntimeException('Failed to parse file "' . $file . '"');
+        }
 
+        /**
+         * @var Collection<string, string> $importedClasses
+         */
         $importedClasses = collect();
 
         $traverser = new NodeTraverser();
@@ -56,6 +63,6 @@ class UseStatementParser
 
         $traverser->traverse($ast);
 
-        return $importedClasses->toArray();
+        return $importedClasses->all();
     }
 }

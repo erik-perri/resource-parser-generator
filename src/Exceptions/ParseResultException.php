@@ -9,9 +9,9 @@ use PhpParser\Node;
 
 class ParseResultException extends Exception
 {
-    public function __construct(string $messagePrefix, public readonly Node $node)
+    public function __construct(string $messagePrefix, public readonly ?Node $node)
     {
-        $message = $node->getLine() === -1
+        $message = !$node || $node->getLine() === -1
             ? "$messagePrefix."
             : "$messagePrefix at line {$node->getLine()}.";
 

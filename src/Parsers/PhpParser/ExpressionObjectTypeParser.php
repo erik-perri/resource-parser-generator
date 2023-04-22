@@ -99,10 +99,20 @@ class ExpressionObjectTypeParser
     {
         [$leftSide, $rightSide] = $this->extractSides($value, $resourceClass);
 
-        $leftSideFile = $this->classFileFinder->find($leftSide[0]);
-        $leftSideClass = $this->classFileTypehintParser->parse($leftSide[0], $leftSideFile);
+        /** @var class-string $leftSideClass */
+        $leftSideClass = $leftSide[0];
+        $leftSideFile = $this->classFileFinder->find($leftSideClass);
+        $leftSideClass = $this->classFileTypehintParser->parse($leftSideClass, $leftSideFile);
 
-        return $leftSideClass->getPropertyTypes($rightSide[0]);
+        $types = $leftSideClass->getPropertyTypes($rightSide[0]);
+        if (!$types) {
+            throw new ParseResultException(
+                'Unknown type of "' . $rightSide[0] . '" for property fetch',
+                $value->var,
+            );
+        }
+
+        return $types;
     }
 
     /**
@@ -113,10 +123,20 @@ class ExpressionObjectTypeParser
     {
         [$leftSide, $rightSide] = $this->extractSides($value, $resourceClass);
 
-        $leftSideFile = $this->classFileFinder->find($leftSide[0]);
-        $leftSideClass = $this->classFileTypehintParser->parse($leftSide[0], $leftSideFile);
+        /** @var class-string $leftSideClass */
+        $leftSideClass = $leftSide[0];
+        $leftSideFile = $this->classFileFinder->find($leftSideClass);
+        $leftSideClass = $this->classFileTypehintParser->parse($leftSideClass, $leftSideFile);
 
-        return $leftSideClass->getMethodTypes($rightSide[0]);
+        $types = $leftSideClass->getMethodTypes($rightSide[0]);
+        if (!$types) {
+            throw new ParseResultException(
+                'Unknown type of "' . $rightSide[0] . '" for property fetch',
+                $value->var,
+            );
+        }
+
+        return $types;
     }
 
     /**
@@ -182,6 +202,10 @@ class ExpressionObjectTypeParser
      */
     private function extractTypeFromTernary(Ternary $value, ClassTypehints $resourceClass): array
     {
+        if (!$value->if) {
+            throw new ParseResultException('Ternary expression missing if', $value);
+        }
+
         $ifType = $this->parse($value->if, $resourceClass);
         $elseType = $this->parse($value->else, $resourceClass);
 

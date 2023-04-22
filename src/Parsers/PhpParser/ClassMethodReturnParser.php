@@ -4,7 +4,11 @@ declare(strict_types=1);
 
 namespace ResourceParserGenerator\Parsers\PhpParser;
 
+use phpDocumentor\Reflection\DocBlock\Tags\TagWithType;
 use phpDocumentor\Reflection\DocBlockFactory;
+use phpDocumentor\Reflection\Types\Compound;
+use phpDocumentor\Reflection\Types\Mixed_;
+use phpDocumentor\Reflection\Types\Void_;
 use ReflectionClass;
 use ReflectionException;
 use ReflectionUnionType;
@@ -26,12 +30,12 @@ class ClassMethodReturnParser
 
     /**
      * @param string[] $methodsToCheck
-     * @param string $className
-     * @param string|null $classFile
+     * @param class-string $className
+     * @param string $classFile
      * @return ClassTypehints
      * @throws ReflectionException
      */
-    public function parse(array|null $methodsToCheck, string $className, string|null $classFile): ClassTypehints
+    public function parse(array|null $methodsToCheck, string $className, string $classFile): ClassTypehints
     {
         $reflectionClass = new ReflectionClass($className);
 
@@ -57,20 +61,19 @@ class ClassMethodReturnParser
             if ($method->getDocComment()) {
                 $docBlock = $this->docBlockFactory->create($method->getDocComment());
 
-                $return = $docBlock->getTagsByName('return');
-                $return = count($return) ? reset($return) : null;
+                $returns = $docBlock->getTagsByName('return');
+                $return = count($returns) ? $returns[0] : null;
 
                 if ($return) {
-                    $scope = $classFile
-                        ? $this->resolveScope->loadImports($classFile)
-                        : null;
+                    $scope = $this->resolveScope->loadImports($classFile);
+
+                    $type = $return instanceof TagWithType
+                        ? $return->getType()
+                        : new Compound([new Mixed_(), new Void_()]);
 
                     $methods = $methods->addMethod(
                         $method->getName(),
-                        $this->convertDocblockTagTypes->convert(
-                            $return->getType(),
-                            $scope,
-                        ),
+                        $this->convertDocblockTagTypes->convert($type, $scope),
                     );
                     continue;
                 }
@@ -85,9 +88,14 @@ class ClassMethodReturnParser
                 }
                 $methods = $methods->addMethod($method->getName(), $types);
             } else {
-                $methods = $returnType
-                    ? $methods->addMethod($method->getName(), [$returnType->getName()])
-                    : $methods->addMethod($method->getName(), ['mixed', 'void']);
+                if ($returnType) {
+                    // @phpstan-ignore-next-line -- ReflectionType::getName() is not missing
+                    $types = [$returnType->getName()];
+                } else {
+                    $types = ['mixed', 'void'];
+                }
+
+                $methods = $methods->addMethod($method->getName(), $types);
             }
         }
 

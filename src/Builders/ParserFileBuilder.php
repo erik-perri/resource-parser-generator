@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace ResourceParserGenerator\Builders;
 
+use Illuminate\Support\Collection;
 use ResourceParserGenerator\Builders\Constraints\ConstraintContract;
 
 class ParserFileBuilder
@@ -33,7 +34,8 @@ class ParserFileBuilder
      */
     public function imports(): array
     {
-        return collect($this->parsers)
+        /** @var Collection<int, string> $imports */
+        $imports = collect($this->parsers)
             ->map(fn(ParserBuilder $parser) => collect($parser->properties())
                 ->map(fn(ConstraintContract $constraint) => $constraint->imports()))
             ->flatten()
@@ -41,7 +43,8 @@ class ParserFileBuilder
             ->add('output')
             ->unique()
             ->sort()
-            ->values()
-            ->toArray();
+            ->values();
+
+        return $imports->all();
     }
 }

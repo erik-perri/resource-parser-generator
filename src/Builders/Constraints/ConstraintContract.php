@@ -8,5 +8,8 @@ interface ConstraintContract
 {
     public function constraint(): string;
 
+    /**
+     * @return string[]
+     */
     public function imports(): array;
 }

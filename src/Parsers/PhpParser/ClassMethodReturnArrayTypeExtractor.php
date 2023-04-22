@@ -18,6 +18,7 @@ class ClassMethodReturnArrayTypeExtractor
     }
 
     /**
+     * @return array<string, string[]>
      * @throws ParseResultException|ReflectionException
      */
     public function extract(Array_ $array, ClassTypehints $resourceClass): array

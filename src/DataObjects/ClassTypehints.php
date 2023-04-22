@@ -6,6 +6,11 @@ namespace ResourceParserGenerator\DataObjects;
 
 class ClassTypehints
 {
+    /**
+     * @param string $className
+     * @param array<string, string[]> $properties
+     * @param array<string, string[]> $methods
+     */
     public function __construct(
         public readonly string $className,
         public readonly array $properties = [],
@@ -14,7 +19,12 @@ class ClassTypehints
         //
     }
 
-    public function addMethod(string $methodName, array $returnTypes): ClassTypehints
+    /**
+     * @param string $methodName
+     * @param string[] $returnTypes
+     * @return ClassTypehints
+     */
+    public function addMethod(string $methodName, array $returnTypes): self
     {
         return new self(
             $this->className,
@@ -23,7 +33,12 @@ class ClassTypehints
         );
     }
 
-    public function addProperty(string $propertyName, array $types): ClassTypehints
+    /**
+     * @param string $propertyName
+     * @param string[] $types
+     * @return ClassTypehints
+     */
+    public function addProperty(string $propertyName, array $types): self
     {
         return new self(
             $this->className,
@@ -32,11 +47,19 @@ class ClassTypehints
         );
     }
 
+    /**
+     * @param string $methodName
+     * @return string[]|null
+     */
     public function getMethodTypes(string $methodName): array|null
     {
         return $this->methods[$methodName] ?? null;
     }
 
+    /**
+     * @param string $propertyName
+     * @return string[]|null
+     */
     public function getPropertyTypes(string $propertyName): array|null
     {
         return $this->properties[$propertyName] ?? null;

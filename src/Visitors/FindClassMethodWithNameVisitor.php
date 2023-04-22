@@ -22,7 +22,8 @@ class FindClassMethodWithNameVisitor extends NodeVisitorAbstract
         //
     }
 
-    public function enterNode(Node $node): void
+    /** @noinspection PhpMissingReturnTypeInspection */
+    public function enterNode(Node $node)
     {
         if ($node instanceof ClassMethod) {
             if ($node->name->name === $this->methodName) {

@@ -69,7 +69,7 @@ class GenerateResourceParserCommand extends Command
      * @template T
      *
      * @param class-string<T> $class
-     * @param array $parameters
+     * @param array<string, mixed> $parameters
      * @return T
      */
     private function make(string $class, array $parameters = [])

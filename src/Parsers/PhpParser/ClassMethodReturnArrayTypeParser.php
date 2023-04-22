@@ -4,7 +4,9 @@ declare(strict_types=1);
 
 namespace ResourceParserGenerator\Parsers\PhpParser;
 
+use Illuminate\Support\Collection;
 use PhpParser\Node\Expr\Array_;
+use ReflectionException;
 use ResourceParserGenerator\Parsers\DocBlock\ClassFileTypehintParser;
 
 class ClassMethodReturnArrayTypeParser
@@ -17,6 +19,13 @@ class ClassMethodReturnArrayTypeParser
         //
     }
 
+    /**
+     * @param class-string $className
+     * @param string $classFile
+     * @param string $methodName
+     * @return array<string, string[]>
+     * @throws ReflectionException
+     */
     public function parse(string $className, string $classFile, string $methodName): array
     {
         $returns = [];
@@ -33,12 +42,22 @@ class ClassMethodReturnArrayTypeParser
         return $this->mergeReturnTypes($returns);
     }
 
+    /**
+     * @param array<array<string, string[]>> $returns
+     * @return array<string, string[]>
+     */
     private function mergeReturnTypes(array $returns): array
     {
+        /**
+         * @var Collection<int, array<string, string[]>> $returns
+         */
         $returns = collect($returns);
         $keys = $returns->flatMap(fn(array $properties) => array_keys($properties))->unique();
 
-        return $keys->mapWithKeys(function ($key) use ($returns) {
+        /**
+         * @var Collection<string, string[]> $merged
+         */
+        $merged = $keys->mapWithKeys(function (string $key) use ($returns) {
             $values = $returns->map(fn(array $properties) => $properties[$key] ?? ['undefined'])
                 ->flatten()
                 ->unique()

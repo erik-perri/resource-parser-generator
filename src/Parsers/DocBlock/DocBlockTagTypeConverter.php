@@ -11,6 +11,9 @@ use RuntimeException;
 
 class DocBlockTagTypeConverter
 {
+    /**
+     * @return string[]
+     */
     public function convert(?Type $type, ResolveScope $scope): array
     {
         if ($type instanceof Compound) {
@@ -33,7 +36,7 @@ class DocBlockTagTypeConverter
     private function getTypehint(Type $type, ResolveScope $scope): string
     {
         if (!method_exists($type, '__toString')) {
-            throw new RuntimeException('Unexpected non-stringable property type: ' . get_class($type));
+            throw new RuntimeException('Unexpected non-stringable property type: "' . get_class($type) . '"');
         }
 
         $typeString = ltrim($type->__toString(), '\\');

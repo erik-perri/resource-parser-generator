@@ -13,6 +13,10 @@ use ResourceParserGenerator\Builders\Constraints\StringConstraint;
 
 class ParserConstraintBuilder
 {
+    /**
+     * @param string[] $types
+     * @throws Exception
+     */
     public function create(array $types): ConstraintContract
     {
         if (count($types) > 1) {
@@ -27,7 +31,7 @@ class ParserConstraintBuilder
             'string' => new StringConstraint(),
             'int' => new IntegerConstraint(),
             'null' => new NullConstraint(),
-            default => throw new Exception("Unknown type: $type"),
+            default => throw new Exception('Unhandled type for constraint "' . $type . '"'),
         };
     }
 }

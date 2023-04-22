@@ -39,6 +39,9 @@ class ParserBuilder
         ])->render();
     }
 
+    /**
+     * @return ConstraintContract[]
+     */
     public function properties(): array
     {
         return $this->properties;

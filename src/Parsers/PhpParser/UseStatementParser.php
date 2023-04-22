@@ -31,12 +31,16 @@ class UseStatementParser
 
         $traverser = new NodeTraverser();
         $traverser->addVisitor(new class($importedClasses) extends NodeVisitorAbstract {
-            public function __construct(private readonly Collection $importedClasses)
+            /**
+             * @param Collection<string, string> $classes
+             */
+            public function __construct(private readonly Collection $classes)
             {
                 //
             }
 
-            public function enterNode(Node $node): void
+            /** @noinspection PhpMissingReturnTypeInspection */
+            public function enterNode(Node $node)
             {
                 if ($node instanceof Node\Stmt\Use_) {
                     foreach ($node->uses as $use) {
@@ -44,7 +48,7 @@ class UseStatementParser
                             throw new ParseResultException('Unhandled "use" statement type', $use);
                         }
 
-                        $this->importedClasses->put($use->getAlias()->name, $use->name->toString());
+                        $this->classes->put($use->getAlias()->name, $use->name->toString());
                     }
                 }
             }

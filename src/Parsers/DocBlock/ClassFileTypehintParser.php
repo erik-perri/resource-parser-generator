@@ -22,6 +22,9 @@ class ClassFileTypehintParser
     }
 
     /**
+     * @param class-string $className
+     * @param string $classFile
+     * @return ClassTypehints
      * @throws ReflectionException
      */
     public function parse(string $className, string $classFile): ClassTypehints

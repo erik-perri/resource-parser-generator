@@ -33,6 +33,7 @@ class ExpressionObjectTypeParser
     }
 
     /**
+     * @return string[]
      * @throws ParseResultException|ReflectionException
      */
     public function parse(Expr $expr, ClassTypehints $thisClass): array
@@ -91,6 +92,7 @@ class ExpressionObjectTypeParser
     }
 
     /**
+     * @return string[]
      * @throws ParseResultException|ReflectionException
      */
     private function extractTypeFromPropertyFetch(PropertyFetch $value, ClassTypehints $resourceClass): array
@@ -104,6 +106,7 @@ class ExpressionObjectTypeParser
     }
 
     /**
+     * @return string[]
      * @throws ParseResultException|ReflectionException
      */
     private function extractTypeFromMethodCall(MethodCall $value, ClassTypehints $resourceClass): array
@@ -117,14 +120,17 @@ class ExpressionObjectTypeParser
     }
 
     /**
+     * @return string[]
      * @throws ParseResultException|ReflectionException
      */
     private function extractTypeFromNullsafeMethodCall(NullsafeMethodCall $value, ClassTypehints $resourceClass): array
     {
         [$leftSide, $rightSide] = $this->extractSides($value, $resourceClass);
 
-        $leftSideFile = $this->classFileFinder->find($leftSide[0]);
-        $leftSideClass = $this->classMethodReturnParser->parse([$rightSide[0]], $leftSide[0], $leftSideFile);
+        /** @var class-string $leftSideClass */
+        $leftSideClass = $leftSide[0];
+        $leftSideFile = $this->classFileFinder->find($leftSideClass);
+        $leftSideClass = $this->classMethodReturnParser->parse([$rightSide[0]], $leftSideClass, $leftSideFile);
 
         $rightSideTypes = $leftSideClass->getMethodTypes($rightSide[0]);
 
@@ -139,6 +145,7 @@ class ExpressionObjectTypeParser
     }
 
     /**
+     * @return array<int, string[]>
      * @throws ParseResultException|ReflectionException
      */
     public function extractSides(
@@ -170,6 +177,7 @@ class ExpressionObjectTypeParser
     }
 
     /**
+     * @return string[]
      * @throws ParseResultException|ReflectionException
      */
     private function extractTypeFromTernary(Ternary $value, ClassTypehints $resourceClass): array

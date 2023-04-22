@@ -8,6 +8,9 @@ use ResourceParserGenerator\Parsers\PhpParser\UseStatementParser;
 
 class ResolveScope
 {
+    /**
+     * @var array<string, string> $imports [alias => class name]
+     */
     private array $imports = [];
 
     public function __construct(private readonly UseStatementParser $useStatementParser)

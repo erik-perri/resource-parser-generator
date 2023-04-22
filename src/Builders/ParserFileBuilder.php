@@ -8,6 +8,9 @@ use ResourceParserGenerator\Builders\Constraints\ConstraintContract;
 
 class ParserFileBuilder
 {
+    /**
+     * @var array<ParserBuilder>
+     */
     private array $parsers = [];
 
     public function addParser(ParserBuilder $parserBuilder): self
@@ -25,6 +28,9 @@ class ParserFileBuilder
         ])->render();
     }
 
+    /**
+     * @return string[]
+     */
     public function imports(): array
     {
         return collect($this->parsers)

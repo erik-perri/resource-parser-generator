@@ -22,10 +22,8 @@ class FindArrayReturnVisitor extends NodeVisitorAbstract
         //
     }
 
-    /**
-     * @throws ParseResultException
-     */
-    public function leaveNode(Node $node): void
+    /** @noinspection PhpMissingReturnTypeInspection */
+    public function leaveNode(Node $node)
     {
         if (!($node instanceof Return_)) {
             return;

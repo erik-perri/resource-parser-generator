@@ -52,9 +52,7 @@ class GenerateResourceParserCommand extends Command
 
             $parserFile->addParser($parserBuilder);
 
-            $template = trim($parserFile->create()) . "\n";
-
-            $this->output->writeln($template);
+            $this->output->writeln($parserFile->create());
         } catch (Throwable $error) {
             $this->components->error(
                 'Failed to generate parser for "' . $className . '": ' . $error->getMessage(),

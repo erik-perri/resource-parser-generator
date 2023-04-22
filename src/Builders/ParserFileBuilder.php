@@ -23,10 +23,12 @@ class ParserFileBuilder
 
     public function create(): string
     {
-        return view('resource-parser-generator::resource-parser-file', [
+        $content = view('resource-parser-generator::resource-parser-file', [
             'imports' => $this->imports(),
             'parsers' => $this->parsers,
         ])->render();
+
+        return trim($content) . "\n";
     }
 
     /**

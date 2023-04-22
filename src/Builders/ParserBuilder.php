@@ -29,7 +29,7 @@ class ParserBuilder
 
     public function create(): string
     {
-        return view('resource-parser-generator::resource-parser', [
+        $content = view('resource-parser-generator::resource-parser', [
             'properties' => array_map(
                 fn(ConstraintContract $constraint) => $constraint->constraint(),
                 $this->properties,
@@ -37,6 +37,8 @@ class ParserBuilder
             'shortClassName' => class_basename($this->className),
             'methodName' => $this->methodName,
         ])->render();
+
+        return trim($content) . "\n";
     }
 
     /**

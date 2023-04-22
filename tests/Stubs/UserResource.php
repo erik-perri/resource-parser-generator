@@ -45,4 +45,18 @@ class UserResource
             ];
         }
     }
+
+    public function scalars(): array
+    {
+        return [
+            'string' => '...',
+            'negative_number' => -1,
+            'positive_number' => +1,
+            'neutral_number' => 1,
+            'float' => 1.1,
+            'boolean_true' => true,
+            'boolean_false' => false,
+            'null' => null,
+        ];
+    }
 }

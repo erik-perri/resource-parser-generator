@@ -92,6 +92,21 @@ class ClassMethodReturnArrayTypeParserTest extends TestCase
                     'name' => ['string', 'undefined'],
                 ],
             ],
+            'scalars' => [
+                'classFile' => dirname(__DIR__, 3) . '/Stubs/UserResource.php',
+                'className' => UserResource::class,
+                'methodName' => 'scalars',
+                'expectedReturns' => [
+                    'string' => ['string'],
+                    'negative_number' => ['int'],
+                    'positive_number' => ['int'],
+                    'neutral_number' => ['int'],
+                    'float' => ['float'],
+                    'boolean_true' => ['bool'],
+                    'boolean_false' => ['bool'],
+                    'null' => ['null'],
+                ],
+            ],
         ];
     }
 }

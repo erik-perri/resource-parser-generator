@@ -5,9 +5,15 @@ declare(strict_types=1);
 namespace ResourceParserGenerator\Parsers\PhpParser;
 
 use PhpParser\Node\Expr;
+use PhpParser\Node\Expr\ConstFetch;
 use PhpParser\Node\Expr\PropertyFetch;
+use PhpParser\Node\Expr\UnaryMinus;
+use PhpParser\Node\Expr\UnaryPlus;
 use PhpParser\Node\Expr\Variable;
 use PhpParser\Node\Identifier;
+use PhpParser\Node\Scalar\DNumber;
+use PhpParser\Node\Scalar\LNumber;
+use PhpParser\Node\Scalar\String_;
 use ResourceParserGenerator\DataObjects\ClassTypehints;
 use ResourceParserGenerator\Exceptions\ParseResultException;
 use ResourceParserGenerator\Filesystem\ClassFileFinder;
@@ -57,6 +63,32 @@ class ExpressionObjectTypeParser
             }
 
             throw new ParseResultException('Unhandled property in property fetch', $expr);
+        }
+
+        if ($expr instanceof ConstFetch) {
+            switch ($expr->name->toLowerString()) {
+                case 'true':
+                case 'false':
+                    return ['bool'];
+                case 'null':
+                    return ['null'];
+            }
+
+            throw new ParseResultException('Unhandled constant name "' . $expr->name . '"', $expr);
+        }
+
+        if ($expr instanceof UnaryMinus ||
+            $expr instanceof UnaryPlus ||
+            $expr instanceof LNumber) {
+            return ['int'];
+        }
+
+        if ($expr instanceof DNumber) {
+            return ['float'];
+        }
+
+        if ($expr instanceof String_) {
+            return ['string'];
         }
 
         throw new ParseResultException('Unhandled expression type "' . $expr->getType() . '"', $expr);

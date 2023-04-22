@@ -8,6 +8,7 @@ use ResourceParserGenerator\Tests\Stubs\Models\User;
 
 /**
  * @property User $resource
+ * @property $untyped
  */
 class UserResource
 {

@@ -23,10 +23,14 @@ class DocBlockTagTypeConverter
             return $typehint;
         }
 
+        if (!$type) {
+            return ['mixed'];
+        }
+
         return [$this->getTypehint($type, $scope)];
     }
 
-    private function getTypehint(?Type $type, ResolveScope $scope): string
+    private function getTypehint(Type $type, ResolveScope $scope): string
     {
         if (!method_exists($type, '__toString')) {
             throw new RuntimeException('Unexpected non-stringable property type: ' . get_class($type));

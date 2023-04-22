@@ -44,6 +44,7 @@ class ClassFileTypehintParserTest extends TestCase
         $this->assertEquals(
             [
                 'resource' => [User::class],
+                'untyped' => ['mixed'],
             ],
             $typehints->properties,
         );

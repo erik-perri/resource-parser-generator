@@ -17,17 +17,16 @@ use PhpParser\Node\Scalar\DNumber;
 use PhpParser\Node\Scalar\LNumber;
 use PhpParser\Node\Scalar\String_;
 use ReflectionException;
-use ResourceParserGenerator\DataObjects\ClassTypehints;
 use ResourceParserGenerator\Exceptions\ParseResultException;
 use ResourceParserGenerator\Filesystem\ClassFileFinder;
-use ResourceParserGenerator\Parsers\DocBlock\ClassFileTypehintParser;
+use ResourceParserGenerator\Parsers\FileParser;
+use ResourceParserGenerator\Parsers\PhpParser\Context\ResolverContract;
 
 class ExpressionObjectTypeParser
 {
     public function __construct(
         private readonly ClassFileFinder $classFileFinder,
-        private readonly ClassFileTypehintParser $classFileTypehintParser,
-        private readonly ClassMethodReturnParser $classMethodReturnParser,
+        private readonly FileParser $fileParser,
     ) {
         //
     }
@@ -36,30 +35,30 @@ class ExpressionObjectTypeParser
      * @return string[]
      * @throws ParseResultException|ReflectionException
      */
-    public function parse(Expr $expr, ClassTypehints $thisClass): array
+    public function parse(Expr $expr, ResolverContract $resolver): array
     {
         if ($expr instanceof MethodCall) {
-            return $this->extractTypeFromMethodCall($expr, $thisClass);
+            return $this->extractTypeFromMethodCall($expr, $resolver);
         }
 
         if ($expr instanceof NullsafeMethodCall) {
-            return $this->extractTypeFromNullsafeMethodCall($expr, $thisClass);
+            return $this->extractTypeFromNullsafeMethodCall($expr, $resolver);
         }
 
         if ($expr instanceof Ternary) {
-            return $this->extractTypeFromTernary($expr, $thisClass);
+            return $this->extractTypeFromTernary($expr, $resolver);
         }
 
         if ($expr instanceof Variable) {
-            if ($expr->name === 'this') {
-                return [$thisClass->className];
+            if ($expr->name instanceof Expr) {
+                throw new ParseResultException('Unexpected expression in variable name', $expr);
             }
 
-            throw new ParseResultException('Unhandled variable type', $expr);
+            return $resolver->resolveVariable($expr->name);
         }
 
         if ($expr instanceof PropertyFetch) {
-            return $this->extractTypeFromPropertyFetch($expr, $thisClass);
+            return $this->extractTypeFromPropertyFetch($expr, $resolver);
         }
 
         if ($expr instanceof ConstFetch) {
@@ -95,9 +94,9 @@ class ExpressionObjectTypeParser
      * @return string[]
      * @throws ParseResultException|ReflectionException
      */
-    private function extractTypeFromPropertyFetch(PropertyFetch $value, ClassTypehints $resourceClass): array
+    private function extractTypeFromPropertyFetch(PropertyFetch $value, ResolverContract $resolver): array
     {
-        [$leftSide, $rightSide] = $this->extractSides($value, $resourceClass);
+        [$leftSide, $rightSide] = $this->extractSides($value, $resolver);
 
         /**
          * @var class-string $leftSideClass
@@ -105,12 +104,19 @@ class ExpressionObjectTypeParser
          */
         $leftSideClass = $leftSide[0];
         $leftSideFile = $this->classFileFinder->find($leftSideClass);
-        $leftSideClass = $this->classFileTypehintParser->parse($leftSideClass, $leftSideFile);
+        $leftSideFileScope = $this->fileParser->parse($leftSideFile);
+        $leftSideClassScope = $leftSideFileScope->class($leftSideClass);
+        if (!$leftSideClassScope) {
+            throw new ParseResultException(
+                'Unknown class "' . $leftSideClass . '" for left side of property fetch',
+                $value->var,
+            );
+        }
 
-        $types = $leftSideClass->propertyTypes($rightSide[0]);
+        $types = $leftSideClassScope->propertyTypes($rightSide[0]);
         if (!$types) {
             throw new ParseResultException(
-                'Unknown type of "' . $rightSide[0] . '" for property fetch',
+                'Unknown type of "' . $rightSide[0] . '" for right side of property fetch',
                 $value->var,
             );
         }
@@ -122,9 +128,9 @@ class ExpressionObjectTypeParser
      * @return string[]
      * @throws ParseResultException|ReflectionException
      */
-    private function extractTypeFromMethodCall(MethodCall $value, ClassTypehints $resourceClass): array
+    private function extractTypeFromMethodCall(MethodCall $value, ResolverContract $resolver): array
     {
-        [$leftSide, $rightSide] = $this->extractSides($value, $resourceClass);
+        [$leftSide, $rightSide] = $this->extractSides($value, $resolver);
 
         /**
          * @var class-string $leftSideClass
@@ -132,26 +138,33 @@ class ExpressionObjectTypeParser
          */
         $leftSideClass = $leftSide[0];
         $leftSideFile = $this->classFileFinder->find($leftSideClass);
-        $leftSideClass = $this->classFileTypehintParser->parse($leftSideClass, $leftSideFile);
-
-        $types = $leftSideClass->methodTypes($rightSide[0]);
-        if (!$types) {
+        $leftSideFileScope = $this->fileParser->parse($leftSideFile);
+        $leftSideClassScope = $leftSideFileScope->class($leftSideClass);
+        if (!$leftSideClassScope) {
             throw new ParseResultException(
-                'Unknown type of "' . $rightSide[0] . '" for property fetch',
+                'Unknown class "' . $leftSideClass . '" for left side of method call',
                 $value->var,
             );
         }
 
-        return $types;
+        $methodScope = $leftSideClassScope->method($rightSide[0]);
+        if (!$methodScope) {
+            throw new ParseResultException(
+                'Unknown method "' . $rightSide[0] . '" for right side for method call',
+                $value->var,
+            );
+        }
+
+        return $methodScope->returnTypes();
     }
 
     /**
      * @return string[]
      * @throws ParseResultException|ReflectionException
      */
-    private function extractTypeFromNullsafeMethodCall(NullsafeMethodCall $value, ClassTypehints $resourceClass): array
+    private function extractTypeFromNullsafeMethodCall(NullsafeMethodCall $value, ResolverContract $resolver): array
     {
-        [$leftSide, $rightSide] = $this->extractSides($value, $resourceClass);
+        [$leftSide, $rightSide] = $this->extractSides($value, $resolver);
 
         /**
          * @var class-string $leftSideClass
@@ -159,18 +172,26 @@ class ExpressionObjectTypeParser
          */
         $leftSideClass = $leftSide[0];
         $leftSideFile = $this->classFileFinder->find($leftSideClass);
-        $leftSideClass = $this->classMethodReturnParser->parse([$rightSide[0]], $leftSideClass, $leftSideFile);
-
-        $rightSideTypes = $leftSideClass->methodTypes($rightSide[0]);
-
-        if ($rightSideTypes === null) {
+        $leftSideFileScope = $this->fileParser->parse($leftSideFile);
+        $leftSideClassScope = $leftSideFileScope->class($leftSideClass);
+        if (!$leftSideClassScope) {
             throw new ParseResultException(
-                'Unknown type "' . $rightSide[0] . '" for right side of property fetch',
+                'Unknown class "' . $leftSideClass . '" for left side of nullsafe method call',
                 $value->var,
             );
         }
 
-        return array_unique(array_merge($rightSideTypes, ['null']));
+        $methodScope = $leftSideClassScope->method($rightSide[0]);
+        if (!$methodScope) {
+            throw new ParseResultException(
+                'Unknown method "' . $rightSide[0] . '" for right side of nullsafe method call',
+                $value->var,
+            );
+        }
+
+        $types = $methodScope->returnTypes();
+
+        return array_unique(array_merge($types, ['null']));
     }
 
     /**
@@ -179,9 +200,9 @@ class ExpressionObjectTypeParser
      */
     public function extractSides(
         PropertyFetch|MethodCall|NullsafeMethodCall $value,
-        ClassTypehints $resourceClass,
+        ResolverContract $resolver,
     ): array {
-        $leftSide = $this->parse($value->var, $resourceClass);
+        $leftSide = $this->parse($value->var, $resolver);
         if ($value instanceof NullsafeMethodCall) {
             $leftSide = array_filter($leftSide, fn($type) => $type !== 'null');
         }
@@ -193,7 +214,7 @@ class ExpressionObjectTypeParser
         }
 
         $rightSide = $value->name instanceof Expr
-            ? $this->parse($value->name, $resourceClass)
+            ? $this->parse($value->name, $resolver)
             : [$value->name->name];
         if (count($rightSide) !== 1) {
             throw new ParseResultException(
@@ -209,14 +230,14 @@ class ExpressionObjectTypeParser
      * @return string[]
      * @throws ParseResultException|ReflectionException
      */
-    private function extractTypeFromTernary(Ternary $value, ClassTypehints $resourceClass): array
+    private function extractTypeFromTernary(Ternary $value, ResolverContract $resolver): array
     {
         if (!$value->if) {
             throw new ParseResultException('Ternary expression missing if', $value);
         }
 
-        $ifType = $this->parse($value->if, $resourceClass);
-        $elseType = $this->parse($value->else, $resourceClass);
+        $ifType = $this->parse($value->if, $resolver);
+        $elseType = $this->parse($value->else, $resolver);
 
         return array_unique(array_merge($ifType, $elseType));
     }

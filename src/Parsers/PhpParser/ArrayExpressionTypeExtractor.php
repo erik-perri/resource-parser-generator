@@ -7,10 +7,10 @@ namespace ResourceParserGenerator\Parsers\PhpParser;
 use PhpParser\Node\Expr\Array_;
 use PhpParser\Node\Scalar\String_;
 use ReflectionException;
-use ResourceParserGenerator\DataObjects\ClassTypehints;
 use ResourceParserGenerator\Exceptions\ParseResultException;
+use ResourceParserGenerator\Parsers\PhpParser\Context\MethodScope;
 
-class ClassMethodReturnArrayTypeExtractor
+class ArrayExpressionTypeExtractor
 {
     public function __construct(private readonly ExpressionObjectTypeParser $expressionObjectTypeParser)
     {
@@ -21,7 +21,7 @@ class ClassMethodReturnArrayTypeExtractor
      * @return array<string, string[]>
      * @throws ParseResultException|ReflectionException
      */
-    public function extract(Array_ $array, ClassTypehints $resourceClass): array
+    public function extract(Array_ $array, MethodScope $scope): array
     {
         $properties = [];
 
@@ -36,7 +36,7 @@ class ClassMethodReturnArrayTypeExtractor
             }
 
             $value = $item->value;
-            $properties[$key->value] = $this->expressionObjectTypeParser->parse($value, $resourceClass);
+            $properties[$key->value] = $this->expressionObjectTypeParser->parse($value, $scope);
         }
 
         return $properties;

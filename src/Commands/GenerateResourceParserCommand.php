@@ -9,7 +9,8 @@ use ResourceParserGenerator\Builders\ParserBuilder;
 use ResourceParserGenerator\Builders\ParserConstraintBuilder;
 use ResourceParserGenerator\Builders\ParserFileBuilder;
 use ResourceParserGenerator\Filesystem\ClassFileFinder;
-use ResourceParserGenerator\Parsers\PhpParser\ClassMethodReturnArrayTypeParser;
+use ResourceParserGenerator\Parsers\ClassMethodReturnTypeParser;
+use RuntimeException;
 use Throwable;
 
 class GenerateResourceParserCommand extends Command
@@ -35,7 +36,20 @@ class GenerateResourceParserCommand extends Command
 
         try {
             $classFile = $this->make(ClassFileFinder::class)->find($className);
-            $returns = $this->make(ClassMethodReturnArrayTypeParser::class)->parse($className, $classFile, $methodName);
+            $returns = $this->make(ClassMethodReturnTypeParser::class)->parse($className, $classFile, $methodName);
+
+            foreach ($returns as $return) {
+                if (!is_array($return)) {
+                    throw new RuntimeException(
+                        'Non-array return type for "' . $methodName . '" found, cannot build parser.'
+                    );
+                }
+            }
+
+            /**
+             * Validated in foreach above.
+             * @var array<string, string[]> $returns
+             */
 
             $constraintBuilder = $this->make(ParserConstraintBuilder::class);
             $parserFile = $this->make(ParserFileBuilder::class);

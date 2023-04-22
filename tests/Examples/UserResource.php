@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace ResourceParserGenerator\Tests\Examples;
 
+use Illuminate\Http\Request;
 use ResourceParserGenerator\Tests\Examples\Models\User;
 
 /**
@@ -46,10 +47,15 @@ class UserResource
         }
     }
 
-    public function ternaries(): array
-    {
+    public function ternaries(
+        Request $request,
+        $another,
+        string $anotherString,
+        ?string $nullable,
+        bool|string|null $null
+    ): array {
         return [
-            'ternary_to_int' => $this->resource->created_at ? +1 : -1,
+            'ternary_to_int' => $request->has('something') ? +1 : -1,
             'ternary_to_compound' => $this->resource->created_at ? ($this->resource->updated_at ? true : -1) : 'false',
         ];
     }

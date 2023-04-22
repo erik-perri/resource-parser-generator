@@ -6,11 +6,11 @@ namespace ResourceParserGenerator\Tests\Unit\Parsers\PhpParser;
 
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\DataProvider;
-use ResourceParserGenerator\Parsers\PhpParser\ClassMethodReturnArrayTypeParser;
+use ResourceParserGenerator\Parsers\ClassMethodReturnTypeParser;
 use ResourceParserGenerator\Tests\Examples\UserResource;
 use ResourceParserGenerator\Tests\TestCase;
 
-#[CoversClass(ClassMethodReturnArrayTypeParser::class)]
+#[CoversClass(ClassMethodReturnTypeParser::class)]
 class ClassMethodReturnArrayTypeParserTest extends TestCase
 {
     #[DataProvider('userResourceProvider')]
@@ -22,9 +22,9 @@ class ClassMethodReturnArrayTypeParserTest extends TestCase
     ): void {
         // Arrange
         /**
-         * @var ClassMethodReturnArrayTypeParser $parser
+         * @var ClassMethodReturnTypeParser $parser
          */
-        $parser = $this->app->make(ClassMethodReturnArrayTypeParser::class);
+        $parser = $this->app->make(ClassMethodReturnTypeParser::class);
 
         // Act
         $returns = $parser->parse($className, $classFile, $methodName);

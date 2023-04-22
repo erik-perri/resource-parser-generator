@@ -11,7 +11,7 @@ use phpDocumentor\Reflection\Types\String_;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\DataProvider;
 use ResourceParserGenerator\Parsers\DocBlock\DocBlockTagTypeConverter;
-use ResourceParserGenerator\Parsers\ResolveScope;
+use ResourceParserGenerator\Parsers\PhpParser\Context\ResolverContract;
 use ResourceParserGenerator\Tests\TestCase;
 
 #[CoversClass(DocBlockTagTypeConverter::class)]
@@ -22,9 +22,9 @@ class DocBlockTagTypeConverterTest extends TestCase
     {
         // Arrange
         /**
-         * @var ResolveScope $scope
+         * @var ResolverContract $scope
          */
-        $scope = $this->mock(ResolveScope::class)
+        $scope = $this->mock(ResolverContract::class)
             ->expects('resolveClass')
             ->atLeast()
             ->once()

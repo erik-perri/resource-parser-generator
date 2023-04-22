@@ -10,14 +10,11 @@ use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Model;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\DataProvider;
-use PHPUnit\Framework\Attributes\UsesClass;
 use ResourceParserGenerator\Parsers\PhpParser\UseStatementParser;
-use ResourceParserGenerator\ResourceParserGeneratorServiceProvider;
 use ResourceParserGenerator\Tests\Stubs\Models\User;
 use ResourceParserGenerator\Tests\TestCase;
 
 #[CoversClass(UseStatementParser::class)]
-#[UsesClass(ResourceParserGeneratorServiceProvider::class)]
 class UseStatementsParserTest extends TestCase
 {
     #[DataProvider('expectedUseProvider')]

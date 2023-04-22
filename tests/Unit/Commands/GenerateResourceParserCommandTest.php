@@ -7,52 +7,11 @@ namespace ResourceParserGenerator\Tests\Unit\Commands;
 use Closure;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\DataProvider;
-use PHPUnit\Framework\Attributes\UsesClass;
-use ResourceParserGenerator\Builders\Constraints\NullConstraint;
-use ResourceParserGenerator\Builders\Constraints\StringConstraint;
-use ResourceParserGenerator\Builders\Constraints\UnionConstraint;
-use ResourceParserGenerator\Builders\ParserBuilder;
-use ResourceParserGenerator\Builders\ParserConstraintBuilder;
-use ResourceParserGenerator\Builders\ParserFileBuilder;
 use ResourceParserGenerator\Commands\GenerateResourceParserCommand;
-use ResourceParserGenerator\DataObjects\ClassTypehints;
-use ResourceParserGenerator\Filesystem\ClassFileFinder;
-use ResourceParserGenerator\Parsers\DocBlock\ClassFileTypehintParser;
-use ResourceParserGenerator\Parsers\DocBlock\DocBlockTagTypeConverter;
-use ResourceParserGenerator\Parsers\PhpParser\ClassMethodReturnArrayTypeExtractor;
-use ResourceParserGenerator\Parsers\PhpParser\ClassMethodReturnArrayTypeLocator;
-use ResourceParserGenerator\Parsers\PhpParser\ClassMethodReturnArrayTypeParser;
-use ResourceParserGenerator\Parsers\PhpParser\ClassMethodReturnParser;
-use ResourceParserGenerator\Parsers\PhpParser\ExpressionObjectTypeParser;
-use ResourceParserGenerator\Parsers\PhpParser\UseStatementParser;
-use ResourceParserGenerator\Parsers\ResolveScope;
-use ResourceParserGenerator\ResourceParserGeneratorServiceProvider;
 use ResourceParserGenerator\Tests\Stubs\UserResource;
 use ResourceParserGenerator\Tests\TestCase;
-use ResourceParserGenerator\Visitors\FindArrayReturnVisitor;
-use ResourceParserGenerator\Visitors\FindClassMethodWithNameVisitor;
 
 #[CoversClass(GenerateResourceParserCommand::class)]
-#[UsesClass(ClassFileFinder::class)]
-#[UsesClass(ClassFileTypehintParser::class)]
-#[UsesClass(ClassMethodReturnArrayTypeExtractor::class)]
-#[UsesClass(ClassMethodReturnArrayTypeLocator::class)]
-#[UsesClass(ClassMethodReturnArrayTypeParser::class)]
-#[UsesClass(ClassMethodReturnParser::class)]
-#[UsesClass(ClassTypehints::class)]
-#[UsesClass(UnionConstraint::class)]
-#[UsesClass(DocBlockTagTypeConverter::class)]
-#[UsesClass(ExpressionObjectTypeParser::class)]
-#[UsesClass(FindArrayReturnVisitor::class)]
-#[UsesClass(FindClassMethodWithNameVisitor::class)]
-#[UsesClass(NullConstraint::class)]
-#[UsesClass(ParserBuilder::class)]
-#[UsesClass(ParserConstraintBuilder::class)]
-#[UsesClass(ParserFileBuilder::class)]
-#[UsesClass(ResolveScope::class)]
-#[UsesClass(ResourceParserGeneratorServiceProvider::class)]
-#[UsesClass(StringConstraint::class)]
-#[UsesClass(UseStatementParser::class)]
 class GenerateResourceParserCommandTest extends TestCase
 {
     public function testGeneratorShouldReturnFailureIfClassDoesNotExist(): void

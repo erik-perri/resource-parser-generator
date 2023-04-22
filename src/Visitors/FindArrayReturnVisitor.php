@@ -9,7 +9,7 @@ use PhpParser\Node;
 use PhpParser\Node\Expr\Array_;
 use PhpParser\Node\Stmt\Return_;
 use PhpParser\NodeVisitorAbstract;
-use ResourceParserGenerator\Exceptions\UnhandledParseResultException;
+use ResourceParserGenerator\Exceptions\ParseResultException;
 
 class FindArrayReturnVisitor extends NodeVisitorAbstract
 {
@@ -23,7 +23,7 @@ class FindArrayReturnVisitor extends NodeVisitorAbstract
     }
 
     /**
-     * @throws UnhandledParseResultException
+     * @throws ParseResultException
      */
     public function leaveNode(Node $node): void
     {
@@ -32,8 +32,8 @@ class FindArrayReturnVisitor extends NodeVisitorAbstract
         }
 
         if (!($node->expr instanceof Array_)) {
-            throw new UnhandledParseResultException(
-                'Unexpected return value in resource, not array.',
+            throw new ParseResultException(
+                'Unexpected non-array return value',
                 $node->expr,
             );
         }

@@ -9,7 +9,7 @@ use PhpParser\Node\Expr\PropertyFetch;
 use PhpParser\Node\Expr\Variable;
 use PhpParser\Node\Identifier;
 use ResourceParserGenerator\DataObjects\ClassTypehints;
-use ResourceParserGenerator\Exceptions\UnhandledParseResultException;
+use ResourceParserGenerator\Exceptions\ParseResultException;
 use ResourceParserGenerator\Filesystem\ClassFileFinder;
 use ResourceParserGenerator\Parsers\DocBlock\ClassFileTypehintParser;
 
@@ -30,8 +30,8 @@ class ExprObjectTypeParser
             if ($expr->var instanceof PropertyFetch) {
                 $from = $this->parse($expr->var, $thisClass);
                 if (count($from) !== 1) {
-                    throw new UnhandledParseResultException(
-                        'Found multiple types on left side of fetch.',
+                    throw new ParseResultException(
+                        'Unexpected compound left side of property fetch',
                         $expr->var,
                     );
                 }
@@ -46,8 +46,8 @@ class ExprObjectTypeParser
             }
 
             if (!$fromClass) {
-                throw new UnhandledParseResultException(
-                    'Unexpected variable in property fetch.',
+                throw new ParseResultException(
+                    'Unknown type on left side of property fetch',
                     $expr->var,
                 );
             }
@@ -56,9 +56,9 @@ class ExprObjectTypeParser
                 return $fromClass->getPropertyTypes($expr->name->name);
             }
 
-            throw new UnhandledParseResultException('Unexpected property in PropertyFetch.', $expr);
+            throw new ParseResultException('Unhandled property in property fetch', $expr);
         }
 
-        throw new UnhandledParseResultException('Unexpected Expr type.', $expr);
+        throw new ParseResultException('Unhandled expression type "' . $expr->getType() . '"', $expr);
     }
 }

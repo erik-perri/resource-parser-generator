@@ -12,7 +12,7 @@ use PhpParser\Node\Expr\PropertyFetch;
 use PhpParser\Node\Scalar\String_;
 use ReflectionException;
 use ResourceParserGenerator\DataObjects\ClassTypehints;
-use ResourceParserGenerator\Exceptions\UnhandledParseResultException;
+use ResourceParserGenerator\Exceptions\ParseResultException;
 use ResourceParserGenerator\Filesystem\ClassFileFinder;
 use ResourceParserGenerator\Parsers\DocBlock\ClassFileTypehintParser;
 
@@ -28,7 +28,7 @@ class ClassMethodReturnArrayTypeExtractor
     }
 
     /**
-     * @throws UnhandledParseResultException|ReflectionException
+     * @throws ParseResultException|ReflectionException
      */
     public function extract(Array_ $array, ClassTypehints $resourceClass): array
     {
@@ -36,10 +36,7 @@ class ClassMethodReturnArrayTypeExtractor
 
         foreach ($array->items as $item) {
             if (!($item->key instanceof String_)) {
-                throw new UnhandledParseResultException(
-                    'Unexpected return value in resource, not a string key.',
-                    $item,
-                );
+                throw new ParseResultException('Unexpected non-string key in resource', $item);
             }
 
             $value = $item->value;
@@ -50,8 +47,8 @@ class ClassMethodReturnArrayTypeExtractor
                     $value,
                     $resourceClass,
                 ),
-                default => throw new UnhandledParseResultException(
-                    'Unexpected array item value type "' . $item->value->getType() . '"',
+                default => throw new ParseResultException(
+                    'Unexpected property type "' . $item->value->getType() . '"',
                     $item->value,
                 ),
             };
@@ -61,7 +58,7 @@ class ClassMethodReturnArrayTypeExtractor
     }
 
     /**
-     * @throws UnhandledParseResultException|ReflectionException
+     * @throws ParseResultException|ReflectionException
      */
     private function extractTypeFromPropertyFetch(PropertyFetch $value, ClassTypehints $resourceClass): array
     {
@@ -74,7 +71,7 @@ class ClassMethodReturnArrayTypeExtractor
     }
 
     /**
-     * @throws UnhandledParseResultException|ReflectionException
+     * @throws ParseResultException|ReflectionException
      */
     private function extractTypeFromMethodCall(MethodCall $value, ClassTypehints $resourceClass): array
     {
@@ -87,7 +84,7 @@ class ClassMethodReturnArrayTypeExtractor
     }
 
     /**
-     * @throws UnhandledParseResultException|ReflectionException
+     * @throws ParseResultException|ReflectionException
      */
     private function extractTypeFromNullsafeMethodCall(NullsafeMethodCall $value, ClassTypehints $resourceClass): array
     {
@@ -99,8 +96,8 @@ class ClassMethodReturnArrayTypeExtractor
         $rightSideTypes = $leftSideClass->getMethodTypes($rightSide[0]);
 
         if ($rightSideTypes === null) {
-            throw new UnhandledParseResultException(
-                'Unexpected right side of property fetch, unable to determine type for "' . $rightSide[0] . '".',
+            throw new ParseResultException(
+                'Unknown type "' . $rightSide[0] . '" for right side of property fetch',
                 $value->var,
             );
         }
@@ -109,7 +106,7 @@ class ClassMethodReturnArrayTypeExtractor
     }
 
     /**
-     * @throws UnhandledParseResultException
+     * @throws ParseResultException
      */
     public function extractSides(
         PropertyFetch|MethodCall|NullsafeMethodCall $value,
@@ -120,8 +117,8 @@ class ClassMethodReturnArrayTypeExtractor
             $leftSide = array_filter($leftSide, fn($type) => $type !== 'null');
         }
         if (count($leftSide) !== 1) {
-            throw new UnhandledParseResultException(
-                'Unexpected left side of property fetch, not a single type.',
+            throw new ParseResultException(
+                'Unexpected compound left side of property fetch',
                 $value->var,
             );
         }
@@ -130,8 +127,8 @@ class ClassMethodReturnArrayTypeExtractor
             ? $this->exprObjectTypeParser->parse($value->name, $resourceClass)
             : [$value->name->name];
         if (count($rightSide) !== 1) {
-            throw new UnhandledParseResultException(
-                'Unexpected right side of property fetch, not a single type.',
+            throw new ParseResultException(
+                'Unexpected compound right side of property fetch',
                 $value->var,
             );
         }

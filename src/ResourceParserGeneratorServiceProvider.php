@@ -16,7 +16,7 @@ class ResourceParserGeneratorServiceProvider extends ServiceProvider
 {
     public function boot(): void
     {
-        $this->loadViewsFrom(__DIR__ . '/resources/views', 'resource-parser-generator');
+        $this->loadViewsFrom(__DIR__ . '/../resources/views', 'resource-parser-generator');
     }
 
     public function register(): void

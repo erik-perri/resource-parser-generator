@@ -92,6 +92,15 @@ class ClassMethodReturnArrayTypeParserTest extends TestCase
                     'name' => ['string', 'undefined'],
                 ],
             ],
+            'ternaries' => [
+                'classFile' => dirname(__DIR__, 3) . '/Stubs/UserResource.php',
+                'className' => UserResource::class,
+                'methodName' => 'ternaries',
+                'expectedReturns' => [
+                    'ternary_to_int' => ['int'],
+                    'ternary_to_compound' => ['bool', 'int', 'string'],
+                ],
+            ],
             'scalars' => [
                 'classFile' => dirname(__DIR__, 3) . '/Stubs/UserResource.php',
                 'className' => UserResource::class,

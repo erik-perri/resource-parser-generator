@@ -9,6 +9,7 @@ use PhpParser\Node\Expr\ConstFetch;
 use PhpParser\Node\Expr\MethodCall;
 use PhpParser\Node\Expr\NullsafeMethodCall;
 use PhpParser\Node\Expr\PropertyFetch;
+use PhpParser\Node\Expr\Ternary;
 use PhpParser\Node\Expr\UnaryMinus;
 use PhpParser\Node\Expr\UnaryPlus;
 use PhpParser\Node\Expr\Variable;
@@ -42,6 +43,10 @@ class ExpressionObjectTypeParser
 
         if ($expr instanceof NullsafeMethodCall) {
             return $this->extractTypeFromNullsafeMethodCall($expr, $thisClass);
+        }
+
+        if ($expr instanceof Ternary) {
+            return $this->extractTypeFromTernary($expr, $thisClass);
         }
 
         if ($expr instanceof Variable) {
@@ -162,5 +167,16 @@ class ExpressionObjectTypeParser
         }
 
         return [$leftSide, $rightSide];
+    }
+
+    /**
+     * @throws ParseResultException|ReflectionException
+     */
+    private function extractTypeFromTernary(Ternary $value, ClassTypehints $resourceClass): array
+    {
+        $ifType = $this->parse($value->if, $resourceClass);
+        $elseType = $this->parse($value->else, $resourceClass);
+
+        return array_unique(array_merge($ifType, $elseType));
     }
 }

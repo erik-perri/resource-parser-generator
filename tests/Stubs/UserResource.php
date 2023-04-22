@@ -46,6 +46,14 @@ class UserResource
         }
     }
 
+    public function ternaries(): array
+    {
+        return [
+            'ternary_to_int' => $this->resource->created_at ? +1 : -1,
+            'ternary_to_compound' => $this->resource->created_at ? ($this->resource->updated_at ? true : -1) : 'false',
+        ];
+    }
+
     public function scalars(): array
     {
         return [

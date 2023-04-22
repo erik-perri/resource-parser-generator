@@ -36,7 +36,9 @@ class ParserFileBuilder
      */
     public function imports(): array
     {
-        /** @var Collection<int, string> $imports */
+        /**
+         * @var Collection<int, string> $imports
+         */
         $imports = collect($this->parsers)
             ->map(fn(ParserBuilder $parser) => collect($parser->properties())
                 ->map(fn(ConstraintContract $constraint) => $constraint->imports()))

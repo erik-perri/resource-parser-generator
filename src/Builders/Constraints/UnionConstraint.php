@@ -32,7 +32,9 @@ class UnionConstraint implements ConstraintContract
 
     public function imports(): array
     {
-        /** @var Collection<int, string> $imports */
+        /**
+         * @var Collection<int, string> $imports
+         */
         $imports = collect($this->constraints)
             ->map(fn(ConstraintContract $constraint) => $constraint->imports())
             ->flatten()

@@ -21,7 +21,9 @@ class ClassMethodReturnArrayTypeParserTest extends TestCase
         array $expectedReturns,
     ): void {
         // Arrange
-        /** @var ClassMethodReturnArrayTypeParser $parser */
+        /**
+         * @var ClassMethodReturnArrayTypeParser $parser
+         */
         $parser = $this->app->make(ClassMethodReturnArrayTypeParser::class);
 
         // Act

@@ -99,7 +99,10 @@ class ExpressionObjectTypeParser
     {
         [$leftSide, $rightSide] = $this->extractSides($value, $resourceClass);
 
-        /** @var class-string $leftSideClass */
+        /**
+         * @var class-string $leftSideClass
+         * @noinspection PhpRedundantVariableDocTypeInspection
+         */
         $leftSideClass = $leftSide[0];
         $leftSideFile = $this->classFileFinder->find($leftSideClass);
         $leftSideClass = $this->classFileTypehintParser->parse($leftSideClass, $leftSideFile);
@@ -123,7 +126,10 @@ class ExpressionObjectTypeParser
     {
         [$leftSide, $rightSide] = $this->extractSides($value, $resourceClass);
 
-        /** @var class-string $leftSideClass */
+        /**
+         * @var class-string $leftSideClass
+         * @noinspection PhpRedundantVariableDocTypeInspection
+         */
         $leftSideClass = $leftSide[0];
         $leftSideFile = $this->classFileFinder->find($leftSideClass);
         $leftSideClass = $this->classFileTypehintParser->parse($leftSideClass, $leftSideFile);
@@ -147,7 +153,10 @@ class ExpressionObjectTypeParser
     {
         [$leftSide, $rightSide] = $this->extractSides($value, $resourceClass);
 
-        /** @var class-string $leftSideClass */
+        /**
+         * @var class-string $leftSideClass
+         * @noinspection PhpRedundantVariableDocTypeInspection
+         */
         $leftSideClass = $leftSide[0];
         $leftSideFile = $this->classFileFinder->find($leftSideClass);
         $leftSideClass = $this->classMethodReturnParser->parse([$rightSide[0]], $leftSideClass, $leftSideFile);

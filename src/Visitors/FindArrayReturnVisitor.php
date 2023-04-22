@@ -16,13 +16,15 @@ class FindArrayReturnVisitor extends NodeVisitorAbstract
     /**
      * @param Closure(Array_): void $handler
      */
-    public function __construct(
-        private readonly Closure $handler,
-    ) {
+    public function __construct(private readonly Closure $handler)
+    {
         //
     }
 
-    /** @noinspection PhpMissingReturnTypeInspection */
+    /**
+     * @throws ParseResultException
+     * @noinspection PhpMissingReturnTypeInspection
+     */
     public function leaveNode(Node $node)
     {
         if ($node instanceof Return_) {

@@ -6,6 +6,7 @@ namespace ResourceParserGenerator\Parsers\DocBlock;
 
 use phpDocumentor\Reflection\Type;
 use phpDocumentor\Reflection\Types\Compound;
+use phpDocumentor\Reflection\Types\Nullable;
 use PhpParser\Node\Name;
 use ResourceParserGenerator\Parsers\PhpParser\Context\ResolverContract;
 use RuntimeException;
@@ -17,27 +18,37 @@ class DocBlockTagTypeConverter
      */
     public function convert(?Type $type, ResolverContract $resolver): array
     {
-        if ($type instanceof Compound) {
-            $typehint = [];
-
-            foreach ($type as $subType) {
-                $typehint[] = $this->getTypehint($subType, $resolver);
-            }
-
-            return $typehint;
-        }
-
         if (!$type) {
             return ['mixed'];
         }
 
-        return [$this->getTypehint($type, $resolver)];
+        if ($type instanceof Compound) {
+            $typehints = [];
+
+            foreach ($type as $subType) {
+                $typehints[] = $this->getTypehint($subType, $resolver);
+            }
+
+            return array_unique(array_merge(...$typehints));
+        }
+
+        return $this->getTypehint($type, $resolver);
     }
 
-    private function getTypehint(Type $type, ResolverContract $resolver): string
+    /**
+     * @return string[]
+     */
+    private function getTypehint(Type $type, ResolverContract $resolver): array
     {
         if (!method_exists($type, '__toString')) {
             throw new RuntimeException('Unexpected non-stringable property type: "' . get_class($type) . '"');
+        }
+
+        if ($type instanceof Nullable) {
+            return array_unique(array_merge(
+                ['null'],
+                $this->getTypehint($type->getActualType(), $resolver),
+            ));
         }
 
         $typeString = ltrim($type->__toString(), '\\');
@@ -51,9 +62,9 @@ class DocBlockTagTypeConverter
             'null',
             'void',
         ], true)) {
-            return $typeString;
+            return [$typeString];
         }
 
-        return $resolver->resolveClass(new Name($typeString));
+        return [$resolver->resolveClass(new Name($typeString))];
     }
 }

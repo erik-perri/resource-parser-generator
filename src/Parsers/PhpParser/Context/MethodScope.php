@@ -122,9 +122,12 @@ class MethodScope implements ResolverContract
         return $type->toString();
     }
 
-    public function resolveClass(string $class): string
+    /**
+     * @throws ParseResultException
+     */
+    public function resolveClass(Name $name): string
     {
-        return $this->scope->resolveClass($class);
+        return $this->scope->resolveClass($name);
     }
 
     /**

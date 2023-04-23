@@ -4,27 +4,32 @@ declare(strict_types=1);
 
 namespace ResourceParserGenerator\Parsers\PhpParser\Context;
 
+use PhpParser\Node\Name;
+use PhpParser\Node\Stmt\Use_;
+use PhpParser\NodeVisitor\NameResolver;
+use ResourceParserGenerator\Exceptions\ParseResultException;
 use RuntimeException;
 
 class FileScope implements ResolverContract
 {
-    private string $namespace;
-
     /**
-     * @param ClassScope[] $classes
-     * @param array<string, string> $imports
+     * @var ClassScope[]
      */
+    private array $classes = [];
+
     public function __construct(
-        public readonly string $fileName,
-        private array $classes = [],
-        private array $imports = [],
+        private readonly string $fileName,
+        private readonly NameResolver $nameResolver,
     ) {
         //
     }
 
-    public static function create(string $fileName): self
+    public static function create(string $fileName, NameResolver $nameResolver): self
     {
-        return resolve(self::class, ['fileName' => $fileName]);
+        return resolve(self::class, [
+            'fileName' => $fileName,
+            'nameResolver' => $nameResolver,
+        ]);
     }
 
     public function addClass(ClassScope $classScope): self
@@ -34,21 +39,27 @@ class FileScope implements ResolverContract
         return $this;
     }
 
-    public function addImport(string $alias, string $class): self
-    {
-        $this->imports = array_merge($this->imports, [$alias => $class]);
-
-        return $this;
-    }
-
     public function namespace(): string
     {
-        return $this->namespace;
+        $namespace = $this->nameResolver->getNameContext()->getNamespace();
+        if (!$namespace) {
+            throw new RuntimeException('Cannot resolve namespace in file scope of "' . $this->fileName . '"');
+        }
+
+        return $namespace->toString();
     }
 
-    public function resolveClass(string $class): string
+    /**
+     * @throws ParseResultException
+     */
+    public function resolveClass(Name $name): string
     {
-        return $this->imports[$class] ?? $class;
+        $resolved = $this->nameResolver->getNameContext()->getResolvedName($name, Use_::TYPE_NORMAL);
+        if (!$resolved) {
+            throw new ParseResultException('Cannot resolve class name "' . $name->toString() . '"', $name);
+        }
+
+        return $resolved->toString();
     }
 
     /**
@@ -57,13 +68,6 @@ class FileScope implements ResolverContract
     public function resolveVariable(string $variable): array
     {
         throw new RuntimeException('Cannot resolve variable in file scope');
-    }
-
-    public function setNamespace(string $namespace): self
-    {
-        $this->namespace = $namespace;
-
-        return $this;
     }
 
     /**

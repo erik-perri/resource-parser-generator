@@ -6,10 +6,10 @@ namespace ResourceParserGenerator\Parsers;
 
 use Illuminate\Support\Facades\File;
 use PhpParser\NodeTraverser;
+use PhpParser\NodeVisitor\NameResolver;
 use PhpParser\Parser;
 use ResourceParserGenerator\Parsers\PhpParser\Context\FileScope;
 use ResourceParserGenerator\Visitors\ClassScopeVisitor;
-use ResourceParserGenerator\Visitors\FileScopeVisitor;
 use RuntimeException;
 
 class FileParser
@@ -26,10 +26,11 @@ class FileParser
             throw new RuntimeException('Failed to parse file "' . $file . '"');
         }
 
-        $fileScope = FileScope::create($file);
+        $nameResolver = new NameResolver();
+        $fileScope = FileScope::create($file, $nameResolver);
 
         $traverser = new NodeTraverser();
-        $traverser->addVisitor(FileScopeVisitor::create($fileScope));
+        $traverser->addVisitor($nameResolver);
         $traverser->addVisitor(ClassScopeVisitor::create($fileScope));
         $traverser->traverse($ast);
 

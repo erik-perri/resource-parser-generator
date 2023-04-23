@@ -9,9 +9,11 @@ use phpDocumentor\Reflection\DocBlockFactory;
 use phpDocumentor\Reflection\Types\Compound;
 use phpDocumentor\Reflection\Types\Mixed_;
 use phpDocumentor\Reflection\Types\Void_;
+use PhpParser\Node\Name;
 use ReflectionClass;
 use ReflectionException;
 use ReflectionUnionType;
+use ResourceParserGenerator\Exceptions\ParseResultException;
 use ResourceParserGenerator\Parsers\DocBlock\DocBlockTagTypeConverter;
 use RuntimeException;
 
@@ -92,9 +94,12 @@ class ClassScope implements ResolverContract
         );
     }
 
-    public function resolveClass(string $class): string
+    /**
+     * @throws ParseResultException
+     */
+    public function resolveClass(Name $name): string
     {
-        return $this->scope->resolveClass($class);
+        return $this->scope->resolveClass($name);
     }
 
     /**

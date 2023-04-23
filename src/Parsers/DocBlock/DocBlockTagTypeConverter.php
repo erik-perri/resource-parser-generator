@@ -6,6 +6,7 @@ namespace ResourceParserGenerator\Parsers\DocBlock;
 
 use phpDocumentor\Reflection\Type;
 use phpDocumentor\Reflection\Types\Compound;
+use PhpParser\Node\Name;
 use ResourceParserGenerator\Parsers\PhpParser\Context\ResolverContract;
 use RuntimeException;
 
@@ -41,6 +42,18 @@ class DocBlockTagTypeConverter
 
         $typeString = ltrim($type->__toString(), '\\');
 
-        return $resolver->resolveClass($typeString);
+        if (in_array($typeString, [
+            'int',
+            'float',
+            'bool',
+            'string',
+            'array',
+            'null',
+            'void',
+        ], true)) {
+            return $typeString;
+        }
+
+        return $resolver->resolveClass(new Name($typeString));
     }
 }

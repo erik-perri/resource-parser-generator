@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace ResourceParserGenerator\Parsers\PhpParser\Context;
 
+use PhpParser\Node\Name;
 use RuntimeException;
 
 class VirtualFunctionScope implements ResolverContract
@@ -44,9 +45,9 @@ class VirtualFunctionScope implements ResolverContract
         return $this->name;
     }
 
-    public function resolveClass(string $class): string
+    public function resolveClass(Name $name): string
     {
-        return $this->scope->resolveClass($class);
+        return $this->scope->resolveClass($name);
     }
 
     /**

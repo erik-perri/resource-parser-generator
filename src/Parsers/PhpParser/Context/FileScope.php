@@ -18,7 +18,7 @@ class FileScope implements ResolverContract
     private array $classes = [];
 
     public function __construct(
-        private readonly string $fileName,
+        public readonly string $fileName,
         private readonly NameResolver $nameResolver,
     ) {
         //

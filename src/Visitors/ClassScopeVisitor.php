@@ -17,7 +17,7 @@ use ResourceParserGenerator\Exceptions\ParseResultException;
 use ResourceParserGenerator\Parsers\DocBlock\DocBlockTagTypeConverter;
 use ResourceParserGenerator\Parsers\PhpParser\Context\ClassScope;
 use ResourceParserGenerator\Parsers\PhpParser\Context\FileScope;
-use ResourceParserGenerator\Parsers\PhpParser\Context\VirtualFunctionScope;
+use ResourceParserGenerator\Parsers\PhpParser\Context\VirtualMethodScope;
 
 class ClassScopeVisitor extends NodeVisitorAbstract
 {
@@ -88,7 +88,7 @@ class ClassScopeVisitor extends NodeVisitorAbstract
                     $this->convertDocblockTagTypes->convert($tag->getType(), $classScope),
                 );
             } elseif ($tag instanceof Method) {
-                $method = VirtualFunctionScope::create(
+                $method = VirtualMethodScope::create(
                     $classScope,
                     $tag->getMethodName(),
                     $this->convertDocblockTagTypes->convert($tag->getReturnType(), $classScope),

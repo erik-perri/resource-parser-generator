@@ -22,7 +22,7 @@ use ResourceParserGenerator\Filesystem\ClassFileFinder;
 use ResourceParserGenerator\Parsers\FileParser;
 use ResourceParserGenerator\Parsers\PhpParser\Context\ResolverContract;
 
-class ExpressionObjectTypeParser
+class ExpressionToTypeConverter
 {
     public function __construct(
         private readonly ClassFileFinder $classFileFinder,
@@ -35,7 +35,7 @@ class ExpressionObjectTypeParser
      * @return string[]
      * @throws ParseResultException|ReflectionException
      */
-    public function parse(Expr $expr, ResolverContract $resolver): array
+    public function convert(Expr $expr, ResolverContract $resolver): array
     {
         if ($expr instanceof MethodCall) {
             return $this->extractTypeFromMethodCall($expr, $resolver);
@@ -202,7 +202,7 @@ class ExpressionObjectTypeParser
         PropertyFetch|MethodCall|NullsafeMethodCall $value,
         ResolverContract $resolver,
     ): array {
-        $leftSide = $this->parse($value->var, $resolver);
+        $leftSide = $this->convert($value->var, $resolver);
         if ($value instanceof NullsafeMethodCall) {
             $leftSide = array_filter($leftSide, fn($type) => $type !== 'null');
         }
@@ -214,7 +214,7 @@ class ExpressionObjectTypeParser
         }
 
         $rightSide = $value->name instanceof Expr
-            ? $this->parse($value->name, $resolver)
+            ? $this->convert($value->name, $resolver)
             : [$value->name->name];
         if (count($rightSide) !== 1) {
             throw new ParseResultException(
@@ -236,8 +236,8 @@ class ExpressionObjectTypeParser
             throw new ParseResultException('Ternary expression missing if', $value);
         }
 
-        $ifType = $this->parse($value->if, $resolver);
-        $elseType = $this->parse($value->else, $resolver);
+        $ifType = $this->convert($value->if, $resolver);
+        $elseType = $this->convert($value->else, $resolver);
 
         return array_unique(array_merge($ifType, $elseType));
     }

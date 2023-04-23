@@ -5,33 +5,38 @@ declare(strict_types=1);
 namespace ResourceParserGenerator\Parsers\PhpParser\Context;
 
 use PhpParser\Node\Name;
+use ReflectionException;
+use ResourceParserGenerator\Exceptions\ParseResultException;
+use ResourceParserGenerator\Parsers\PhpParser\ClassMethodReturnFinder;
 use RuntimeException;
 
-class VirtualFunctionScope implements ResolverContract
+class VirtualMethodScope implements ResolverContract
 {
     /**
-     * @param FileScope|ClassScope $scope
+     * @param ClassScope $scope
      * @param string $name
-     * @param string[] $returnTypes
+     * @param string[]|null $returnTypes
+     * @param ClassMethodReturnFinder $returnFinder
      */
     public function __construct(
-        private readonly FileScope|ClassScope $scope,
+        public readonly ClassScope $scope,
         private readonly string $name,
-        private readonly array $returnTypes,
+        private readonly ?array $returnTypes,
+        private readonly ClassMethodReturnFinder $returnFinder,
     ) {
         //
     }
 
     /**
-     * @param FileScope|ClassScope $scope
+     * @param ClassScope $scope
      * @param string $name
-     * @param string[] $returnTypes
-     * @return VirtualFunctionScope
+     * @param string[]|null $returnTypes
+     * @return VirtualMethodScope
      */
     public static function create(
-        FileScope|ClassScope $scope,
+        ClassScope $scope,
         string $name,
-        array $returnTypes
+        ?array $returnTypes,
     ): self {
         return resolve(self::class, [
             'scope' => $scope,
@@ -45,6 +50,9 @@ class VirtualFunctionScope implements ResolverContract
         return $this->name;
     }
 
+    /**
+     * @throws ParseResultException
+     */
     public function resolveClass(Name $name): string
     {
         return $this->scope->resolveClass($name);
@@ -62,9 +70,10 @@ class VirtualFunctionScope implements ResolverContract
 
     /**
      * @return string[]
+     * @throws ParseResultException|ReflectionException
      */
     public function returnTypes(): array
     {
-        return $this->returnTypes;
+        return $this->returnTypes ?? $this->returnFinder->find($this);
     }
 }

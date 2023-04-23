@@ -4,17 +4,8 @@ declare(strict_types=1);
 
 namespace ResourceParserGenerator\Parsers\PhpParser\Context;
 
-use phpDocumentor\Reflection\DocBlock\Tags\TagWithType;
-use phpDocumentor\Reflection\DocBlockFactory;
-use phpDocumentor\Reflection\Types\Compound;
-use phpDocumentor\Reflection\Types\Mixed_;
-use phpDocumentor\Reflection\Types\Void_;
 use PhpParser\Node\Name;
-use ReflectionClass;
-use ReflectionException;
-use ReflectionUnionType;
 use ResourceParserGenerator\Exceptions\ParseResultException;
-use ResourceParserGenerator\Parsers\DocBlock\DocBlockTagTypeConverter;
 use RuntimeException;
 
 class ClassScope implements ResolverContract
@@ -22,7 +13,7 @@ class ClassScope implements ResolverContract
     private string $className;
 
     /**
-     * @var array<MethodScope|VirtualFunctionScope>
+     * @var array<MethodScope|VirtualMethodScope>
      */
     private array $methods = [];
 
@@ -31,11 +22,8 @@ class ClassScope implements ResolverContract
      */
     private array $properties = [];
 
-    public function __construct(
-        public readonly FileScope $scope,
-        private readonly DocBlockFactory $docBlockFactory,
-        private readonly DocBlockTagTypeConverter $convertDocblockTagTypes,
-    ) {
+    public function __construct(public readonly FileScope $scope)
+    {
         //
     }
 
@@ -75,23 +63,12 @@ class ClassScope implements ResolverContract
         return $classString;
     }
 
-    /**
-     * @throws ReflectionException
-     */
-    public function method(string $methodName): MethodScope|VirtualFunctionScope|null
+    public function method(string $methodName): MethodScope|VirtualMethodScope|null
     {
         $methodScope = collect($this->methods)
-            ->first(fn(MethodScope|VirtualFunctionScope $method) => $method->name() === $methodName);
+            ->first(fn(MethodScope|VirtualMethodScope $method) => $method->name() === $methodName);
 
-        if ($methodScope) {
-            return $methodScope;
-        }
-
-        return VirtualFunctionScope::create(
-            $this->scope,
-            $methodName,
-            $this->findMethodReturns($methodName),
-        );
+        return $methodScope ?? VirtualMethodScope::create($this, $methodName, null);
     }
 
     /**
@@ -117,7 +94,7 @@ class ClassScope implements ResolverContract
         return $this;
     }
 
-    public function setMethod(MethodScope|VirtualFunctionScope $methodScope): self
+    public function setMethod(MethodScope|VirtualMethodScope $methodScope): self
     {
         $this->methods[$methodScope->name()] = $methodScope;
 
@@ -131,49 +108,5 @@ class ClassScope implements ResolverContract
     public function propertyTypes(string $name): array|null
     {
         return $this->properties[$name] ?? null;
-    }
-
-    /**
-     * @return string[]
-     * @throws ReflectionException
-     */
-    private function findMethodReturns(string $methodName): array
-    {
-        $reflectionClass = new ReflectionClass($this->fullyQualifiedClassName());
-        $reflectedMethod = $reflectionClass->getMethod($methodName);
-
-        // Next check the docblock on the actual method
-        if ($reflectedMethod->getDocComment()) {
-            $docBlock = $this->docBlockFactory->create($reflectedMethod->getDocComment());
-
-            $returns = $docBlock->getTagsByName('return');
-            $return = count($returns) ? $returns[0] : null;
-
-            if ($return) {
-                $type = $return instanceof TagWithType
-                    ? $return->getType()
-                    : new Compound([new Mixed_(), new Void_()]);
-
-                return $this->convertDocblockTagTypes->convert($type, $this);
-            }
-        }
-
-        // Finally fall back to the actual typed return
-        $returnType = $reflectedMethod->getReturnType();
-        if ($returnType instanceof ReflectionUnionType) {
-            $types = [];
-            foreach ($returnType->getTypes() as $type) {
-                $types[] = $type->getName();
-            }
-        } else {
-            if ($returnType) {
-                // @phpstan-ignore-next-line -- ReflectionType::getName() is not missing
-                $types = [$returnType->getName()];
-            } else {
-                $types = ['mixed', 'void'];
-            }
-        }
-
-        return $types;
     }
 }

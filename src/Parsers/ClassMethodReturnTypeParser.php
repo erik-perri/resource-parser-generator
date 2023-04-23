@@ -7,15 +7,15 @@ namespace ResourceParserGenerator\Parsers;
 use Illuminate\Support\Collection;
 use ReflectionException;
 use ResourceParserGenerator\Exceptions\ParseResultException;
-use ResourceParserGenerator\Parsers\PhpParser\Context\VirtualFunctionScope;
-use ResourceParserGenerator\Parsers\PhpParser\MethodScopeArrayReturnTypeLocator;
+use ResourceParserGenerator\Parsers\PhpParser\Context\VirtualMethodScope;
+use ResourceParserGenerator\Parsers\PhpParser\MethodScopeArrayReturnTypeExtractor;
 use RuntimeException;
 
 class ClassMethodReturnTypeParser
 {
     public function __construct(
         private readonly FileParser $fileParser,
-        private readonly MethodScopeArrayReturnTypeLocator $arrayReturnTypeLocator,
+        private readonly MethodScopeArrayReturnTypeExtractor $arrayReturnTypeLocator,
     ) {
         //
     }
@@ -45,11 +45,11 @@ class ClassMethodReturnTypeParser
 
         $returnTypes = $methodScope->returnTypes();
         if ($returnTypes === ['array']) {
-            if ($methodScope instanceof VirtualFunctionScope) {
+            if ($methodScope instanceof VirtualMethodScope) {
                 return $methodScope->returnTypes();
             }
 
-            $returns = $this->arrayReturnTypeLocator->locate($methodScope);
+            $returns = $this->arrayReturnTypeLocator->extract($methodScope);
 
             return $this->mergeReturnTypes($returns);
         }

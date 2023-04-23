@@ -54,12 +54,13 @@ class DocBlockTagTypeConverter
         $typeString = ltrim($type->__toString(), '\\');
 
         if (in_array($typeString, [
-            'int',
-            'float',
-            'bool',
-            'string',
             'array',
+            'bool',
+            'float',
+            'int',
+            'mixed',
             'null',
+            'string',
             'void',
         ], true)) {
             return [$typeString];

@@ -4,28 +4,25 @@ declare(strict_types=1);
 
 namespace ResourceParserGenerator\Parsers\PhpParser\Context;
 
-use PhpParser\Node\ComplexType;
 use PhpParser\Node\Expr;
 use PhpParser\Node\Expr\Error;
 use PhpParser\Node\Expr\Variable;
-use PhpParser\Node\Identifier;
 use PhpParser\Node\Name;
-use PhpParser\Node\NullableType;
 use PhpParser\Node\Param;
 use PhpParser\Node\Stmt;
 use PhpParser\Node\Stmt\ClassMethod;
-use PhpParser\Node\UnionType;
+use ReflectionException;
 use ResourceParserGenerator\Exceptions\ParseResultException;
+use ResourceParserGenerator\Parsers\PhpParser\ClassMethodReturnFinder;
+use ResourceParserGenerator\Parsers\PhpParser\SimpleTypeConverter;
 
 class MethodScope implements ResolverContract
 {
-    /**
-     * @param ClassScope $scope
-     * @param ClassMethod $classMethod
-     */
     public function __construct(
-        private readonly ClassScope $scope,
+        public readonly ClassScope $scope,
         private readonly ClassMethod $classMethod,
+        private readonly ClassMethodReturnFinder $returnFinder,
+        private readonly SimpleTypeConverter $typeConverter,
     ) {
         //
     }
@@ -36,6 +33,11 @@ class MethodScope implements ResolverContract
             'scope' => $scope,
             'classMethod' => $classMethod,
         ]);
+    }
+
+    public function ast(): ClassMethod
+    {
+        return $this->classMethod;
     }
 
     public function name(): string
@@ -52,7 +54,7 @@ class MethodScope implements ResolverContract
         return collect($this->classMethod->params)
             ->mapWithKeys(function (Param $param) {
                 $name = $this->parseParameterName($param->var);
-                $types = $this->parseParameterType($param->type);
+                $types = $this->typeConverter->convert($param->type);
 
                 return [$name => $types];
             })
@@ -61,39 +63,11 @@ class MethodScope implements ResolverContract
 
     /**
      * @return string[]
-     * @throws ParseResultException
+     * @throws ParseResultException|ReflectionException
      */
     public function returnTypes(): array
     {
-        return $this->parseParameterType($this->classMethod->returnType);
-    }
-
-    /**
-     * @return string[]
-     * @throws ParseResultException
-     */
-    private function parseParameterType(null|Identifier|Name|ComplexType $type): array
-    {
-        if ($type === null) {
-            return ['mixed'];
-        }
-
-        if ($type instanceof Identifier || $type instanceof Name) {
-            return [$this->parseTypeName($type)];
-        }
-
-        if ($type instanceof NullableType) {
-            return array_unique(['null', $this->parseTypeName($type->type)]);
-        }
-
-        if ($type instanceof UnionType) {
-            return array_unique(array_merge(...array_map(
-                fn(null|Identifier|Name|ComplexType $type) => $this->parseParameterType($type),
-                $type->types,
-            )));
-        }
-
-        throw new ParseResultException('Unhandled parameter type' . $type->getType(), $type);
+        return $this->returnFinder->find($this);
     }
 
     /**
@@ -111,15 +85,6 @@ class MethodScope implements ResolverContract
         }
 
         return $name;
-    }
-
-    private function parseTypeName(Identifier|Name $type): string
-    {
-        if ($type instanceof Identifier) {
-            return $type->name;
-        }
-
-        return $type->toString();
     }
 
     /**

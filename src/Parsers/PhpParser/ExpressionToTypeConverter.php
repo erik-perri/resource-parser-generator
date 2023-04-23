@@ -208,7 +208,7 @@ class ExpressionToTypeConverter
         }
         if (count($leftSide) !== 1) {
             throw new ParseResultException(
-                'Unexpected compound left side of property fetch',
+                'Unexpected compound left side of property fetch "' . implode('", "', $leftSide) . '"',
                 $value->var,
             );
         }
@@ -218,7 +218,7 @@ class ExpressionToTypeConverter
             : [$value->name->name];
         if (count($rightSide) !== 1) {
             throw new ParseResultException(
-                'Unexpected compound right side of property fetch',
+                'Unexpected compound right side of property fetch "' . implode('", "', $rightSide) . '"',
                 $value->var,
             );
         }

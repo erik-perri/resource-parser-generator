@@ -17,8 +17,7 @@ class GenerateResourceParserCommandTest extends TestCase
     public function testGeneratorShouldReturnFailureIfClassDoesNotExist(): void
     {
         $this->artisan(GenerateResourceParserCommand::class, [
-            'resourceClassName' => 'ResourceParserGenerator\MissingClass',
-            'methodName' => 'base',
+            'resourceClassMethodSpec' => 'ResourceParserGenerator\MissingClass::base',
         ])
             ->expectsOutputToContain('Class "ResourceParserGenerator\MissingClass" does not exist.')
             ->assertExitCode(1)
@@ -28,8 +27,7 @@ class GenerateResourceParserCommandTest extends TestCase
     public function testGeneratorShouldReturnFailureIfMethodDoesNotExist(): void
     {
         $this->artisan(GenerateResourceParserCommand::class, [
-            'resourceClassName' => UserResource::class,
-            'methodName' => 'notARealMethod',
+            'resourceClassMethodSpec' => UserResource::class . '::notARealMethod',
         ])
             ->expectsOutputToContain(
                 'Class "' . UserResource::class . '" does not contain a "notARealMethod" method.',
@@ -40,15 +38,13 @@ class GenerateResourceParserCommandTest extends TestCase
 
     #[DataProvider('generatedContentProvider')]
     public function testGeneratorShouldReturnExpectedContent(
-        string $className,
-        string $methodName,
+        array $methodSpecs,
         Closure $outputFactory
     ): void {
         $template = $outputFactory->call($this);
 
         $this->artisan(GenerateResourceParserCommand::class, [
-            'resourceClassName' => $className,
-            'methodName' => $methodName,
+            'resourceClassMethodSpec' => $methodSpecs,
         ])
             ->expectsOutput($template)
             ->assertExitCode(0)
@@ -59,17 +55,24 @@ class GenerateResourceParserCommandTest extends TestCase
     {
         return [
             'UserResource authentication format' => [
-                'className' => UserResource::class,
-                'methodName' => 'authentication',
+                'methodSpecs' => [UserResource::class . '::authentication'],
                 'outputFactory' => fn() => file_get_contents(
                     dirname(__DIR__, 2) . '/Output/userResourceAuthenticationParser.ts.txt',
                 ),
             ],
             'UserResource adminList format' => [
-                'className' => UserResource::class,
-                'methodName' => 'adminList',
+                'methodSpecs' => [UserResource::class . '::adminList'],
                 'outputFactory' => fn() => file_get_contents(
                     dirname(__DIR__, 2) . '/Output/userResourceAdminListParser.ts.txt',
+                ),
+            ],
+            'combined file' => [
+                'methodSpecs' => [
+                    UserResource::class . '::authentication',
+                    UserResource::class . '::adminList',
+                ],
+                'outputFactory' => fn() => file_get_contents(
+                    dirname(__DIR__, 2) . '/Output/userResourceParser.ts.txt',
                 ),
             ],
         ];

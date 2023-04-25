@@ -25,4 +25,9 @@ class ClassFileFinder
 
         return $file;
     }
+
+    public function has(string $className): bool
+    {
+        return $this->loader->findFile($className) !== false;
+    }
 }

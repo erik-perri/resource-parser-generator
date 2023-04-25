@@ -91,12 +91,12 @@ class ClassMethodReturnArrayTypeParserTest extends TestCase
                     'null' => ['null'],
                 ],
             ],
-            'usingParameter' => [
+            'parameter with dependency from extends' => [
                 'classFile' => dirname(__DIR__, 3) . '/Examples/UserResource.php',
                 'className' => UserResource::class,
                 'methodName' => 'usingParameter',
                 'expectedReturns' => [
-                    'path' => ['string'],
+                    'path' => ['null', 'string'],
                 ],
             ]
         ];

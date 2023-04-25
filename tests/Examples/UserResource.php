@@ -72,7 +72,7 @@ class UserResource
     public function usingParameter(Request $request): array
     {
         return [
-            'path' => $request->path(),
+            'path' => $request->headers->get('path'),
         ];
     }
 }

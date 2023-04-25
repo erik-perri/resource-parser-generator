@@ -5,7 +5,9 @@ declare(strict_types=1);
 namespace ResourceParserGenerator\Parsers\PhpParser\Context;
 
 use PhpParser\Node\Name;
+use ReflectionException;
 use ResourceParserGenerator\Exceptions\ParseResultException;
+use ResourceParserGenerator\Parsers\PhpParser\ClassPropertyTypeFinder;
 use RuntimeException;
 
 class ClassScope implements ResolverContract
@@ -22,8 +24,11 @@ class ClassScope implements ResolverContract
      */
     private array $properties = [];
 
-    public function __construct(public readonly FileScope $scope)
-    {
+    public function __construct(
+        public readonly FileScope $scope,
+        private readonly ClassPropertyTypeFinder $typeFinder,
+        private readonly ?ClassScope $extends = null,
+    ) {
         //
     }
 
@@ -47,6 +52,15 @@ class ClassScope implements ResolverContract
     public function className(): string
     {
         return $this->className;
+    }
+
+    public function extend(FileScope $scope): self
+    {
+        return new self(
+            $scope,
+            $this->typeFinder,
+            $this,
+        );
     }
 
     /**
@@ -76,7 +90,27 @@ class ClassScope implements ResolverContract
      */
     public function resolveClass(Name $name): string
     {
-        return $this->scope->resolveClass($name);
+        try {
+            return $this->scope->resolveClass($name);
+        } catch (ParseResultException $exception) {
+            if ($this->extends) {
+                return $this->extends->resolveClass($name);
+            }
+
+            throw $exception;
+        }
+    }
+
+    /**
+     * @param string $name
+     * @return string[]|null
+     * @throws ReflectionException
+     */
+    public function propertyTypes(string $name): array|null
+    {
+        return $this->properties[$name]
+            ?? $this->extends?->propertyTypes($name)
+            ?? $this->typeFinder->find($this, $name);
     }
 
     /**
@@ -99,14 +133,5 @@ class ClassScope implements ResolverContract
         $this->methods[$methodScope->name()] = $methodScope;
 
         return $this;
-    }
-
-    /**
-     * @param string $name
-     * @return string[]|null
-     */
-    public function propertyTypes(string $name): array|null
-    {
-        return $this->properties[$name] ?? null;
     }
 }

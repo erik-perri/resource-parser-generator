@@ -4,18 +4,24 @@ declare(strict_types=1);
 
 namespace ResourceParserGenerator\Parsers\PhpParser;
 
+use phpDocumentor\Reflection\DocBlock\Tag;
+use phpDocumentor\Reflection\DocBlock\Tags\Var_;
+use phpDocumentor\Reflection\DocBlockFactory;
 use PhpParser\Node\Expr\Array_;
 use PhpParser\Node\Scalar\String_;
 use PhpParser\NodeTraverser;
 use ReflectionException;
 use ResourceParserGenerator\Exceptions\ParseResultException;
+use ResourceParserGenerator\Parsers\DocBlock\DocBlockTagTypeConverter;
 use ResourceParserGenerator\Parsers\PhpParser\Context\MethodScope;
 use ResourceParserGenerator\Visitors\FindArrayReturnVisitor;
 
 class MethodScopeArrayReturnTypeExtractor
 {
     public function __construct(
-        private readonly ExpressionToTypeConverter $expressionObjectTypeParser
+        private readonly ExpressionToTypeConverter $expressionObjectTypeParser,
+        private readonly DocBlockFactory $docBlockFactory,
+        private readonly DocBlockTagTypeConverter $docBlockTagTypeConverter,
     ) {
         //
     }
@@ -56,6 +62,21 @@ class MethodScopeArrayReturnTypeExtractor
             $key = $item->key;
             if (!($key instanceof String_)) {
                 throw new ParseResultException('Unexpected non-string key in resource', $item);
+            }
+
+            $docComment = $item->getDocComment();
+            if ($docComment) {
+                $docBlock = $this->docBlockFactory->create($docComment->getText());
+                $typeOverride = collect($docBlock->getTagsByName('var'))
+                    ->filter(fn(Tag $tag) => $tag instanceof Var_)
+                    ->filter(fn(Var_ $tag) => $tag->getVariableName() === $key->value)
+                    ->map(fn(Var_ $tag) => $this->docBlockTagTypeConverter->convert($tag->getType(), $method))
+                    ->first();
+
+                if ($typeOverride) {
+                    $properties[$key->value] = $typeOverride;
+                    continue;
+                }
             }
 
             $value = $item->value;

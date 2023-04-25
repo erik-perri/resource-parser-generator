@@ -47,11 +47,13 @@ class UserResource
         }
     }
 
-    public function ternaries(Request $request): array
+    public function override(): array
     {
         return [
-            'ternary_to_int' => $request->has('something') ? +1 : -1,
-            'ternary_to_compound' => $this->resource->created_at ? ($this->resource->updated_at ? true : -1) : 'false',
+            /**
+             * @var int $id
+             */
+            'id' => 'definitely a string',
         ];
     }
 
@@ -66,6 +68,14 @@ class UserResource
             'boolean_true' => true,
             'boolean_false' => false,
             'null' => null,
+        ];
+    }
+
+    public function ternaries(Request $request): array
+    {
+        return [
+            'ternary_to_int' => $request->has('something') ? +1 : -1,
+            'ternary_to_compound' => $this->resource->created_at ? ($this->resource->updated_at ? true : -1) : 'false',
         ];
     }
 

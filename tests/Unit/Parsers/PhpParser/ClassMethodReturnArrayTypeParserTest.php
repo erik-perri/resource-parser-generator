@@ -98,7 +98,15 @@ class ClassMethodReturnArrayTypeParserTest extends TestCase
                 'expectedReturns' => [
                     'path' => ['null', 'string'],
                 ],
-            ]
+            ],
+            'override' => [
+                'classFile' => dirname(__DIR__, 3) . '/Examples/UserResource.php',
+                'className' => UserResource::class,
+                'methodName' => 'override',
+                'expectedReturns' => [
+                    'id' => ['int'],
+                ],
+            ],
         ];
     }
 }

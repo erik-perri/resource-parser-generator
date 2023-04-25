@@ -65,7 +65,11 @@ class ClassScopeVisitor extends NodeVisitorAbstract
             if (!($extends instanceof Name)) {
                 throw new ParseResultException('Unexpected extends type', $node);
             }
-            $extendsClassName = $this->scope->resolveClass($node->extends);
+            /**
+             * @var class-string $extendsClassName
+             * @noinspection PhpRedundantVariableDocTypeInspection
+             */
+            $extendsClassName = $this->scope->resolveClass($extends);
             if ($this->classFileFinder->has($extendsClassName)) {
                 $extendsClassFile = $this->classFileFinder->find($extendsClassName);
                 $extendsClassScope = $this->fileParser->parse($extendsClassFile);

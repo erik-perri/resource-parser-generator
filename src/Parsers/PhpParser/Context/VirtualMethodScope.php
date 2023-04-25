@@ -7,7 +7,7 @@ namespace ResourceParserGenerator\Parsers\PhpParser\Context;
 use PhpParser\Node\Name;
 use ReflectionException;
 use ResourceParserGenerator\Exceptions\ParseResultException;
-use ResourceParserGenerator\Parsers\PhpParser\ClassMethodReturnFinder;
+use ResourceParserGenerator\Parsers\PhpParser\ClassMethodReturnTypeFinder;
 use RuntimeException;
 
 class VirtualMethodScope implements ResolverContract
@@ -16,13 +16,13 @@ class VirtualMethodScope implements ResolverContract
      * @param ClassScope $scope
      * @param string $name
      * @param string[]|null $returnTypes
-     * @param ClassMethodReturnFinder $returnFinder
+     * @param ClassMethodReturnTypeFinder $returnFinder
      */
     public function __construct(
         public readonly ClassScope $scope,
         private readonly string $name,
         private readonly ?array $returnTypes,
-        private readonly ClassMethodReturnFinder $returnFinder,
+        private readonly ClassMethodReturnTypeFinder $returnFinder,
     ) {
         //
     }

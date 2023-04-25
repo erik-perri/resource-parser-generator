@@ -18,7 +18,7 @@ use ResourceParserGenerator\Parsers\PhpParser\Context\ClassScope;
 use ResourceParserGenerator\Parsers\PhpParser\Context\MethodScope;
 use ResourceParserGenerator\Parsers\PhpParser\Context\VirtualMethodScope;
 
-class ClassMethodReturnFinder
+class ClassMethodReturnTypeFinder
 {
     public function __construct(
         private readonly DocBlockFactory $docBlockFactory,

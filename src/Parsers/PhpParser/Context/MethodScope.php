@@ -13,7 +13,7 @@ use PhpParser\Node\Stmt;
 use PhpParser\Node\Stmt\ClassMethod;
 use ReflectionException;
 use ResourceParserGenerator\Exceptions\ParseResultException;
-use ResourceParserGenerator\Parsers\PhpParser\ClassMethodReturnFinder;
+use ResourceParserGenerator\Parsers\PhpParser\ClassMethodReturnTypeFinder;
 use ResourceParserGenerator\Parsers\PhpParser\SimpleTypeConverter;
 
 class MethodScope implements ResolverContract
@@ -21,7 +21,7 @@ class MethodScope implements ResolverContract
     public function __construct(
         public readonly ClassScope $scope,
         private readonly ClassMethod $classMethod,
-        private readonly ClassMethodReturnFinder $returnFinder,
+        private readonly ClassMethodReturnTypeFinder $returnFinder,
         private readonly SimpleTypeConverter $typeConverter,
     ) {
         //

@@ -6,9 +6,11 @@ namespace ResourceParserGenerator\Commands;
 
 use Illuminate\Console\Command;
 use Illuminate\Support\Arr;
+use ReflectionException;
 use ResourceParserGenerator\Builders\ParserBuilder;
 use ResourceParserGenerator\Builders\ParserConstraintBuilder;
 use ResourceParserGenerator\Builders\ParserFileBuilder;
+use ResourceParserGenerator\Exceptions\ParseResultException;
 use ResourceParserGenerator\Filesystem\ClassFileFinder;
 use ResourceParserGenerator\Parsers\ClassMethodReturnTypeParser;
 use RuntimeException;
@@ -28,25 +30,36 @@ class GenerateResourceParserCommand extends Command
             return static::FAILURE;
         }
 
-        try {
-            $constraintBuilder = $this->make(ParserConstraintBuilder::class);
-            $parserFile = $this->make(ParserFileBuilder::class);
+        $constraintBuilder = $this->make(ParserConstraintBuilder::class);
+        $parserFile = $this->make(ParserFileBuilder::class);
 
-            foreach ($methods as [$className, $methodName]) {
+        foreach ($methods as [$className, $methodName]) {
+            /**
+             * @var class-string $className
+             */
+            try {
                 $this->generateParser($className, $methodName, $constraintBuilder, $parserFile);
+            } catch (Throwable $error) {
+                $this->components->error(
+                    'Failed to generate parser for "' . $className . '::' . $methodName . '": ' . $error->getMessage(),
+                );
+                return static::FAILURE;
             }
-
-            $this->output->writeln($parserFile->create());
-        } catch (Throwable $error) {
-            $this->components->error(
-                'Failed to generate parser for "' . $className . '": ' . $error->getMessage(),
-            );
-            return static::FAILURE;
         }
+
+        $this->output->writeln($parserFile->create());
 
         return static::SUCCESS;
     }
 
+    /**
+     * @param class-string $className
+     * @param string $methodName
+     * @param ParserConstraintBuilder $constraintBuilder
+     * @param ParserFileBuilder $parserFile
+     * @return void
+     * @throws ParseResultException|ReflectionException
+     */
     private function generateParser(
         string $className,
         string $methodName,
@@ -95,6 +108,9 @@ class GenerateResourceParserCommand extends Command
         return resolve($class, $parameters);
     }
 
+    /**
+     * @return array<string[]>
+     */
     private function methods(): array
     {
         /** @var string[] $methodSpecs */

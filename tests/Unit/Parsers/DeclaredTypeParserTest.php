@@ -6,13 +6,16 @@ declare(strict_types=1);
 
 namespace ResourceParserGenerator\Tests\Unit\Parsers;
 
+use Closure;
 use PhpParser\Node;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\DataProvider;
+use ResourceParserGenerator\Contracts\ClassNameResolverContract;
 use ResourceParserGenerator\Contracts\TypeContract;
 use ResourceParserGenerator\Parsers\DeclaredTypeParser;
 use ResourceParserGenerator\Parsers\Types\ArrayType;
 use ResourceParserGenerator\Parsers\Types\BoolType;
+use ResourceParserGenerator\Parsers\Types\ClassType;
 use ResourceParserGenerator\Parsers\Types\FloatType;
 use ResourceParserGenerator\Parsers\Types\IntType;
 use ResourceParserGenerator\Parsers\Types\MixedType;
@@ -30,13 +33,24 @@ class DeclaredTypeParserTest extends TestCase
     #[DataProvider('identifierProvider')]
     #[DataProvider('nullableProvider')]
     #[DataProvider('unionProvider')]
-    public function testParses(mixed $input, TypeContract $expected): void
+    public function testParses(mixed $input, TypeContract $expected, ?Closure $resolveMockFactory = null): void
     {
         // Arrange
         $parser = $this->make(DeclaredTypeParser::class);
 
+        /**
+         * @var ClassNameResolverContract $resolveMock
+         */
+        $resolveMock = $resolveMockFactory
+            ? $resolveMockFactory->call($this)
+            : $this->mock(ClassNameResolverContract::class)
+                ->shouldReceive('resolve')
+                ->never()
+                ->andReturnNull()
+                ->getMock();
+
         // Act
-        $result = $parser->parse($input);
+        $result = $parser->parse($input, $resolveMock);
 
         // Assert
         $this->assertInstanceOf(get_class($expected), $result);
@@ -85,6 +99,30 @@ class DeclaredTypeParserTest extends TestCase
             'void' => [
                 'input' => new Node\Identifier('void'),
                 'expected' => new VoidType(),
+            ],
+            'class fully qualified' => [
+                'input' => new Node\Name\FullyQualified('App\Foo\Bar'),
+                'expected' => new ClassType('App\Foo\Bar', null),
+            ],
+            'class relative' => [
+                'input' => new Node\Name\Relative('Foo\Baz'),
+                'expected' => new ClassType('App\Foo\Baz', 'Foo\Baz'),
+                'resolveMock' => fn() => $this->mock(ClassNameResolverContract::class)
+                    ->shouldReceive('resolve')
+                    ->once()
+                    ->with('Foo\Baz', true)
+                    ->andReturn('App\Foo\Baz')
+                    ->getMock(),
+            ],
+            'class not qualified' => [
+                'input' => new Node\Name('Baz'),
+                'expected' => new ClassType('App\Foo\Baz', 'Baz'),
+                'resolveMock' => fn() => $this->mock(ClassNameResolverContract::class)
+                    ->shouldReceive('resolve')
+                    ->once()
+                    ->with('Baz', false)
+                    ->andReturn('App\Foo\Baz')
+                    ->getMock(),
             ],
         ];
     }

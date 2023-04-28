@@ -8,6 +8,7 @@ use PhpParser\Node\Stmt\Class_;
 use ResourceParserGenerator\Parsers\DataObjects\ClassProperty;
 use ResourceParserGenerator\Parsers\DataObjects\ClassScope;
 use ResourceParserGenerator\Parsers\DataObjects\FileScope;
+use ResourceParserGenerator\Resolvers\ClassNameResolver;
 
 class PhpClassParser
 {
@@ -34,11 +35,13 @@ class PhpClassParser
 
     private function parseClassProperties(Class_ $class, ClassScope $classScope): void
     {
+        $resolver = ClassNameResolver::make($classScope->file);
+
         foreach ($class->getProperties() as $property) {
             foreach ($property->props as $prop) {
                 $classProperty = new ClassProperty(
                     $prop->name->toString(),
-                    $this->declaredTypeParser->parse($property->type),
+                    $this->declaredTypeParser->parse($property->type, $resolver),
                     $property->flags,
                 );
 

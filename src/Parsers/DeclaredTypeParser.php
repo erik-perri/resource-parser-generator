@@ -7,11 +7,15 @@ namespace ResourceParserGenerator\Parsers;
 use PhpParser\Node\ComplexType;
 use PhpParser\Node\Identifier;
 use PhpParser\Node\Name;
+use PhpParser\Node\Name\FullyQualified;
+use PhpParser\Node\Name\Relative;
 use PhpParser\Node\NullableType;
 use PhpParser\Node\UnionType;
+use ResourceParserGenerator\Contracts\ClassNameResolverContract;
 use ResourceParserGenerator\Contracts\TypeContract;
 use ResourceParserGenerator\Parsers\Types\ArrayType;
 use ResourceParserGenerator\Parsers\Types\BoolType;
+use ResourceParserGenerator\Parsers\Types\ClassType;
 use ResourceParserGenerator\Parsers\Types\FloatType;
 use ResourceParserGenerator\Parsers\Types\IntType;
 use ResourceParserGenerator\Parsers\Types\MixedType;
@@ -24,7 +28,7 @@ use RuntimeException;
 
 class DeclaredTypeParser
 {
-    public function parse(ComplexType|Identifier|Name|null $type): TypeContract
+    public function parse(ComplexType|Identifier|Name|null $type, ClassNameResolverContract $resolver): TypeContract
     {
         if (!$type) {
             return new UntypedType();
@@ -47,15 +51,37 @@ class DeclaredTypeParser
 
         if ($type instanceof UnionType) {
             return new Types\UnionType(
-                ...array_map(fn(ComplexType|Identifier|Name $type) => $this->parse($type), $type->types),
+                ...array_map(fn(ComplexType|Identifier|Name $type) => $this->parse($type, $resolver), $type->types),
             );
         }
 
         if ($type instanceof NullableType) {
             return new Types\UnionType(
                 new NullType(),
-                $this->parse($type->type),
+                $this->parse($type->type, $resolver),
             );
+        }
+
+        if ($type instanceof FullyQualified) {
+            return new ClassType($type->toString(), null);
+        }
+
+        if ($type instanceof Relative) {
+            $resolved = $resolver->resolve($type->toString(), true);
+            if (!$resolved) {
+                throw new RuntimeException(sprintf('Unable to resolve relative class "%s"', $type->toString()));
+            }
+
+            return new ClassType($resolved, $type->toString());
+        }
+
+        if ($type instanceof Name) {
+            $resolved = $resolver->resolve($type->toString(), false);
+            if (!$resolved) {
+                throw new RuntimeException(sprintf('Unable to resolve class "%s"', $type->toString()));
+            }
+
+            return new ClassType($resolved, $type->toString());
         }
 
         throw new RuntimeException(sprintf('Unhandled declared type "%s"', get_class($type)));

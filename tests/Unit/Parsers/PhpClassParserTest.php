@@ -21,126 +21,6 @@ use ResourceParserGenerator\Tests\TestCase;
 #[CoversClass(PhpClassParser::class)]
 class PhpClassParserTest extends TestCase
 {
-    public static function classCodeProvider()
-    {
-        return [
-            'private' => [
-                'code' => <<<PHP
-<?php
-namespace ResourceParserGenerator\Tests\Examples;
-class TestClass
-{
-    private string \$propertyOne;
-}
-PHP,
-                'expectations' => [
-                    'isPrivate' => true,
-                    'isProtected' => false,
-                    'isPublic' => false,
-                    'isReadonly' => false,
-                    'isStatic' => false,
-                    'name' => 'propertyOne',
-                    'type' => 'string',
-                ],
-            ],
-            'protected' => [
-                'code' => <<<PHP
-<?php
-namespace ResourceParserGenerator\Tests\Examples;
-class TestClass
-{
-    protected int \$propertyTwo;
-}
-PHP,
-                'expectations' => [
-                    'isPrivate' => false,
-                    'isProtected' => true,
-                    'isPublic' => false,
-                    'isReadonly' => false,
-                    'isStatic' => false,
-                    'name' => 'propertyTwo',
-                    'type' => 'int',
-                ],
-            ],
-            'public' => [
-                'code' => <<<PHP
-<?php
-namespace ResourceParserGenerator\Tests\Examples;
-class TestClass
-{
-    public float \$propertyThree;
-}
-PHP,
-                'expectations' => [
-                    'isPrivate' => false,
-                    'isProtected' => false,
-                    'isPublic' => true,
-                    'isReadonly' => false,
-                    'isStatic' => false,
-                    'name' => 'propertyThree',
-                    'type' => 'float',
-                ],
-            ],
-            'public due to no visibility spec' => [
-                'code' => <<<PHP
-<?php
-namespace ResourceParserGenerator\Tests\Examples;
-class TestClass
-{
-    static float \$propertyFour;
-}
-PHP,
-                'expectations' => [
-                    'isPrivate' => false,
-                    'isProtected' => false,
-                    'isPublic' => true,
-                    'isReadonly' => false,
-                    'isStatic' => true,
-                    'name' => 'propertyFour',
-                    'type' => 'float',
-                ],
-            ],
-            'static' => [
-                'code' => <<<PHP
-<?php
-namespace ResourceParserGenerator\Tests\Examples;
-class TestClass
-{
-    public static mixed \$propertyFive;
-}
-PHP,
-                'expectations' => [
-                    'isPrivate' => false,
-                    'isProtected' => false,
-                    'isPublic' => true,
-                    'isReadonly' => false,
-                    'isStatic' => true,
-                    'name' => 'propertyFive',
-                    'type' => 'mixed',
-                ],
-            ],
-            'readonly' => [
-                'code' => <<<PHP
-<?php
-namespace ResourceParserGenerator\Tests\Examples;
-class TestClass
-{
-    private readonly string \$propertySix;
-}
-PHP,
-                'expectations' => [
-                    'isPrivate' => true,
-                    'isProtected' => false,
-                    'isPublic' => false,
-                    'isReadonly' => true,
-                    'isStatic' => false,
-                    'name' => 'propertySix',
-                    'type' => 'string',
-                ],
-            ],
-        ];
-    }
-
     #[DataProvider('classCodeProvider')]
     public function testParsesClassProperties(string $code, array $expectations): void
     {
@@ -154,48 +34,212 @@ PHP,
 
         // Assert
         $this->assertCount(
-            1,
+            count($expectations),
             $class->properties(),
-            'Failed asserting that class {$class->name} has 1 property',
+            'Failed asserting that class {$class->name} has correct number of properties.',
         );
 
-        $property = $class->property($expectations['name']);
+        foreach ($expectations as $propertyExpectations) {
+            $property = $class->property($propertyExpectations['name']);
 
-        $this->assertEquals(
-            $expectations['isPrivate'],
-            $property->isPrivate(),
-            "Failed asserting that property {$property->name} is private",
-        );
-        $this->assertEquals(
-            $expectations['isProtected'],
-            $property->isProtected(),
-            "Failed asserting that property {$property->name} is protected",
-        );
-        $this->assertEquals(
-            $expectations['isPublic'],
-            $property->isPublic(),
-            "Failed asserting that property {$property->name} is public"
-        );
-        $this->assertEquals(
-            $expectations['isReadonly'],
-            $property->isReadonly(),
-            "Failed asserting that property {$property->name} is readonly"
-        );
-        $this->assertEquals(
-            $expectations['isStatic'],
-            $property->isStatic(),
-            "Failed asserting that property {$property->name} is static"
-        );
-        $this->assertEquals(
-            $expectations['name'],
-            $property->name,
-            "Failed asserting that property {$property->name} is named {$expectations['name']}"
-        );
-        $this->assertEquals(
-            $expectations['type'],
-            $property->type->name(),
-            "Failed asserting that property {$property->name} is of type {$expectations['type']}"
-        );
+            $this->assertEquals(
+                $propertyExpectations['isPrivate'],
+                $property->isPrivate(),
+                "Failed asserting that property {$property->name} is private.",
+            );
+            $this->assertEquals(
+                $propertyExpectations['isProtected'],
+                $property->isProtected(),
+                "Failed asserting that property {$property->name} is protected.",
+            );
+            $this->assertEquals(
+                $propertyExpectations['isPublic'],
+                $property->isPublic(),
+                "Failed asserting that property {$property->name} is public.",
+            );
+            $this->assertEquals(
+                $propertyExpectations['isReadonly'],
+                $property->isReadonly(),
+                "Failed asserting that property {$property->name} is readonly.",
+            );
+            $this->assertEquals(
+                $propertyExpectations['isStatic'],
+                $property->isStatic(),
+                "Failed asserting that property {$property->name} is static.",
+            );
+            $this->assertEquals(
+                $propertyExpectations['name'],
+                $property->name,
+                "Failed asserting that property {$property->name} is named {$propertyExpectations['name']}.",
+            );
+            $this->assertEquals(
+                $propertyExpectations['type'],
+                $property->type->name(),
+                "Failed asserting that property {$property->name} is of type {$propertyExpectations['type']}.",
+            );
+        }
+    }
+
+    public static function classCodeProvider(): array
+    {
+        return [
+            'private' => [
+                'code' => <<<PHP
+<?php
+namespace ResourceParserGenerator\Tests\Examples;
+class TestClass
+{
+    private string \$propertyOne;
+}
+PHP,
+                'expectations' => [
+                    [
+                        'isPrivate' => true,
+                        'isProtected' => false,
+                        'isPublic' => false,
+                        'isReadonly' => false,
+                        'isStatic' => false,
+                        'name' => 'propertyOne',
+                        'type' => 'string',
+                    ],
+                ],
+            ],
+            'protected' => [
+                'code' => <<<PHP
+<?php
+namespace ResourceParserGenerator\Tests\Examples;
+class TestClass
+{
+    protected int \$propertyTwo;
+}
+PHP,
+                'expectations' => [
+                    [
+                        'isPrivate' => false,
+                        'isProtected' => true,
+                        'isPublic' => false,
+                        'isReadonly' => false,
+                        'isStatic' => false,
+                        'name' => 'propertyTwo',
+                        'type' => 'int',
+                    ],
+                ],
+            ],
+            'public' => [
+                'code' => <<<PHP
+<?php
+namespace ResourceParserGenerator\Tests\Examples;
+class TestClass
+{
+    public float \$propertyThree;
+}
+PHP,
+                'expectations' => [
+                    [
+                        'isPrivate' => false,
+                        'isProtected' => false,
+                        'isPublic' => true,
+                        'isReadonly' => false,
+                        'isStatic' => false,
+                        'name' => 'propertyThree',
+                        'type' => 'float',
+                    ],
+                ],
+            ],
+            'public due to no visibility spec' => [
+                'code' => <<<PHP
+<?php
+namespace ResourceParserGenerator\Tests\Examples;
+class TestClass
+{
+    static float \$propertyFour;
+}
+PHP,
+                'expectations' => [
+                    [
+                        'isPrivate' => false,
+                        'isProtected' => false,
+                        'isPublic' => true,
+                        'isReadonly' => false,
+                        'isStatic' => true,
+                        'name' => 'propertyFour',
+                        'type' => 'float',
+                    ],
+                ],
+            ],
+            'static' => [
+                'code' => <<<PHP
+<?php
+namespace ResourceParserGenerator\Tests\Examples;
+class TestClass
+{
+    public static mixed \$propertyFive;
+}
+PHP,
+                'expectations' => [
+                    [
+                        'isPrivate' => false,
+                        'isProtected' => false,
+                        'isPublic' => true,
+                        'isReadonly' => false,
+                        'isStatic' => true,
+                        'name' => 'propertyFive',
+                        'type' => 'mixed',
+                    ],
+                ],
+            ],
+            'readonly' => [
+                'code' => <<<PHP
+<?php
+namespace ResourceParserGenerator\Tests\Examples;
+class TestClass
+{
+    private readonly string \$propertySix;
+}
+PHP,
+                'expectations' => [
+                    [
+                        'isPrivate' => true,
+                        'isProtected' => false,
+                        'isPublic' => false,
+                        'isReadonly' => true,
+                        'isStatic' => false,
+                        'name' => 'propertySix',
+                        'type' => 'string',
+                    ],
+                ],
+            ],
+            'multiple' => [
+                'code' => <<<PHP
+<?php
+namespace ResourceParserGenerator\Tests\Examples;
+class TestClass
+{
+    private array \$propertySeven, \$propertyEight;
+}
+PHP,
+                'expectations' => [
+                    [
+                        'isPrivate' => true,
+                        'isProtected' => false,
+                        'isPublic' => false,
+                        'isReadonly' => false,
+                        'isStatic' => false,
+                        'name' => 'propertySeven',
+                        'type' => 'array',
+                    ],
+                    [
+                        'isPrivate' => true,
+                        'isProtected' => false,
+                        'isPublic' => false,
+                        'isReadonly' => false,
+                        'isStatic' => false,
+                        'name' => 'propertyEight',
+                        'type' => 'array',
+                    ],
+                ],
+            ],
+        ];
     }
 
     private function getClass(string $contents, string $name): Class_

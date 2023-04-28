@@ -8,6 +8,7 @@ use PhpParser\Node\ComplexType;
 use PhpParser\Node\Identifier;
 use PhpParser\Node\Name;
 use ResourceParserGenerator\Contracts\TypeContract;
+use ResourceParserGenerator\Parsers\Types\ArrayType;
 use ResourceParserGenerator\Parsers\Types\BoolType;
 use ResourceParserGenerator\Parsers\Types\FloatType;
 use ResourceParserGenerator\Parsers\Types\IntType;
@@ -29,14 +30,15 @@ class DeclaredTypeParser
 
         if ($type instanceof Identifier) {
             return match ($type->name) {
-                'int' => new IntType(),
-                'string' => new StringType(),
-                'float' => new FloatType(),
+                'array' => new ArrayType(null),
                 'bool' => new BoolType(),
-                'object' => new ObjectType(),
-                'void' => new VoidType(),
-                'null' => new NullType(),
+                'float' => new FloatType(),
+                'int' => new IntType(),
                 'mixed' => new MixedType(),
+                'null' => new NullType(),
+                'object' => new ObjectType(),
+                'string' => new StringType(),
+                'void' => new VoidType(),
                 default => throw new RuntimeException(sprintf('Unhandled identifier type "%s"', $type->name)),
             };
         }

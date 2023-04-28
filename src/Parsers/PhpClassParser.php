@@ -8,7 +8,6 @@ use PhpParser\Node\Stmt\Class_;
 use ResourceParserGenerator\Parsers\DataObjects\ClassProperty;
 use ResourceParserGenerator\Parsers\DataObjects\ClassScope;
 use ResourceParserGenerator\Parsers\DataObjects\FileScope;
-use RuntimeException;
 
 class PhpClassParser
 {
@@ -36,17 +35,15 @@ class PhpClassParser
     private function parseClassProperties(Class_ $class, ClassScope $classScope): void
     {
         foreach ($class->getProperties() as $property) {
-            if (count($property->props) !== 1) {
-                throw new RuntimeException('Whatever this is, is not supported');
+            foreach ($property->props as $prop) {
+                $classProperty = new ClassProperty(
+                    $prop->name->toString(),
+                    $this->declaredTypeParser->parse($property->type),
+                    $property->flags,
+                );
+
+                $classScope->addProperty($classProperty);
             }
-
-            $classProperty = new ClassProperty(
-                $property->props[0]->name->toString(),
-                $this->declaredTypeParser->parse($property->type),
-                $property->flags,
-            );
-
-            $classScope->addProperty($classProperty);
         }
     }
 }

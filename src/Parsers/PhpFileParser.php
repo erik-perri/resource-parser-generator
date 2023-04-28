@@ -58,10 +58,15 @@ class PhpFileParser
         }
 
         if (count($namespaces) > 1) {
-            throw new RuntimeException('Multiple namespaces found');
+            throw new RuntimeException('Multiple namespaces not supported');
         }
 
-        $scope->setNamespace($namespaces[0]->name->toString());
+        $namespaceName = $namespaces[0]->name;
+        if (!$namespaceName) {
+            throw new RuntimeException('Unnamed namespaces not supported');
+        }
+
+        $scope->setNamespace($namespaceName->toString());
     }
 
     /**
@@ -87,9 +92,13 @@ class PhpFileParser
             }
 
             foreach ($use->uses as $useUse) {
+                /**
+                 * @var class-string $className
+                 */
+                $className = $useUse->name->toString();
                 $scope->addImport(
                     $useUse->alias?->toString() ?? $useUse->name->getLast(),
-                    $useUse->name->toString(),
+                    $className,
                 );
             }
         }
@@ -116,9 +125,13 @@ class PhpFileParser
             $prefix = $use->prefix->toString();
 
             foreach ($use->uses as $useUse) {
+                /**
+                 * @var class-string $className
+                 */
+                $className = sprintf('%s\\%s', $prefix, $useUse->name->toString());
                 $scope->addImport(
                     $useUse->alias?->toString() ?? $useUse->name->getLast(),
-                    sprintf('%s\\%s', $prefix, $useUse->name->toString()),
+                    $className,
                 );
             }
         }

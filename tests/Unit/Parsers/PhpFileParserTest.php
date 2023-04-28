@@ -86,7 +86,7 @@ namespace ResourceParserGenerator\Tests\Examples;
 namespace ResourceParserGenerator\Tests\ExamplesTwo;
 PHP,
                 'exception' => RuntimeException::class,
-                'exceptionMessage' => 'Multiple namespaces found',
+                'exceptionMessage' => 'Multiple namespaces not supported',
             ],
             'duplicate aliases' => [
                 'contents' => <<<PHP

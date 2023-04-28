@@ -14,7 +14,7 @@ class FileScope
     private array $classes = [];
 
     /**
-     * @var array<string, string>
+     * @var array<string, class-string>
      */
     private array $imports = [];
 
@@ -72,6 +72,9 @@ class FileScope
         throw new RuntimeException(sprintf('Class "%s" not found', $name));
     }
 
+    /**
+     * @return array<string, class-string>
+     */
     public function imports(): array
     {
         return $this->imports;

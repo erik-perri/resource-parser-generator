@@ -143,7 +143,11 @@ class PhpFileParser
         }
 
         foreach ($classes as $class) {
-            $classScope = ClassScope::create($scope, $class->name->toString());
+            $className = $class->name
+                ? $class->name->toString()
+                : sprintf('AnonymousClass%d', $class->getLine());
+
+            $classScope = ClassScope::create($scope, $className);
 
             $scope->addClass($classScope);
         }

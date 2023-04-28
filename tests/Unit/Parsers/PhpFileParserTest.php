@@ -188,4 +188,30 @@ PHP;
         $this->assertEquals('ResourceParserGenerator\Tests\Examples', $class->file->namespace());
         $this->assertEquals('TestClass', $class->name);
     }
+
+    public function testParsesAnonymousClasses(): void
+    {
+        // Arrange
+        $parser = $this->make(PhpFileParser::class);
+        $contents = <<<PHP
+<?php
+
+namespace ResourceParserGenerator\Tests\Examples;
+
+\$class = new class {
+    public function method(string \$parameter): void
+    {
+        //
+    }
+};
+PHP;
+
+        // Act
+        $result = $parser->parse($contents);
+
+        // Assert
+        $class = $result->class('AnonymousClass5');
+        $this->assertEquals('ResourceParserGenerator\Tests\Examples', $class->file->namespace());
+        $this->assertEquals('AnonymousClass5', $class->name);
+    }
 }

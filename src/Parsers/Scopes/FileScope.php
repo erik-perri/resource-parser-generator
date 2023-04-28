@@ -8,17 +8,17 @@ use RuntimeException;
 
 class FileScope
 {
-    private string|null $namespace = null;
-
-    /**
-     * @var array<string, string>
-     */
-    private array $uses = [];
-
     /**
      * @var array<ClassScope>
      */
     private array $classes = [];
+
+    /**
+     * @var array<string, string>
+     */
+    private array $imports = [];
+
+    private string|null $namespace = null;
 
     public function __construct()
     {
@@ -37,13 +37,13 @@ class FileScope
         return $this;
     }
 
-    public function addUse(string $alias, string $class): self
+    public function addImport(string $alias, string $class): self
     {
-        if (isset($this->uses[$alias])) {
+        if (isset($this->imports[$alias])) {
             throw new RuntimeException(sprintf('Alias "%s" already exists', $alias));
         }
 
-        $this->uses[$alias] = $class;
+        $this->imports[$alias] = $class;
 
         return $this;
     }
@@ -69,9 +69,9 @@ class FileScope
         return $this->namespace;
     }
 
-    public function getUses(): array
+    public function getImports(): array
     {
-        return $this->uses;
+        return $this->imports;
     }
 
     public function setNamespace(string|null $namespace): self

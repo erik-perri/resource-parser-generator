@@ -118,7 +118,7 @@ PHP,
         $result = $parser->parse($contents);
 
         // Assert
-        $this->assertSame($expected, $result->getUses());
+        $this->assertSame($expected, $result->getImports());
     }
 
     public static function useCodeProvider(): array

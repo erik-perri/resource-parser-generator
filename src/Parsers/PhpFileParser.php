@@ -76,7 +76,7 @@ class PhpFileParser
             }
 
             foreach ($use->uses as $useUse) {
-                $scope->addUse(
+                $scope->addImport(
                     $useUse->alias?->toString() ?? $useUse->name->getLast(),
                     $useUse->name->toString(),
                 );
@@ -100,7 +100,7 @@ class PhpFileParser
             $prefix = $use->prefix->toString();
 
             foreach ($use->uses as $useUse) {
-                $scope->addUse(
+                $scope->addImport(
                     $useUse->alias?->toString() ?? $useUse->name->getLast(),
                     sprintf('%s\\%s', $prefix, $useUse->name->toString()),
                 );

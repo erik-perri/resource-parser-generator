@@ -189,6 +189,31 @@ PHP;
         $this->assertEquals('TestClass', $class->name);
     }
 
+    public function testParsesMultipleClasses(): void
+    {
+        // Arrange
+        $parser = $this->make(PhpFileParser::class);
+        $contents = <<<PHP
+<?php
+
+namespace ResourceParserGenerator\Tests\Examples;
+
+class TestClassOne
+{
+}
+
+class TestClassTwo
+{
+}
+PHP;
+
+        // Act
+        $result = $parser->parse($contents);
+
+        // Assert
+        $this->assertCount(2, $result->classes());
+    }
+
     public function testParsesAnonymousClasses(): void
     {
         // Arrange

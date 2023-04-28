@@ -4,25 +4,27 @@ declare(strict_types=1);
 
 namespace ResourceParserGenerator\Parsers\Scopes;
 
+use Illuminate\Support\Collection;
 use RuntimeException;
 
 class FileScope
 {
     /**
-     * @var array<ClassScope>
+     * @var Collection<int, ClassScope>
      */
-    private array $classes = [];
+    private readonly Collection $classes;
 
     /**
-     * @var array<string, class-string>
+     * @var Collection<string, class-string>
      */
-    private array $imports = [];
+    private readonly Collection $imports;
 
     private string|null $namespace = null;
 
     public function __construct()
     {
-        //
+        $this->classes = collect();
+        $this->imports = collect();
     }
 
     public static function create(): self
@@ -32,7 +34,7 @@ class FileScope
 
     public function addClass(ClassScope $classScope): self
     {
-        $this->classes[] = $classScope;
+        $this->classes->push($classScope);
 
         return $this;
     }
@@ -48,36 +50,35 @@ class FileScope
             throw new RuntimeException(sprintf('Alias "%s" already exists', $alias));
         }
 
-        $this->imports[$alias] = $class;
+        $this->imports->put($alias, $class);
 
         return $this;
     }
 
     /**
-     * @return ClassScope[]
+     * @return Collection<int, ClassScope>
      */
-    public function classes(): array
+    public function classes(): Collection
     {
-        return $this->classes;
+        return $this->classes->collect();
     }
 
     public function class(string $name): ClassScope
     {
-        foreach ($this->classes as $class) {
-            if ($class->name === $name) {
-                return $class;
-            }
+        $class = $this->classes->first(fn(ClassScope $class) => $class->name === $name);
+        if ($class) {
+            return $class;
         }
 
         throw new RuntimeException(sprintf('Class "%s" not found', $name));
     }
 
     /**
-     * @return array<string, class-string>
+     * @return Collection<string, class-string>
      */
-    public function imports(): array
+    public function imports(): Collection
     {
-        return $this->imports;
+        return $this->imports->collect();
     }
 
     public function namespace(): string|null

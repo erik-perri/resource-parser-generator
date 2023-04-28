@@ -6,6 +6,7 @@ namespace ResourceParserGenerator;
 
 use Illuminate\Support\Env;
 use Illuminate\Support\ServiceProvider;
+use PhpParser\NodeFinder;
 use PhpParser\Parser;
 use PhpParser\ParserFactory;
 use ResourceParserGenerator\Contracts\ClassFileLocatorContract;
@@ -31,6 +32,11 @@ class ResourceParserGeneratorServiceProvider extends ServiceProvider
             $this->app->singleton(
                 Parser::class,
                 fn() => (new ParserFactory)->create(ParserFactory::ONLY_PHP7),
+            );
+
+            $this->app->singleton(
+                NodeFinder::class,
+                fn() => new NodeFinder,
             );
         }
     }

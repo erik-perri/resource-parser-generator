@@ -11,14 +11,16 @@ use PhpParser\Node\Stmt\Namespace_;
 use PhpParser\Node\Stmt\Use_;
 use PhpParser\NodeFinder;
 use PhpParser\Parser;
-use ResourceParserGenerator\Parsers\DataObjects\ClassScope;
 use ResourceParserGenerator\Parsers\DataObjects\FileScope;
 use RuntimeException;
 
 class PhpFileParser
 {
-    public function __construct(private readonly Parser $parser)
-    {
+    public function __construct(
+        private readonly Parser $parser,
+        private readonly NodeFinder $nodeFinder,
+        private readonly PhpClassParser $classParser,
+    ) {
         //
     }
 
@@ -41,18 +43,28 @@ class PhpFileParser
     }
 
     /**
+     * @param string|null $namespace
+     * @param string $className
+     * @return class-string
+     */
+    private function buildImportClassName(string|null $namespace, string $className): string
+    {
+        return $namespace
+            ? sprintf('%s\\%s', $namespace, $className)
+            : $className;
+    }
+
+    /**
      * @param Stmt[] $ast
      * @param FileScope $scope
      * @return void
      */
     private function parseNamespaceStatement(array $ast, FileScope $scope): void
     {
-        $nodeFinder = new NodeFinder();
-
         /**
          * @var Namespace_[] $namespaces
          */
-        $namespaces = $nodeFinder->findInstanceOf($ast, Namespace_::class);
+        $namespaces = $this->nodeFinder->findInstanceOf($ast, Namespace_::class);
         if (!count($namespaces)) {
             return;
         }
@@ -76,12 +88,10 @@ class PhpFileParser
      */
     private function parseUseStatements(array $ast, FileScope $scope): void
     {
-        $nodeFinder = new NodeFinder();
-
         /**
          * @var Use_[] $uses
          */
-        $uses = $nodeFinder->findInstanceOf($ast, Use_::class);
+        $uses = $this->nodeFinder->findInstanceOf($ast, Use_::class);
         if (!count($uses)) {
             return;
         }
@@ -92,13 +102,9 @@ class PhpFileParser
             }
 
             foreach ($use->uses as $useUse) {
-                /**
-                 * @var class-string $className
-                 */
-                $className = $useUse->name->toString();
                 $scope->addImport(
                     $useUse->alias?->toString() ?? $useUse->name->getLast(),
-                    $className,
+                    $this->buildImportClassName(null, $useUse->name->toString()),
                 );
             }
         }
@@ -111,12 +117,10 @@ class PhpFileParser
      */
     private function parseGroupUseStatements(array $ast, FileScope $scope): void
     {
-        $nodeFinder = new NodeFinder();
-
         /**
          * @var GroupUse[] $uses
          */
-        $uses = $nodeFinder->findInstanceOf($ast, GroupUse::class);
+        $uses = $this->nodeFinder->findInstanceOf($ast, GroupUse::class);
         if (!count($uses)) {
             return;
         }
@@ -125,13 +129,9 @@ class PhpFileParser
             $prefix = $use->prefix->toString();
 
             foreach ($use->uses as $useUse) {
-                /**
-                 * @var class-string $className
-                 */
-                $className = sprintf('%s\\%s', $prefix, $useUse->name->toString());
                 $scope->addImport(
                     $useUse->alias?->toString() ?? $useUse->name->getLast(),
-                    $className,
+                    $this->buildImportClassName($prefix, $useUse->name->toString()),
                 );
             }
         }
@@ -144,25 +144,17 @@ class PhpFileParser
      */
     private function parseClassStatements(array $ast, FileScope $scope): void
     {
-        $nodeFinder = new NodeFinder();
-
         /**
          * @var Class_[] $classes
          */
-        $classes = $nodeFinder->findInstanceOf($ast, Class_::class);
+        $classes = $this->nodeFinder->findInstanceOf($ast, Class_::class);
 
         if (!count($classes)) {
             return;
         }
 
         foreach ($classes as $class) {
-            $className = $class->name
-                ? $class->name->toString()
-                : sprintf('AnonymousClass%d', $class->getLine());
-
-            $classScope = ClassScope::create($scope, $className);
-
-            $scope->addClass($classScope);
+            $this->classParser->parse($class, $scope);
         }
     }
 }

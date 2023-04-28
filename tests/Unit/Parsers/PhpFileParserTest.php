@@ -6,13 +6,11 @@ namespace ResourceParserGenerator\Tests\Unit\Parsers;
 
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\DataProvider;
-use ResourceParserGenerator\Parsers\DataObjects\ClassScope;
 use ResourceParserGenerator\Parsers\DataObjects\FileScope;
 use ResourceParserGenerator\Parsers\PhpFileParser;
 use ResourceParserGenerator\Tests\TestCase;
 use RuntimeException;
 
-#[CoversClass(ClassScope::class)]
 #[CoversClass(FileScope::class)]
 #[CoversClass(PhpFileParser::class)]
 class PhpFileParserTest extends TestCase
@@ -162,49 +160,15 @@ PHP,
         ];
     }
 
-    public function testParsesClasses(): void
-    {
-        // Arrange
-        $parser = $this->make(PhpFileParser::class);
-        $contents = <<<PHP
-<?php
-
-namespace ResourceParserGenerator\Tests\Examples;
-
-class TestClass
-{
-    public function method(string \$parameter): void
-    {
-        //
-    }
-}
-PHP;
-
-        // Act
-        $result = $parser->parse($contents);
-
-        // Assert
-        $class = $result->class('TestClass');
-        $this->assertEquals('ResourceParserGenerator\Tests\Examples', $class->file->namespace());
-        $this->assertEquals('TestClass', $class->name);
-    }
-
     public function testParsesMultipleClasses(): void
     {
         // Arrange
         $parser = $this->make(PhpFileParser::class);
         $contents = <<<PHP
 <?php
-
 namespace ResourceParserGenerator\Tests\Examples;
-
-class TestClassOne
-{
-}
-
-class TestClassTwo
-{
-}
+class TestClassOne {}
+class TestClassTwo {}
 PHP;
 
         // Act
@@ -220,23 +184,16 @@ PHP;
         $parser = $this->make(PhpFileParser::class);
         $contents = <<<PHP
 <?php
-
 namespace ResourceParserGenerator\Tests\Examples;
-
-\$class = new class {
-    public function method(string \$parameter): void
-    {
-        //
-    }
-};
+\$class = new class {};
 PHP;
 
         // Act
         $result = $parser->parse($contents);
 
         // Assert
-        $class = $result->class('AnonymousClass5');
+        $class = $result->class('AnonymousClass3');
         $this->assertEquals('ResourceParserGenerator\Tests\Examples', $class->file->namespace());
-        $this->assertEquals('AnonymousClass5', $class->name);
+        $this->assertEquals('AnonymousClass3', $class->name);
     }
 }

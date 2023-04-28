@@ -5,22 +5,23 @@ declare(strict_types=1);
 namespace ResourceParserGenerator\Tests\Examples;
 
 use Illuminate\Http\Request;
+use Illuminate\Http\Resources\Json\JsonResource;
 use ResourceParserGenerator\Tests\Examples\Models\User;
 
 /**
  * @property User $resource
  * @property $untyped
  */
-class UserResource
+class UserResource extends JsonResource
 {
     public function adminList(): array
     {
         return [
-            'id' => $this->resource->getRouteKey(),
-            'email' => $this->resource->email,
-            'name' => $this->resource->name,
+//            'id' => $this->resource->getRouteKey(),
+//            'email' => $this->resource->email,
+//            'name' => $this->resource->name,
             'created_at' => $this->resource->created_at?->toIso8601ZuluString(),
-            'updated_at' => $this->resource->updated_at?->toIso8601ZuluString(),
+//            'updated_at' => $this->resource->updated_at?->toIso8601ZuluString(),
         ];
     }
 
@@ -83,6 +84,13 @@ class UserResource
     {
         return [
             'path' => $request->headers->get('path'),
+        ];
+    }
+
+    public function usingWhenLoaded(): array
+    {
+        return [
+            'alias' => $this->whenLoaded('nameAlias', fn() => $this->resource->nameAlias->name),
         ];
     }
 }

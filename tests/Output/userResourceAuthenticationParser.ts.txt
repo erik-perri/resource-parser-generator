@@ -1,9 +1,0 @@
-import {object, output, string} from 'zod';
-
-export const userResourceAuthenticationParser = object({
-  id: string(),
-  email: string(),
-  name: string(),
-});
-
-export type UserResourceAuthentication = output<typeof userResourceAuthenticationParser>;

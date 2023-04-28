@@ -34,19 +34,15 @@ class PhpFileParserTest extends TestCase
             'namespace' => [
                 'contents' => <<<PHP
 <?php
-
 namespace ResourceParserGenerator\Tests\Examples;
-
-class Test {
-}
+class Test {}
 PHP,
                 'expected' => 'ResourceParserGenerator\Tests\Examples'
             ],
             'no namespace' => [
                 'contents' => <<<PHP
-
-class Test {
-}
+<?php
+class Test {}
 PHP,
                 'expected' => null
             ],
@@ -79,7 +75,6 @@ PHP,
             'multiple namespaces' => [
                 'contents' => <<<PHP
 <?php
-
 namespace ResourceParserGenerator\Tests\Examples;
 namespace ResourceParserGenerator\Tests\ExamplesTwo;
 PHP,
@@ -89,9 +84,7 @@ PHP,
             'duplicate aliases' => [
                 'contents' => <<<PHP
 <?php
-
 namespace ResourceParserGenerator\Tests\Examples;
-
 use ResourceParserGenerator\Tests\ExampleOne as ExampleOne;
 use ResourceParserGenerator\Tests\ExampleTwo as ExampleOne;
 PHP,
@@ -125,7 +118,6 @@ PHP,
             'single use' => [
                 'contents' => <<<PHP
 <?php
-
 use ResourceParserGenerator\Tests\Examples\UserResource;
 PHP,
                 'expected' => [
@@ -135,7 +127,6 @@ PHP,
             'multiple uses' => [
                 'contents' => <<<PHP
 <?php
-
 use ResourceParserGenerator\Tests\Examples\{NoHints,UserResource};
 PHP,
                 'expected' => [
@@ -146,7 +137,6 @@ PHP,
             'multiple uses with aliases and whitespace and comments' => [
                 'contents' => <<<PHP
 <?php
-
 use ResourceParserGenerator\Tests\Examples\{
     NoHints as NoHintsAlias, // No hints
     UserResource as UserResourceAlias // User resource

@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace ResourceParserGenerator\Parsers\Scopes;
+namespace ResourceParserGenerator\Parsers\DataObjects;
 
 class ClassScope
 {

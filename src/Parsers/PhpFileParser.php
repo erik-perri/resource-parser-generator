@@ -11,8 +11,8 @@ use PhpParser\Node\Stmt\Namespace_;
 use PhpParser\Node\Stmt\Use_;
 use PhpParser\NodeFinder;
 use PhpParser\Parser;
-use ResourceParserGenerator\Parsers\Scopes\ClassScope;
-use ResourceParserGenerator\Parsers\Scopes\FileScope;
+use ResourceParserGenerator\Parsers\DataObjects\ClassScope;
+use ResourceParserGenerator\Parsers\DataObjects\FileScope;
 use RuntimeException;
 
 class PhpFileParser

@@ -36,6 +36,9 @@ class ClassScope
         return $this;
     }
 
+    /**
+     * @return Collection<int, ClassProperty>
+     */
     public function properties(): Collection
     {
         return $this->properties->collect();

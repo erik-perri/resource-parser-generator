@@ -7,6 +7,8 @@ namespace ResourceParserGenerator\Parsers;
 use PhpParser\Node\ComplexType;
 use PhpParser\Node\Identifier;
 use PhpParser\Node\Name;
+use PhpParser\Node\NullableType;
+use PhpParser\Node\UnionType;
 use ResourceParserGenerator\Contracts\TypeContract;
 use ResourceParserGenerator\Parsers\Types\ArrayType;
 use ResourceParserGenerator\Parsers\Types\BoolType;
@@ -41,6 +43,19 @@ class DeclaredTypeParser
                 'void' => new VoidType(),
                 default => throw new RuntimeException(sprintf('Unhandled identifier type "%s"', $type->name)),
             };
+        }
+
+        if ($type instanceof UnionType) {
+            return new Types\UnionType(
+                ...array_map(fn(ComplexType|Identifier|Name $type) => $this->parse($type), $type->types),
+            );
+        }
+
+        if ($type instanceof NullableType) {
+            return new Types\UnionType(
+                new NullType(),
+                $this->parse($type->type),
+            );
         }
 
         throw new RuntimeException(sprintf('Unhandled declared type "%s"', get_class($type)));

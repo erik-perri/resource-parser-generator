@@ -49,9 +49,14 @@ class PhpFileParser
      */
     private function buildImportClassName(string|null $namespace, string $className): string
     {
-        return $namespace
+        /**
+         * @var class-string $fullName
+         */
+        $fullName = $namespace
             ? sprintf('%s\\%s', $namespace, $className)
             : $className;
+
+        return $fullName;
     }
 
     /**

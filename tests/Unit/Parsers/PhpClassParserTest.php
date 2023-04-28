@@ -12,11 +12,13 @@ use PhpParser\NodeFinder;
 use PhpParser\Parser;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\DataProvider;
+use ResourceParserGenerator\Parsers\DataObjects\ClassProperty;
 use ResourceParserGenerator\Parsers\DataObjects\ClassScope;
 use ResourceParserGenerator\Parsers\DataObjects\FileScope;
 use ResourceParserGenerator\Parsers\PhpClassParser;
 use ResourceParserGenerator\Tests\TestCase;
 
+#[CoversClass(ClassProperty::class)]
 #[CoversClass(ClassScope::class)]
 #[CoversClass(PhpClassParser::class)]
 class PhpClassParserTest extends TestCase
@@ -236,6 +238,27 @@ PHP,
                         'isStatic' => false,
                         'name' => 'propertyEight',
                         'type' => 'array',
+                    ],
+                ],
+            ],
+            'compound' => [
+                'code' => <<<PHP
+<?php
+namespace ResourceParserGenerator\Tests\Examples;
+class TestClass
+{
+    private string|int \$propertyNine;
+}
+PHP,
+                'expectations' => [
+                    [
+                        'isPrivate' => true,
+                        'isProtected' => false,
+                        'isPublic' => false,
+                        'isReadonly' => false,
+                        'isStatic' => false,
+                        'name' => 'propertyNine',
+                        'type' => 'string|int',
                     ],
                 ],
             ],

@@ -37,6 +37,11 @@ class FileScope
         return $this;
     }
 
+    /**
+     * @param string $alias
+     * @param class-string $class
+     * @return FileScope
+     */
     public function addImport(string $alias, string $class): self
     {
         if (isset($this->imports[$alias])) {
@@ -48,12 +53,15 @@ class FileScope
         return $this;
     }
 
-    public function getClasses(): array
+    /**
+     * @return ClassScope[]
+     */
+    public function classes(): array
     {
         return $this->classes;
     }
 
-    public function getClass(string $name): ClassScope
+    public function class(string $name): ClassScope
     {
         foreach ($this->classes as $class) {
             if ($class->name === $name) {
@@ -64,14 +72,14 @@ class FileScope
         throw new RuntimeException(sprintf('Class "%s" not found', $name));
     }
 
-    public function getNamespace(): string|null
-    {
-        return $this->namespace;
-    }
-
-    public function getImports(): array
+    public function imports(): array
     {
         return $this->imports;
+    }
+
+    public function namespace(): string|null
+    {
+        return $this->namespace;
     }
 
     public function setNamespace(string|null $namespace): self

@@ -27,7 +27,7 @@ class PhpFileParserTest extends TestCase
         $result = $parser->parse($contents);
 
         // Assert
-        $this->assertSame($expected, $result->getNamespace());
+        $this->assertSame($expected, $result->namespace());
     }
 
     public static function namespaceCodeProvider(): array
@@ -118,7 +118,7 @@ PHP,
         $result = $parser->parse($contents);
 
         // Assert
-        $this->assertSame($expected, $result->getImports());
+        $this->assertSame($expected, $result->imports());
     }
 
     public static function useCodeProvider(): array
@@ -184,8 +184,8 @@ PHP;
         $result = $parser->parse($contents);
 
         // Assert
-        $class = $result->getClass('TestClass');
-        $this->assertEquals('ResourceParserGenerator\Tests\Examples', $class->file->getNamespace());
+        $class = $result->class('TestClass');
+        $this->assertEquals('ResourceParserGenerator\Tests\Examples', $class->file->namespace());
         $this->assertEquals('TestClass', $class->name);
     }
 }

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace ResourceParserGenerator\Parsers;
 
+use PhpParser\Node\Stmt;
 use PhpParser\Node\Stmt\Class_;
 use PhpParser\Node\Stmt\GroupUse;
 use PhpParser\Node\Stmt\Namespace_;
@@ -39,6 +40,11 @@ class PhpFileParser
         return $scope;
     }
 
+    /**
+     * @param Stmt[] $ast
+     * @param FileScope $scope
+     * @return void
+     */
     private function parseNamespaceStatement(array $ast, FileScope $scope): void
     {
         $nodeFinder = new NodeFinder();
@@ -58,6 +64,11 @@ class PhpFileParser
         $scope->setNamespace($namespaces[0]->name->toString());
     }
 
+    /**
+     * @param Stmt[] $ast
+     * @param FileScope $scope
+     * @return void
+     */
     private function parseUseStatements(array $ast, FileScope $scope): void
     {
         $nodeFinder = new NodeFinder();
@@ -84,6 +95,11 @@ class PhpFileParser
         }
     }
 
+    /**
+     * @param Stmt[] $ast
+     * @param FileScope $scope
+     * @return void
+     */
     private function parseGroupUseStatements(array $ast, FileScope $scope): void
     {
         $nodeFinder = new NodeFinder();
@@ -108,6 +124,11 @@ class PhpFileParser
         }
     }
 
+    /**
+     * @param Stmt[] $ast
+     * @param FileScope $scope
+     * @return void
+     */
     private function parseClassStatements(array $ast, FileScope $scope): void
     {
         $nodeFinder = new NodeFinder();

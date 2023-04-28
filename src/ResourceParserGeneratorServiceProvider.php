@@ -8,6 +8,8 @@ use Illuminate\Support\Env;
 use Illuminate\Support\ServiceProvider;
 use PhpParser\Parser;
 use PhpParser\ParserFactory;
+use ResourceParserGenerator\Filesystem\ClassFileLocator;
+use ResourceParserGenerator\Filesystem\Contracts\ClassFileLocatorContract;
 
 class ResourceParserGeneratorServiceProvider extends ServiceProvider
 {
@@ -19,6 +21,13 @@ class ResourceParserGeneratorServiceProvider extends ServiceProvider
     public function register(): void
     {
         if ($this->app->environment('local', 'testing')) {
+            $this->app->singleton(
+                ClassFileLocatorContract::class,
+                fn() => new ClassFileLocator(
+                    strval(Env::get('COMPOSER_VENDOR_DIR')) ?: $this->app->basePath('vendor')
+                ),
+            );
+
             $this->app->singleton(
                 Parser::class,
                 fn() => (new ParserFactory)->create(ParserFactory::ONLY_PHP7),

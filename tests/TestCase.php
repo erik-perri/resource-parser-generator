@@ -22,4 +22,16 @@ abstract class TestCase extends \Orchestra\Testbench\TestCase
             ResourceParserGeneratorServiceProvider::class,
         ];
     }
+
+    /**
+     * @template T
+     *
+     * @param class-string<T> $name
+     * @param array $parameters
+     * @return T
+     */
+    protected function make(string $name, array $parameters = []): mixed
+    {
+        return $this->app->make($name, $parameters);
+    }
 }

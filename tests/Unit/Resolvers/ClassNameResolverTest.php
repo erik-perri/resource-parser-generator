@@ -18,7 +18,6 @@ class ClassNameResolverTest extends TestCase
     public function testResolvesClasses(
         Closure $fileScopeFactory,
         string $inputClass,
-        bool $isRelative,
         string|null $expected
     ): void {
         // Arrange
@@ -29,7 +28,7 @@ class ClassNameResolverTest extends TestCase
         ]);
 
         // Act
-        $result = $resolver->resolve($inputClass, $isRelative);
+        $result = $resolver->resolve($inputClass);
 
         // Assert
         $this->assertSame($expected, $result);
@@ -41,34 +40,29 @@ class ClassNameResolverTest extends TestCase
             'unknown class' => [
                 'fileScopeFactory' => fn() => FileScope::create(),
                 'className' => 'What',
-                'isRelative' => false,
                 'expected' => null,
             ],
             'unknown relative class' => [
                 'fileScopeFactory' => fn() => FileScope::create(),
                 'className' => 'What\Is\This',
-                'isRelative' => true,
                 'expected' => null,
             ],
             'fully qualified' => [
                 'fileScopeFactory' => fn() => FileScope::create()
                     ->addImport('Collection', 'Illuminate\Support\Collection'),
                 'className' => 'Illuminate\Support\Collection',
-                'isRelative' => false,
                 'expected' => 'Illuminate\Support\Collection',
             ],
             'unqualified' => [
                 'fileScopeFactory' => fn() => FileScope::create()
                     ->addImport('Collection', 'Illuminate\Support\Collection'),
                 'className' => 'Collection',
-                'isRelative' => false,
                 'expected' => 'Illuminate\Support\Collection',
             ],
             'relative to alias' => [
                 'fileScopeFactory' => fn() => FileScope::create()
                     ->addImport('ParserTypes', 'ResourceParserGenerator\Parsers\Types'),
                 'className' => 'ParserTypes\ClassType',
-                'isRelative' => true,
                 'expected' => 'ResourceParserGenerator\Parsers\Types\ClassType',
             ],
         ];

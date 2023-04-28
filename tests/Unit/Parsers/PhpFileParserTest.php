@@ -186,4 +186,41 @@ PHP;
         $this->assertEquals('ResourceParserGenerator\Tests\Examples', $class->file->namespace());
         $this->assertEquals('AnonymousClass3', $class->name);
     }
+
+    public function testHelpsResolveClassNames(): void
+    {
+        // Arrange
+        $parser = $this->make(PhpFileParser::class);
+        $contents = <<<PHP
+<?php
+namespace ResourceParserGenerator\Tests\Examples;
+use ResourceParserGenerator\Imports\ImportedClass;
+use ResourceParserGenerator\Imports\RelativePath;
+class TestClass
+{
+    private AdjacentClass \$propertyOne;
+    private ImportedClass \$propertyTwo;
+    private RelativePath\RelativeClass \$propertyThree;
+    private \ResourceParserGenerator\Tests\Examples\AbsoluteClass \$propertyThree;
+}
+PHP;
+
+        // Act
+        $result = $parser->parse($contents);
+
+        // Assert
+        $class = $result->class('TestClass');
+        $this->assertEquals(
+            'ResourceParserGenerator\Tests\Examples\AdjacentClass',
+            $class->property('propertyOne')->type->name(),
+        );
+        $this->assertEquals(
+            'ResourceParserGenerator\Imports\ImportedClass',
+            $class->property('propertyTwo')->type->name(),
+        );
+        $this->assertEquals(
+            'ResourceParserGenerator\Imports\RelativePath\RelativeClass',
+            $class->property('propertyThree')->type->name(),
+        );
+    }
 }

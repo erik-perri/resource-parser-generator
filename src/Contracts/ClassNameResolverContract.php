@@ -8,8 +8,7 @@ interface ClassNameResolverContract
 {
     /**
      * @param string $name
-     * @param bool $isRelative
      * @return class-string|null
      */
-    public function resolve(string $name, bool $isRelative): string|null;
+    public function resolve(string $name): string|null;
 }

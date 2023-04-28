@@ -8,7 +8,6 @@ use PhpParser\Node\ComplexType;
 use PhpParser\Node\Identifier;
 use PhpParser\Node\Name;
 use PhpParser\Node\Name\FullyQualified;
-use PhpParser\Node\Name\Relative;
 use PhpParser\Node\NullableType;
 use PhpParser\Node\UnionType;
 use ResourceParserGenerator\Contracts\ClassNameResolverContract;
@@ -66,17 +65,8 @@ class DeclaredTypeParser
             return new ClassType($type->toString(), null);
         }
 
-        if ($type instanceof Relative) {
-            $resolved = $resolver->resolve($type->toString(), true);
-            if (!$resolved) {
-                throw new RuntimeException(sprintf('Unable to resolve relative class "%s"', $type->toString()));
-            }
-
-            return new ClassType($resolved, $type->toString());
-        }
-
         if ($type instanceof Name) {
-            $resolved = $resolver->resolve($type->toString(), false);
+            $resolved = $resolver->resolve($type->toString());
             if (!$resolved) {
                 throw new RuntimeException(sprintf('Unable to resolve class "%s"', $type->toString()));
             }

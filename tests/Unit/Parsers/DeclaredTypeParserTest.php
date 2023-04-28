@@ -110,7 +110,7 @@ class DeclaredTypeParserTest extends TestCase
                 'resolveMock' => fn() => $this->mock(ClassNameResolverContract::class)
                     ->shouldReceive('resolve')
                     ->once()
-                    ->with('Foo\Baz', true)
+                    ->with('Foo\Baz')
                     ->andReturn('App\Foo\Baz')
                     ->getMock(),
             ],
@@ -120,7 +120,7 @@ class DeclaredTypeParserTest extends TestCase
                 'resolveMock' => fn() => $this->mock(ClassNameResolverContract::class)
                     ->shouldReceive('resolve')
                     ->once()
-                    ->with('Baz', false)
+                    ->with('Baz')
                     ->andReturn('App\Foo\Baz')
                     ->getMock(),
             ],

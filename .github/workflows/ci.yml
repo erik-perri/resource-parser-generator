@@ -25,7 +25,7 @@ jobs:
           restore-keys: ${{ runner.os }}-composer-
 
       - run: composer install --no-interaction --no-progress --no-suggest --prefer-dist
-      - run: ./.github/ci.sh
+      - run: bash .github/ci.sh
 
       - uses: actions/upload-artifact@v3
         with:

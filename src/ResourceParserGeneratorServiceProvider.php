@@ -8,8 +8,8 @@ use Illuminate\Support\Env;
 use Illuminate\Support\ServiceProvider;
 use PhpParser\Parser;
 use PhpParser\ParserFactory;
+use ResourceParserGenerator\Contracts\ClassFileLocatorContract;
 use ResourceParserGenerator\Filesystem\ClassFileLocator;
-use ResourceParserGenerator\Filesystem\Contracts\ClassFileLocatorContract;
 
 class ResourceParserGeneratorServiceProvider extends ServiceProvider
 {

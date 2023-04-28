@@ -201,7 +201,7 @@ class TestClass
     private AdjacentClass \$propertyOne;
     private ImportedClass \$propertyTwo;
     private RelativePath\RelativeClass \$propertyThree;
-    private \ResourceParserGenerator\Tests\Examples\AbsoluteClass \$propertyThree;
+    private \ResourceParserGenerator\Tests\Examples\AbsoluteClass \$propertyFour;
 }
 PHP;
 
@@ -221,6 +221,10 @@ PHP;
         $this->assertEquals(
             'ResourceParserGenerator\Imports\RelativePath\RelativeClass',
             $class->property('propertyThree')->type->name(),
+        );
+        $this->assertEquals(
+            'ResourceParserGenerator\Tests\Examples\AbsoluteClass',
+            $class->property('propertyFour')->type->name(),
         );
     }
 }

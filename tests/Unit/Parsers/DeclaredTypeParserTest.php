@@ -13,19 +13,19 @@ use PHPUnit\Framework\Attributes\DataProvider;
 use ResourceParserGenerator\Contracts\ClassNameResolverContract;
 use ResourceParserGenerator\Contracts\TypeContract;
 use ResourceParserGenerator\Parsers\DeclaredTypeParser;
-use ResourceParserGenerator\Parsers\Types\ArrayType;
-use ResourceParserGenerator\Parsers\Types\BoolType;
-use ResourceParserGenerator\Parsers\Types\ClassType;
-use ResourceParserGenerator\Parsers\Types\FloatType;
-use ResourceParserGenerator\Parsers\Types\IntType;
-use ResourceParserGenerator\Parsers\Types\MixedType;
-use ResourceParserGenerator\Parsers\Types\NullType;
-use ResourceParserGenerator\Parsers\Types\ObjectType;
-use ResourceParserGenerator\Parsers\Types\StringType;
-use ResourceParserGenerator\Parsers\Types\UnionType;
-use ResourceParserGenerator\Parsers\Types\UntypedType;
-use ResourceParserGenerator\Parsers\Types\VoidType;
 use ResourceParserGenerator\Tests\TestCase;
+use ResourceParserGenerator\Types\ArrayType;
+use ResourceParserGenerator\Types\BoolType;
+use ResourceParserGenerator\Types\ClassType;
+use ResourceParserGenerator\Types\FloatType;
+use ResourceParserGenerator\Types\IntType;
+use ResourceParserGenerator\Types\MixedType;
+use ResourceParserGenerator\Types\NullType;
+use ResourceParserGenerator\Types\ObjectType;
+use ResourceParserGenerator\Types\StringType;
+use ResourceParserGenerator\Types\UnionType;
+use ResourceParserGenerator\Types\UntypedType;
+use ResourceParserGenerator\Types\VoidType;
 
 #[CoversClass(DeclaredTypeParser::class)]
 class DeclaredTypeParserTest extends TestCase

@@ -2,14 +2,14 @@
 
 declare(strict_types=1);
 
-namespace ResourceParserGenerator\Parsers\Types;
+namespace ResourceParserGenerator\Types;
 
 use ResourceParserGenerator\Contracts\TypeContract;
 
-class NullType implements TypeContract
+class IntType implements TypeContract
 {
     public function name(): string
     {
-        return 'null';
+        return 'int';
     }
 }

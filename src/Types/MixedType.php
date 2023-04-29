@@ -2,14 +2,14 @@
 
 declare(strict_types=1);
 
-namespace ResourceParserGenerator\Parsers\Types;
+namespace ResourceParserGenerator\Types;
 
 use ResourceParserGenerator\Contracts\TypeContract;
 
-class IntType implements TypeContract
+class MixedType implements TypeContract
 {
     public function name(): string
     {
-        return 'int';
+        return 'mixed';
     }
 }

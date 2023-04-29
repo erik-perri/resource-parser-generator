@@ -61,9 +61,9 @@ class ClassNameResolverTest extends TestCase
             ],
             'relative to alias' => [
                 'fileScopeFactory' => fn() => FileScope::create()
-                    ->addImport('ParserTypes', 'ResourceParserGenerator\Parsers\Types'),
+                    ->addImport('ParserTypes', 'ResourceParserGenerator\Types'),
                 'className' => 'ParserTypes\ClassType',
-                'expected' => 'ResourceParserGenerator\Parsers\Types\ClassType',
+                'expected' => 'ResourceParserGenerator\Types\ClassType',
             ],
         ];
     }

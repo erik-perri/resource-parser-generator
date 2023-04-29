@@ -2,14 +2,14 @@
 
 declare(strict_types=1);
 
-namespace ResourceParserGenerator\Parsers\Types;
+namespace ResourceParserGenerator\Types;
 
 use ResourceParserGenerator\Contracts\TypeContract;
 
-class VoidType implements TypeContract
+class StringType implements TypeContract
 {
     public function name(): string
     {
-        return 'void';
+        return 'string';
     }
 }

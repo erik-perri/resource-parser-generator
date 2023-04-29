@@ -12,17 +12,7 @@ use PhpParser\Node\NullableType;
 use PhpParser\Node\UnionType;
 use ResourceParserGenerator\Contracts\ClassNameResolverContract;
 use ResourceParserGenerator\Contracts\TypeContract;
-use ResourceParserGenerator\Parsers\Types\ArrayType;
-use ResourceParserGenerator\Parsers\Types\BoolType;
-use ResourceParserGenerator\Parsers\Types\ClassType;
-use ResourceParserGenerator\Parsers\Types\FloatType;
-use ResourceParserGenerator\Parsers\Types\IntType;
-use ResourceParserGenerator\Parsers\Types\MixedType;
-use ResourceParserGenerator\Parsers\Types\NullType;
-use ResourceParserGenerator\Parsers\Types\ObjectType;
-use ResourceParserGenerator\Parsers\Types\StringType;
-use ResourceParserGenerator\Parsers\Types\UntypedType;
-use ResourceParserGenerator\Parsers\Types\VoidType;
+use ResourceParserGenerator\Types;
 use RuntimeException;
 
 class DeclaredTypeParser
@@ -30,20 +20,20 @@ class DeclaredTypeParser
     public function parse(ComplexType|Identifier|Name|null $type, ClassNameResolverContract $resolver): TypeContract
     {
         if (!$type) {
-            return new UntypedType();
+            return new Types\UntypedType();
         }
 
         if ($type instanceof Identifier) {
             return match ($type->name) {
-                'array' => new ArrayType(null),
-                'bool' => new BoolType(),
-                'float' => new FloatType(),
-                'int' => new IntType(),
-                'mixed' => new MixedType(),
-                'null' => new NullType(),
-                'object' => new ObjectType(),
-                'string' => new StringType(),
-                'void' => new VoidType(),
+                'array' => new Types\ArrayType(null),
+                'bool' => new Types\BoolType(),
+                'float' => new Types\FloatType(),
+                'int' => new Types\IntType(),
+                'mixed' => new Types\MixedType(),
+                'null' => new Types\NullType(),
+                'object' => new Types\ObjectType(),
+                'string' => new Types\StringType(),
+                'void' => new Types\VoidType(),
                 default => throw new RuntimeException(sprintf('Unhandled identifier type "%s"', $type->name)),
             };
         }
@@ -56,13 +46,13 @@ class DeclaredTypeParser
 
         if ($type instanceof NullableType) {
             return new Types\UnionType(
-                new NullType(),
+                new Types\NullType(),
                 $this->parse($type->type, $resolver),
             );
         }
 
         if ($type instanceof FullyQualified) {
-            return new ClassType($type->toString(), null);
+            return new Types\ClassType($type->toString(), null);
         }
 
         if ($type instanceof Name) {
@@ -71,7 +61,7 @@ class DeclaredTypeParser
                 throw new RuntimeException(sprintf('Unable to resolve class "%s"', $type->toString()));
             }
 
-            return new ClassType($resolved, $type->toString());
+            return new Types\ClassType($resolved, $type->toString());
         }
 
         throw new RuntimeException(sprintf('Unhandled declared type "%s"', get_class($type)));

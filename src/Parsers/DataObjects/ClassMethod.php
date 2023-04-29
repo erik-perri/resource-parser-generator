@@ -26,6 +26,26 @@ class ClassMethod
     }
 
     /**
+     * @param string $name
+     * @param TypeContract $returnType
+     * @param int $flags
+     * @param Collection<string, TypeContract> $parameters
+     */
+    public static function create(
+        string $name,
+        TypeContract $returnType,
+        int $flags,
+        Collection $parameters,
+    ): self {
+        return resolve(self::class, [
+            'name' => $name,
+            'returnType' => $returnType,
+            'flags' => $flags,
+            'parameters' => $parameters,
+        ]);
+    }
+
+    /**
      * @return Collection<string, TypeContract>
      */
     public function parameters(): Collection

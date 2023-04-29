@@ -107,7 +107,7 @@ class PhpClassParser
                 }
             }
 
-            $method = new ClassMethod(
+            $method = ClassMethod::create(
                 $methodNode->name->toString(),
                 $this->declaredTypeParser->parse($methodNode->returnType, $resolver),
                 $methodNode->flags,

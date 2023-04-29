@@ -10,13 +10,15 @@ use Mockery\MockInterface;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\DataProvider;
 use ResourceParserGenerator\Contracts\TypeContract;
+use ResourceParserGenerator\Parsers\DataObjects\DocBlock;
 use ResourceParserGenerator\Parsers\DocBlockParser;
 use ResourceParserGenerator\Parsers\DocBlockTypeParser;
 use ResourceParserGenerator\Resolvers\ClassNameResolver;
 use ResourceParserGenerator\Tests\TestCase;
 
-#[CoversClass(DocBlockTypeParser::class)]
+#[CoversClass(DocBlock::class)]
 #[CoversClass(DocBlockParser::class)]
+#[CoversClass(DocBlockTypeParser::class)]
 class DocBlockParserTest extends TestCase
 {
     #[DataProvider('parseProvider')]

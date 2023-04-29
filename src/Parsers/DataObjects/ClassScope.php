@@ -23,6 +23,7 @@ class ClassScope
         public readonly FileScope $file,
         public readonly string $name,
         public readonly ClassScope|null $extends,
+        public readonly DocBlock $docBlock,
     ) {
         $this->methods = collect();
         $this->properties = collect();
@@ -32,11 +33,13 @@ class ClassScope
         FileScope $file,
         string $name,
         ClassScope|null $extends,
+        DocBlock|null $docBlock,
     ): self {
         return resolve(self::class, [
             'file' => $file,
             'name' => $name,
             'extends' => $extends,
+            'docBlock' => $docBlock ?? DocBlock::create(),
         ]);
     }
 

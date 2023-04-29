@@ -13,6 +13,7 @@ class ClassProperty
         public readonly string $name,
         public readonly TypeContract|null $type,
         public readonly int $flags,
+        public readonly DocBlock $docBlock,
     ) {
         //
     }
@@ -21,11 +22,13 @@ class ClassProperty
         string $name,
         TypeContract|null $type,
         int $flags,
+        DocBlock|null $docBlock,
     ): self {
         return resolve(self::class, [
             'name' => $name,
             'type' => $type,
             'flags' => $flags,
+            'docBlock' => $docBlock ?? DocBlock::create(),
         ]);
     }
 

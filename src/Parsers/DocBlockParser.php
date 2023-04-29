@@ -121,7 +121,10 @@ class DocBlockParser
                 throw new RuntimeException('Multiple @return tags found');
             }
 
-            $returnNode = $returnNodes[0];
+            /**
+             * @var PhpDocTagNode $returnNode
+             */
+            $returnNode = reset($returnNodes);
             if ($returnNode->value instanceof ReturnTagValueNode) {
                 $docBlock->setReturn($this->typeParser->parse($returnNode->value->type, $classResolver));
             }

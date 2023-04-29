@@ -40,6 +40,26 @@ class DocBlock
         ]);
     }
 
+    public function hasMethod(string $name): bool
+    {
+        return $this->methods->has($name);
+    }
+
+    public function hasParam(string $name): bool
+    {
+        return $this->params->has($name);
+    }
+
+    public function hasProperty(string $name): bool
+    {
+        return $this->properties->has($name);
+    }
+
+    public function hasVar(string $name): bool
+    {
+        return $this->vars->has($name);
+    }
+
     public function method(string $name): TypeContract
     {
         if (!isset($this->methods[$name])) {

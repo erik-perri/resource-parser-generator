@@ -301,6 +301,59 @@ PHP;
         $this->assertEquals('int', $method->parameters()->get('argumentTwo')->name());
     }
 
+    public function testParsesDocBlocks(): void
+    {
+        // Arrange
+        $code = <<<PHP
+<?php
+namespace ResourceParserGenerator\Tests\Examples;
+/**
+ * @property string \$hintedProperty
+ * @method float hintedMethod(string \$argumentOne, int \$argumentTwo)
+ */
+class TestClass
+{
+    /**
+     * @var string|null
+     */
+    private \$explicitProperty;
+    
+    /**
+     * @param string|null \$argumentOne
+     * @param int \$argumentTwo
+     * @return float
+     */
+    private function method(mixed \$argumentOne, int \$argumentTwo): float
+    {
+        return 1.0;
+    }
+}
+PHP;
+        $fileScope = $this->getFileScopeMock();
+        $fileParser = $this->getFileParserMock();
+        $classAst = $this->getClass($code, 'TestClass');
+
+        // Act
+        $class = $this->make(PhpClassParser::class)->parse($classAst, $fileScope, $fileParser);
+        $method = $class->method('method');
+        $property = $class->property('explicitProperty');
+
+        // Assert
+        $this->assertTrue($class->docBlock->hasProperty('hintedProperty'));
+        $this->assertTrue($class->docBlock->hasMethod('hintedMethod'));
+        $this->assertEquals('string', $class->docBlock->property('hintedProperty')->name());
+        $this->assertEquals('float', $class->docBlock->method('hintedMethod')->name());
+
+        $this->assertTrue($property->docBlock->hasVar(''));
+        $this->assertEquals('string|null', $property->docBlock->var('')->name());
+
+        $this->assertTrue($method->docBlock->hasParam('argumentOne'));
+        $this->assertTrue($method->docBlock->hasParam('argumentTwo'));
+        $this->assertEquals('string|null', $method->docBlock->param('argumentOne')->name());
+        $this->assertEquals('int', $method->docBlock->param('argumentTwo')->name());
+        $this->assertEquals('float', $method->docBlock->return()->name());
+    }
+
     private function getClass(string $contents, string $name): Class_
     {
         $parser = $this->make(Parser::class);

@@ -21,6 +21,7 @@ class PhpClassParser
     public function __construct(
         private readonly DeclaredTypeParser $declaredTypeParser,
         private readonly ClassFileLocatorContract $classFileLocator,
+        private readonly DocBlockParser $docBlockParser,
     ) {
         //
     }
@@ -31,26 +32,33 @@ class PhpClassParser
             ? $class->name->toString()
             : sprintf('AnonymousClass%d', $class->getLine());
 
+        $resolver = ClassNameResolver::create($scope);
+
         $classScope = ClassScope::create(
             $scope,
             $className,
-            $this->parseExtends($class, $scope, $fileParser),
+            $this->parseExtends($class, $fileParser, $resolver),
+            $class->getDocComment()
+                ? $this->docBlockParser->parse($class->getDocComment()->getText(), $resolver)
+                : null,
         );
 
-        $this->parseClassProperties($class, $classScope);
-        $this->parseClassMethods($class, $classScope);
+        $this->parseClassProperties($class, $classScope, $resolver);
+        $this->parseClassMethods($class, $classScope, $resolver);
 
         return $classScope;
     }
 
-    private function parseExtends(Class_ $class, FileScope $scope, PhpFileParser $fileParser): ClassScope|null
-    {
+    private function parseExtends(
+        Class_ $class,
+        PhpFileParser $fileParser,
+        ClassNameResolver $resolver
+    ): ClassScope|null {
         $parent = $class->extends?->toString();
         if (!$parent) {
             return null;
         }
 
-        $resolver = ClassNameResolver::create($scope);
         $parentClassName = $resolver->resolve($parent);
         if (!$parentClassName) {
             throw new RuntimeException(sprintf('Could not resolve class "%s"', $parent));
@@ -71,16 +79,17 @@ class PhpClassParser
         return $parentClassScope;
     }
 
-    private function parseClassProperties(Class_ $class, ClassScope $classScope): void
+    private function parseClassProperties(Class_ $class, ClassScope $classScope, ClassNameResolver $resolver): void
     {
-        $resolver = ClassNameResolver::create($classScope->file);
-
         foreach ($class->getProperties() as $property) {
             foreach ($property->props as $prop) {
                 $classProperty = ClassProperty::create(
                     $prop->name->toString(),
                     $this->declaredTypeParser->parse($property->type, $resolver),
                     $property->flags,
+                    $property->getDocComment()
+                        ? $this->docBlockParser->parse($property->getDocComment()->getText(), $resolver)
+                        : null,
                 );
 
                 $classScope->setProperty($classProperty);
@@ -88,10 +97,8 @@ class PhpClassParser
         }
     }
 
-    private function parseClassMethods(Class_ $class, ClassScope $classScope): void
+    private function parseClassMethods(Class_ $class, ClassScope $classScope, ClassNameResolver $resolver): void
     {
-        $resolver = ClassNameResolver::create($classScope->file);
-
         foreach ($class->getMethods() as $methodNode) {
             $parameters = collect();
 
@@ -112,6 +119,9 @@ class PhpClassParser
                 $this->declaredTypeParser->parse($methodNode->returnType, $resolver),
                 $methodNode->flags,
                 $parameters,
+                $methodNode->getDocComment()
+                    ? $this->docBlockParser->parse($methodNode->getDocComment()->getText(), $resolver)
+                    : null,
             );
 
             $classScope->setMethod($method);

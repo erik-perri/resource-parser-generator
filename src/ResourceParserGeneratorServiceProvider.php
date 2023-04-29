@@ -15,7 +15,6 @@ use PHPStan\PhpDocParser\Parser\PhpDocParser;
 use PHPStan\PhpDocParser\Parser\TypeParser;
 use ResourceParserGenerator\Contracts\ClassFileLocatorContract;
 use ResourceParserGenerator\Filesystem\ClassFileLocator;
-use ResourceParserGenerator\Resolvers\ClassNameResolver;
 
 class ResourceParserGeneratorServiceProvider extends ServiceProvider
 {
@@ -33,8 +32,6 @@ class ResourceParserGeneratorServiceProvider extends ServiceProvider
                     strval(Env::get('COMPOSER_VENDOR_DIR')) ?: $this->app->basePath('vendor')
                 ),
             );
-
-            $this->app->scoped(ClassNameResolver::class);
 
             $this->app->singleton(
                 Parser::class,

@@ -14,23 +14,13 @@ use ResourceParserGenerator\Contracts\ClassNameResolverContract;
 use ResourceParserGenerator\Contracts\TypeContract;
 use ResourceParserGenerator\Parsers\DeclaredTypeParser;
 use ResourceParserGenerator\Tests\TestCase;
-use ResourceParserGenerator\Types\ArrayType;
-use ResourceParserGenerator\Types\BoolType;
-use ResourceParserGenerator\Types\ClassType;
-use ResourceParserGenerator\Types\FloatType;
-use ResourceParserGenerator\Types\IntType;
-use ResourceParserGenerator\Types\MixedType;
-use ResourceParserGenerator\Types\NullType;
-use ResourceParserGenerator\Types\ObjectType;
-use ResourceParserGenerator\Types\StringType;
-use ResourceParserGenerator\Types\UnionType;
-use ResourceParserGenerator\Types\UntypedType;
-use ResourceParserGenerator\Types\VoidType;
+use ResourceParserGenerator\Types;
 
 #[CoversClass(DeclaredTypeParser::class)]
 class DeclaredTypeParserTest extends TestCase
 {
     #[DataProvider('identifierProvider')]
+    #[DataProvider('intersectionProvider')]
     #[DataProvider('nullableProvider')]
     #[DataProvider('unionProvider')]
     public function testParses(mixed $input, TypeContract $expected, ?Closure $resolveMockFactory = null): void
@@ -62,51 +52,51 @@ class DeclaredTypeParserTest extends TestCase
         return [
             'array without type' => [
                 'input' => new Node\Identifier('array'),
-                'expected' => new ArrayType(null),
+                'expected' => new Types\ArrayType(null),
             ],
             'bool' => [
                 'input' => new Node\Identifier('bool'),
-                'expected' => new BoolType(),
+                'expected' => new Types\BoolType(),
             ],
             'float' => [
                 'input' => new Node\Identifier('float'),
-                'expected' => new FloatType(),
+                'expected' => new Types\FloatType(),
             ],
             'int' => [
                 'input' => new Node\Identifier('int'),
-                'expected' => new IntType(),
+                'expected' => new Types\IntType(),
             ],
             'mixed' => [
                 'input' => new Node\Identifier('mixed'),
-                'expected' => new MixedType(),
+                'expected' => new Types\MixedType(),
             ],
             'null' => [
                 'input' => new Node\Identifier('null'),
-                'expected' => new NullType(),
+                'expected' => new Types\NullType(),
             ],
             'object' => [
                 'input' => new Node\Identifier('object'),
-                'expected' => new ObjectType(),
+                'expected' => new Types\ObjectType(),
             ],
             'string' => [
                 'input' => new Node\Identifier('string'),
-                'expected' => new StringType(),
+                'expected' => new Types\StringType(),
             ],
             'untyped' => [
                 'input' => null,
-                'expected' => new UntypedType(),
+                'expected' => new Types\UntypedType(),
             ],
             'void' => [
                 'input' => new Node\Identifier('void'),
-                'expected' => new VoidType(),
+                'expected' => new Types\VoidType(),
             ],
             'class fully qualified' => [
                 'input' => new Node\Name\FullyQualified('App\Foo\Bar'),
-                'expected' => new ClassType('App\Foo\Bar', null),
+                'expected' => new Types\ClassType('App\Foo\Bar', null),
             ],
             'class relative' => [
                 'input' => new Node\Name\Relative('Foo\Baz'),
-                'expected' => new ClassType('App\Foo\Baz', 'Foo\Baz'),
+                'expected' => new Types\ClassType('App\Foo\Baz', 'Foo\Baz'),
                 'resolveMock' => fn() => $this->mock(ClassNameResolverContract::class)
                     ->shouldReceive('resolve')
                     ->once()
@@ -116,7 +106,7 @@ class DeclaredTypeParserTest extends TestCase
             ],
             'class not qualified' => [
                 'input' => new Node\Name('Baz'),
-                'expected' => new ClassType('App\Foo\Baz', 'Baz'),
+                'expected' => new Types\ClassType('App\Foo\Baz', 'Baz'),
                 'resolveMock' => fn() => $this->mock(ClassNameResolverContract::class)
                     ->shouldReceive('resolve')
                     ->once()
@@ -135,9 +125,9 @@ class DeclaredTypeParserTest extends TestCase
                     new Node\Identifier('int'),
                     new Node\Identifier('string'),
                 ]),
-                'expected' => new UnionType(
-                    new IntType(),
-                    new StringType(),
+                'expected' => new Types\UnionType(
+                    new Types\IntType(),
+                    new Types\StringType(),
                 ),
             ],
         ];
@@ -148,14 +138,24 @@ class DeclaredTypeParserTest extends TestCase
         return [
             'int' => [
                 'input' => new Node\NullableType(new Node\Identifier('int')),
-                'expected' => new UnionType(new NullType(), new IntType()),
+                'expected' => new Types\UnionType(new Types\NullType(), new Types\IntType()),
             ],
         ];
     }
 
-    // TODO
-    // public static function intersectionProvider(): array
-    // {
-    //     return [];
-    // }
+    public static function intersectionProvider(): array
+    {
+        return [
+            'Countable&Iterable' => [
+                'input' => new Node\IntersectionType([
+                    new Node\Name\FullyQualified('Countable'),
+                    new Node\Name\FullyQualified('Iterable')
+                ]),
+                'expected' => new Types\IntersectionType(
+                    new Types\ClassType('Countable', 'Countable'),
+                    new Types\ClassType('Iterable', 'Iterable'),
+                ),
+            ],
+        ];
+    }
 }

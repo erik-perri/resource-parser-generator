@@ -17,15 +17,20 @@ class ClassScope
     public function __construct(
         public readonly FileScope $file,
         public readonly string $name,
+        public readonly ClassScope|null $extends,
     ) {
         $this->properties = collect();
     }
 
-    public static function create(FileScope $file, string $name): self
-    {
+    public static function create(
+        FileScope $file,
+        string $name,
+        ClassScope|null $extends,
+    ): self {
         return resolve(self::class, [
             'file' => $file,
             'name' => $name,
+            'extends' => $extends,
         ]);
     }
 
@@ -47,6 +52,11 @@ class ClassScope
     public function property(string $name): ClassProperty
     {
         $property = $this->properties->first(fn(ClassProperty $property) => $property->name === $name);
+
+        if ($property === null && $this->extends) {
+            $property = $this->extends->property($name);
+        }
+
         if ($property === null) {
             throw new RuntimeException(sprintf('Property "%s" not found', $name));
         }

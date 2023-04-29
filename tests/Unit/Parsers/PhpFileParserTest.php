@@ -6,11 +6,13 @@ namespace ResourceParserGenerator\Tests\Unit\Parsers;
 
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\DataProvider;
+use ResourceParserGenerator\Parsers\DataObjects\ClassScope;
 use ResourceParserGenerator\Parsers\DataObjects\FileScope;
 use ResourceParserGenerator\Parsers\PhpFileParser;
 use ResourceParserGenerator\Tests\TestCase;
 use RuntimeException;
 
+#[CoversClass(ClassScope::class)]
 #[CoversClass(FileScope::class)]
 #[CoversClass(PhpFileParser::class)]
 class PhpFileParserTest extends TestCase
@@ -226,5 +228,23 @@ PHP;
             'ResourceParserGenerator\Tests\Examples\AbsoluteClass',
             $class->property('propertyFour')->type->name(),
         );
+    }
+
+    public function testResolvesNestedClassStructures(): void
+    {
+        // Arrange
+        $parser = $this->make(PhpFileParser::class);
+
+        // Act
+        $result = $parser->parse(
+            file_get_contents(dirname(__DIR__, 2) . '/Examples/Nesting/ClassC.php'),
+        );
+        $class = $result->class('ClassC');
+
+        // Assert
+        $this->assertEquals('mixed', $class->property('variableZ')->type->name());
+        $this->assertEquals('int', $class->property('variableA')->type->name());
+        $this->assertEquals('string', $class->property('variableB')->type->name());
+        $this->assertEquals('bool', $class->property('variableC')->type->name());
     }
 }

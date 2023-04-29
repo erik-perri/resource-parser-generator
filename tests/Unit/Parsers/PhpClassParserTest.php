@@ -7,6 +7,7 @@ declare(strict_types=1);
 namespace ResourceParserGenerator\Tests\Unit\Parsers;
 
 use Exception;
+use Mockery\MockInterface;
 use PhpParser\Node\Stmt\Class_;
 use PhpParser\NodeFinder;
 use PhpParser\Parser;
@@ -16,6 +17,7 @@ use ResourceParserGenerator\Parsers\DataObjects\ClassProperty;
 use ResourceParserGenerator\Parsers\DataObjects\ClassScope;
 use ResourceParserGenerator\Parsers\DataObjects\FileScope;
 use ResourceParserGenerator\Parsers\PhpClassParser;
+use ResourceParserGenerator\Parsers\PhpFileParser;
 use ResourceParserGenerator\Tests\TestCase;
 
 #[CoversClass(ClassProperty::class)]
@@ -27,12 +29,11 @@ class PhpClassParserTest extends TestCase
     public function testParsesClassProperties(string $code, array $expectations): void
     {
         // Arrange
-        $parser = $this->make(PhpClassParser::class);
-
         $classAst = $this->getClass($code, 'TestClass');
 
         // Act
-        $class = $parser->parse($classAst, $this->getFileScopeMock());
+        $class = $this->make(PhpClassParser::class)
+            ->parse($classAst, $this->getFileScopeMock(), $this->getFileParserMock());
 
         // Assert
         $this->assertCount(
@@ -47,37 +48,37 @@ class PhpClassParserTest extends TestCase
             $this->assertEquals(
                 $propertyExpectations['isPrivate'],
                 $property->isPrivate(),
-                "Failed asserting that property {$property->name} is private.",
+                "Failed asserting that property $property->name is private.",
             );
             $this->assertEquals(
                 $propertyExpectations['isProtected'],
                 $property->isProtected(),
-                "Failed asserting that property {$property->name} is protected.",
+                "Failed asserting that property $property->name is protected.",
             );
             $this->assertEquals(
                 $propertyExpectations['isPublic'],
                 $property->isPublic(),
-                "Failed asserting that property {$property->name} is public.",
+                "Failed asserting that property $property->name is public.",
             );
             $this->assertEquals(
                 $propertyExpectations['isReadonly'],
                 $property->isReadonly(),
-                "Failed asserting that property {$property->name} is readonly.",
+                "Failed asserting that property $property->name is readonly.",
             );
             $this->assertEquals(
                 $propertyExpectations['isStatic'],
                 $property->isStatic(),
-                "Failed asserting that property {$property->name} is static.",
+                "Failed asserting that property $property->name is static.",
             );
             $this->assertEquals(
                 $propertyExpectations['name'],
                 $property->name,
-                "Failed asserting that property {$property->name} is named {$propertyExpectations['name']}.",
+                "Failed asserting that property $property->name is named {$propertyExpectations['name']}.",
             );
             $this->assertEquals(
                 $propertyExpectations['type'],
                 $property->type->name(),
-                "Failed asserting that property {$property->name} is of type {$propertyExpectations['type']}.",
+                "Failed asserting that property $property->name is of type {$propertyExpectations['type']}.",
             );
         }
     }
@@ -284,18 +285,23 @@ PHP,
         throw new Exception(sprintf('Class "%s" not found', $name));
     }
 
-    private function getFileScopeMock(): FileScope
+    private function getFileScopeMock(): FileScope|MockInterface
     {
         /**
          * @var FileScope $mockFileScope
          */
-        $mockFileScope = $this->mock(FileScope::class)
-            ->shouldReceive('addClass')
-            ->with(\Mockery::type(ClassScope::class))
-            ->once()
-            ->andReturnSelf()
-            ->getMock();
+        $mockFileScope = $this->mock(FileScope::class);
 
         return $mockFileScope;
+    }
+
+    private function getFileParserMock(): PhpFileParser|MockInterface
+    {
+        /**
+         * @var PhpFileParser $mockFileParser
+         */
+        $mockFileParser = $this->mock(PhpFileParser::class);
+
+        return $mockFileParser;
     }
 }

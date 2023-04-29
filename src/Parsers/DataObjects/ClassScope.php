@@ -44,7 +44,7 @@ class ClassScope
 
     public function property(string $name): ClassProperty
     {
-        $property = $this->properties->first(fn(ClassProperty $property) => $property->name === $name);
+        $property = $this->properties->get($name);
 
         if ($property === null && $this->extends) {
             $property = $this->extends->property($name);

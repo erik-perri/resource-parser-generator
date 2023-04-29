@@ -9,6 +9,10 @@ use Illuminate\Support\ServiceProvider;
 use PhpParser\NodeFinder;
 use PhpParser\Parser;
 use PhpParser\ParserFactory;
+use PHPStan\PhpDocParser\Lexer\Lexer;
+use PHPStan\PhpDocParser\Parser\ConstExprParser;
+use PHPStan\PhpDocParser\Parser\PhpDocParser;
+use PHPStan\PhpDocParser\Parser\TypeParser;
 use ResourceParserGenerator\Contracts\ClassFileLocatorContract;
 use ResourceParserGenerator\Filesystem\ClassFileLocator;
 use ResourceParserGenerator\Resolvers\ClassNameResolver;
@@ -41,6 +45,15 @@ class ResourceParserGeneratorServiceProvider extends ServiceProvider
                 NodeFinder::class,
                 fn() => new NodeFinder,
             );
+
+            $this->app->singleton(Lexer::class);
+            $this->app->singleton(PhpDocParser::class, function () {
+                $constExprParser = new ConstExprParser();
+                return new PhpDocParser(
+                    new TypeParser($constExprParser),
+                    $constExprParser,
+                );
+            });
         }
     }
 }

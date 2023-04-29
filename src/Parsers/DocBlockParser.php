@@ -13,10 +13,8 @@ use PHPStan\PhpDocParser\Ast\PhpDoc\PropertyTagValueNode;
 use PHPStan\PhpDocParser\Ast\PhpDoc\ReturnTagValueNode;
 use PHPStan\PhpDocParser\Ast\PhpDoc\VarTagValueNode;
 use PHPStan\PhpDocParser\Lexer\Lexer;
-use PHPStan\PhpDocParser\Parser\ConstExprParser;
 use PHPStan\PhpDocParser\Parser\PhpDocParser;
 use PHPStan\PhpDocParser\Parser\TokenIterator;
-use PHPStan\PhpDocParser\Parser\TypeParser;
 use ResourceParserGenerator\Contracts\ClassNameResolverContract;
 use ResourceParserGenerator\Parsers\DataObjects\DocBlock;
 use ResourceParserGenerator\Types;
@@ -26,6 +24,8 @@ class DocBlockParser
 {
     public function __construct(
         private readonly DocBlockTypeParser $typeParser,
+        private readonly Lexer $phpDocLexer,
+        private readonly PhpDocParser $phpDocParser,
     ) {
         //
     }
@@ -39,17 +39,14 @@ class DocBlockParser
             return $docBlock;
         }
 
-        $lexer = new Lexer();
-        $constExprParser = new ConstExprParser();
-        $phpDocParser = new PhpDocParser(
-            new TypeParser($constExprParser),
-            $constExprParser,
-        );
+        $tokens = $this->phpDocLexer->tokenize($content);
 
-        $tokens = $lexer->tokenize($content);
-        $tokenIterator = new TokenIterator($tokens);
+        /**
+         * @var TokenIterator $tokenIterator
+         */
+        $tokenIterator = resolve(TokenIterator::class, ['tokens' => $tokens]);
 
-        $docNode = $phpDocParser->parse($tokenIterator);
+        $docNode = $this->phpDocParser->parse($tokenIterator);
 
         $this->parseMethods($docNode, $classResolver, $docBlock);
         $this->parseParams($docNode, $classResolver, $docBlock);

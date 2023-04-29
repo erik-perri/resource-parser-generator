@@ -15,7 +15,7 @@ class ClassNameResolver implements ClassNameResolverContract
         //
     }
 
-    public static function make(FileScope $fileScope): self
+    public static function create(FileScope $fileScope): self
     {
         return resolve(self::class, [
             'fileScope' => $fileScope,

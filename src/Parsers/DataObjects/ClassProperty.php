@@ -17,7 +17,7 @@ class ClassProperty
         //
     }
 
-    public static function make(
+    public static function create(
         string $name,
         TypeContract|null $type,
         int $flags,

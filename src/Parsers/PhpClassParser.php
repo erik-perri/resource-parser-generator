@@ -50,7 +50,7 @@ class PhpClassParser
             return null;
         }
 
-        $resolver = ClassNameResolver::make($scope);
+        $resolver = ClassNameResolver::create($scope);
         $parentClassName = $resolver->resolve($parent);
         if (!$parentClassName) {
             throw new RuntimeException(sprintf('Could not resolve class "%s"', $parent));
@@ -73,11 +73,11 @@ class PhpClassParser
 
     private function parseClassProperties(Class_ $class, ClassScope $classScope): void
     {
-        $resolver = ClassNameResolver::make($classScope->file);
+        $resolver = ClassNameResolver::create($classScope->file);
 
         foreach ($class->getProperties() as $property) {
             foreach ($property->props as $prop) {
-                $classProperty = ClassProperty::make(
+                $classProperty = ClassProperty::create(
                     $prop->name->toString(),
                     $this->declaredTypeParser->parse($property->type, $resolver),
                     $property->flags,
@@ -90,7 +90,7 @@ class PhpClassParser
 
     private function parseClassMethods(Class_ $class, ClassScope $classScope): void
     {
-        $resolver = ClassNameResolver::make($classScope->file);
+        $resolver = ClassNameResolver::create($classScope->file);
 
         foreach ($class->getMethods() as $methodNode) {
             $parameters = collect();

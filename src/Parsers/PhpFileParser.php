@@ -11,7 +11,6 @@ use PhpParser\Node\Stmt\Namespace_;
 use PhpParser\Node\Stmt\Use_;
 use PhpParser\NodeFinder;
 use PhpParser\Parser;
-use ResourceParserGenerator\Contracts\ClassFileLocatorContract;
 use ResourceParserGenerator\Parsers\DataObjects\FileScope;
 use RuntimeException;
 
@@ -21,7 +20,6 @@ class PhpFileParser
         private readonly Parser $parser,
         private readonly NodeFinder $nodeFinder,
         private readonly PhpClassParser $classParser,
-        private readonly ClassFileLocatorContract $classFileLocator,
     ) {
         //
     }

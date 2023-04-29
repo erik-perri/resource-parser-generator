@@ -13,6 +13,7 @@ use PhpParser\NodeFinder;
 use PhpParser\Parser;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\DataProvider;
+use ResourceParserGenerator\Parsers\DataObjects\ClassMethod;
 use ResourceParserGenerator\Parsers\DataObjects\ClassProperty;
 use ResourceParserGenerator\Parsers\DataObjects\ClassScope;
 use ResourceParserGenerator\Parsers\DataObjects\FileScope;
@@ -20,6 +21,7 @@ use ResourceParserGenerator\Parsers\PhpClassParser;
 use ResourceParserGenerator\Parsers\PhpFileParser;
 use ResourceParserGenerator\Tests\TestCase;
 
+#[CoversClass(ClassMethod::class)]
 #[CoversClass(ClassProperty::class)]
 #[CoversClass(ClassScope::class)]
 #[CoversClass(PhpClassParser::class)]
@@ -264,6 +266,39 @@ PHP,
                 ],
             ],
         ];
+    }
+
+    public function testParsesClassMethods(): void
+    {
+        // Arrange
+        $code = <<<PHP
+<?php
+namespace ResourceParserGenerator\Tests\Examples;
+class AnotherTestClass
+{
+    private function method(string \$argumentOne, int \$argumentTwo): float
+    {
+        return 1.0;
+    }
+}
+PHP;
+        $fileScope = $this->getFileScopeMock();
+        $fileParser = $this->getFileParserMock();
+        $classAst = $this->getClass($code, 'AnotherTestClass');
+
+        // Act
+        $class = $this->make(PhpClassParser::class)->parse($classAst, $fileScope, $fileParser);
+        $method = $class->method('method');
+
+        // Assert
+        $this->assertTrue($method->isPrivate());
+        $this->assertFalse($method->isProtected());
+        $this->assertFalse($method->isPublic());
+        $this->assertEquals('method', $method->name);
+        $this->assertEquals('float', $method->returnType->name());
+        $this->assertCount(2, $method->parameters());
+        $this->assertEquals('string', $method->parameters()->get('argumentOne')->name());
+        $this->assertEquals('int', $method->parameters()->get('argumentTwo')->name());
     }
 
     private function getClass(string $contents, string $name): Class_

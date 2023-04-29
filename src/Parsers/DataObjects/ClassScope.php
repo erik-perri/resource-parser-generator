@@ -10,6 +10,11 @@ use RuntimeException;
 class ClassScope
 {
     /**
+     * @var Collection<string, ClassMethod>
+     */
+    private readonly Collection $methods;
+
+    /**
      * @var Collection<string, ClassProperty>
      */
     private readonly Collection $properties;
@@ -19,6 +24,7 @@ class ClassScope
         public readonly string $name,
         public readonly ClassScope|null $extends,
     ) {
+        $this->methods = collect();
         $this->properties = collect();
     }
 
@@ -32,6 +38,29 @@ class ClassScope
             'name' => $name,
             'extends' => $extends,
         ]);
+    }
+
+    /**
+     * @return Collection<string, ClassMethod>
+     */
+    public function methods(): Collection
+    {
+        return $this->methods->collect();
+    }
+
+    public function method(string $name): ClassMethod
+    {
+        $method = $this->methods->get($name);
+
+        if ($method === null && $this->extends) {
+            $method = $this->extends->method($name);
+        }
+
+        if ($method === null) {
+            throw new RuntimeException(sprintf('Method "%s" not found', $name));
+        }
+
+        return $method;
     }
 
     /**
@@ -55,6 +84,17 @@ class ClassScope
         }
 
         return $property;
+    }
+
+    public function setMethod(ClassMethod $method): self
+    {
+        if ($this->methods->has($method->name)) {
+            throw new RuntimeException(sprintf('Method "%s" already exists on "%s"', $method->name, $this->name));
+        }
+
+        $this->methods->put($method->name, $method);
+
+        return $this;
     }
 
     public function setProperty(ClassProperty $property): self

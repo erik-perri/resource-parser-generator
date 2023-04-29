@@ -5,8 +5,11 @@ declare(strict_types=1);
 namespace ResourceParserGenerator\Parsers;
 
 use Illuminate\Support\Facades\File;
+use PhpParser\Node\Expr;
+use PhpParser\Node\Expr\Variable;
 use PhpParser\Node\Stmt\Class_;
 use ResourceParserGenerator\Contracts\ClassFileLocatorContract;
+use ResourceParserGenerator\Parsers\DataObjects\ClassMethod;
 use ResourceParserGenerator\Parsers\DataObjects\ClassProperty;
 use ResourceParserGenerator\Parsers\DataObjects\ClassScope;
 use ResourceParserGenerator\Parsers\DataObjects\FileScope;
@@ -35,6 +38,7 @@ class PhpClassParser
         );
 
         $this->parseClassProperties($class, $classScope);
+        $this->parseClassMethods($class, $classScope);
 
         return $classScope;
     }
@@ -73,7 +77,7 @@ class PhpClassParser
 
         foreach ($class->getProperties() as $property) {
             foreach ($property->props as $prop) {
-                $classProperty = new ClassProperty(
+                $classProperty = ClassProperty::make(
                     $prop->name->toString(),
                     $this->declaredTypeParser->parse($property->type, $resolver),
                     $property->flags,
@@ -81,6 +85,36 @@ class PhpClassParser
 
                 $classScope->setProperty($classProperty);
             }
+        }
+    }
+
+    private function parseClassMethods(Class_ $class, ClassScope $classScope): void
+    {
+        $resolver = ClassNameResolver::make($classScope->file);
+
+        foreach ($class->getMethods() as $methodNode) {
+            $parameters = collect();
+
+            foreach ($methodNode->params as $param) {
+                $name = $param->var;
+                if ($name instanceof Variable) {
+                    $name = $name->name;
+                    if (!($name instanceof Expr)) {
+                        $parameters->put($name, $this->declaredTypeParser->parse($param->type, $resolver));
+                    } else {
+                        throw new RuntimeException('Unexpected expression in variable name');
+                    }
+                }
+            }
+
+            $method = new ClassMethod(
+                $methodNode->name->toString(),
+                $this->declaredTypeParser->parse($methodNode->returnType, $resolver),
+                $methodNode->flags,
+                $parameters,
+            );
+
+            $classScope->setMethod($method);
         }
     }
 }

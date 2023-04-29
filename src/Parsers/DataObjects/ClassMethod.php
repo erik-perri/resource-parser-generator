@@ -4,29 +4,33 @@ declare(strict_types=1);
 
 namespace ResourceParserGenerator\Parsers\DataObjects;
 
+use Illuminate\Support\Collection;
 use PhpParser\Node\Stmt\Class_;
 use ResourceParserGenerator\Contracts\TypeContract;
 
-class ClassProperty
+class ClassMethod
 {
+    /**
+     * @param string $name
+     * @param TypeContract $returnType
+     * @param int $flags
+     * @param Collection<string, TypeContract> $parameters
+     */
     public function __construct(
         public readonly string $name,
-        public readonly TypeContract|null $type,
+        public readonly TypeContract $returnType,
         public readonly int $flags,
+        private readonly Collection $parameters,
     ) {
         //
     }
 
-    public static function make(
-        string $name,
-        TypeContract|null $type,
-        int $flags,
-    ): self {
-        return resolve(self::class, [
-            'name' => $name,
-            'type' => $type,
-            'flags' => $flags,
-        ]);
+    /**
+     * @return Collection<string, TypeContract>
+     */
+    public function parameters(): Collection
+    {
+        return $this->parameters->collect();
     }
 
     public function isPrivate(): bool
@@ -43,15 +47,5 @@ class ClassProperty
     {
         return ($this->flags & Class_::MODIFIER_PUBLIC) !== 0
             || ($this->flags & Class_::VISIBILITY_MODIFIER_MASK) === 0;
-    }
-
-    public function isReadonly(): bool
-    {
-        return (bool)($this->flags & Class_::MODIFIER_READONLY);
-    }
-
-    public function isStatic(): bool
-    {
-        return (bool)($this->flags & Class_::MODIFIER_STATIC);
     }
 }

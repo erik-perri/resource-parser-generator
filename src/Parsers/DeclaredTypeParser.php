@@ -28,11 +28,13 @@ class DeclaredTypeParser
             return match ($type->name) {
                 'array' => new Types\ArrayType(null),
                 'bool' => new Types\BoolType(),
+                'callable' => new Types\CallableType(),
                 'float' => new Types\FloatType(),
                 'int' => new Types\IntType(),
                 'mixed' => new Types\MixedType(),
                 'null' => new Types\NullType(),
                 'object' => new Types\ObjectType(),
+                'resource' => new Types\ResourceType(),
                 'string' => new Types\StringType(),
                 'void' => new Types\VoidType(),
                 default => throw new RuntimeException(sprintf('Unhandled identifier type "%s"', $type->name)),

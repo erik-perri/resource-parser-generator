@@ -30,6 +30,7 @@ class ClassMethod
      * @param TypeContract $returnType
      * @param int $flags
      * @param Collection<string, TypeContract> $parameters
+     * @return ClassMethod
      */
     public static function create(
         string $name,

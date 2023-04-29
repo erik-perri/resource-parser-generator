@@ -18,7 +18,7 @@ class UnionType implements TypeContract
         TypeContract ...$type,
     ) {
         /**
-         * @var Collection<int, TypeContract>
+         * @var Collection<int, TypeContract> $types
          */
         $types = collect($type);
 

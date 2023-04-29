@@ -10,7 +10,7 @@ use RuntimeException;
 class ClassScope
 {
     /**
-     * @var Collection<int, ClassProperty>
+     * @var Collection<string, ClassProperty>
      */
     private readonly Collection $properties;
 
@@ -34,15 +34,8 @@ class ClassScope
         ]);
     }
 
-    public function addProperty(ClassProperty $classProperty): self
-    {
-        $this->properties->push($classProperty);
-
-        return $this;
-    }
-
     /**
-     * @return Collection<int, ClassProperty>
+     * @return Collection<string, ClassProperty>
      */
     public function properties(): Collection
     {
@@ -62,5 +55,16 @@ class ClassScope
         }
 
         return $property;
+    }
+
+    public function setProperty(ClassProperty $property): self
+    {
+        if ($this->properties->has($property->name)) {
+            throw new RuntimeException(sprintf('Property "%s" already exists on "%s"', $property->name, $this->name));
+        }
+
+        $this->properties->put($property->name, $property);
+
+        return $this;
     }
 }

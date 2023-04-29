@@ -79,7 +79,7 @@ class PhpClassParser
                     $property->flags,
                 );
 
-                $classScope->addProperty($classProperty);
+                $classScope->setProperty($classProperty);
             }
         }
     }

@@ -63,6 +63,13 @@ class ClassNameResolver implements ClassNameResolverContract
             return $className;
         }
 
+        if ($this->fileScope->hasClass($name)) {
+            /**
+             * @var class-string $name
+             */
+            return $name;
+        }
+
         return null;
     }
 }

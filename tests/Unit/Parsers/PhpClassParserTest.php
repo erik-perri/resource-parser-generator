@@ -13,12 +13,11 @@ use PhpParser\NodeFinder;
 use PhpParser\Parser;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\DataProvider;
+use ResourceParserGenerator\Contracts\ResolverContract;
 use ResourceParserGenerator\Parsers\DataObjects\ClassMethod;
 use ResourceParserGenerator\Parsers\DataObjects\ClassProperty;
 use ResourceParserGenerator\Parsers\DataObjects\ClassScope;
-use ResourceParserGenerator\Parsers\DataObjects\FileScope;
 use ResourceParserGenerator\Parsers\PhpClassParser;
-use ResourceParserGenerator\Parsers\PhpFileParser;
 use ResourceParserGenerator\Tests\TestCase;
 
 #[CoversClass(ClassMethod::class)]
@@ -33,19 +32,24 @@ class PhpClassParserTest extends TestCase
         // Arrange
         $classAst = $this->getClass($code, 'TestClass');
 
+        /**
+         * @var ResolverContract|MockInterface $mockResolver
+         */
+        $mockResolver = $this->mock(ResolverContract::class);
+        $classScope = new ClassScope('AnotherTestClass');
+
         // Act
-        $class = $this->make(PhpClassParser::class)
-            ->parse($classAst, $this->getFileScopeMock(), $this->getFileParserMock());
+        $this->make(PhpClassParser::class)->parse($classAst, $classScope, $mockResolver);
 
         // Assert
         $this->assertCount(
             count($expectations),
-            $class->properties(),
+            $classScope->properties(),
             'Failed asserting that class {$class->name} has correct number of properties.',
         );
 
         foreach ($expectations as $propertyExpectations) {
-            $property = $class->property($propertyExpectations['name']);
+            $property = $classScope->property($propertyExpectations['name']);
 
             $this->assertEquals(
                 $propertyExpectations['isPrivate'],
@@ -282,13 +286,18 @@ class AnotherTestClass
     }
 }
 PHP;
-        $fileScope = $this->getFileScopeMock();
-        $fileParser = $this->getFileParserMock();
+
         $classAst = $this->getClass($code, 'AnotherTestClass');
 
+        /**
+         * @var ResolverContract|MockInterface $mockResolver
+         */
+        $mockResolver = $this->mock(ResolverContract::class);
+        $classScope = new ClassScope('AnotherTestClass');
+
         // Act
-        $class = $this->make(PhpClassParser::class)->parse($classAst, $fileScope, $fileParser);
-        $method = $class->method('method');
+        $this->make(PhpClassParser::class)->parse($classAst, $classScope, $mockResolver);
+        $method = $classScope->method('method');
 
         // Assert
         $this->assertTrue($method->isPrivate());
@@ -329,20 +338,25 @@ class TestClass
     }
 }
 PHP;
-        $fileScope = $this->getFileScopeMock();
-        $fileParser = $this->getFileParserMock();
+
         $classAst = $this->getClass($code, 'TestClass');
 
+        /**
+         * @var ResolverContract|MockInterface $mockResolver
+         */
+        $mockResolver = $this->mock(ResolverContract::class);
+        $classScope = new ClassScope('TestClass');
+
         // Act
-        $class = $this->make(PhpClassParser::class)->parse($classAst, $fileScope, $fileParser);
-        $method = $class->method('method');
-        $property = $class->property('explicitProperty');
+        $this->make(PhpClassParser::class)->parse($classAst, $classScope, $mockResolver);
+        $method = $classScope->method('method');
+        $property = $classScope->property('explicitProperty');
 
         // Assert
-        $this->assertTrue($class->docBlock->hasProperty('hintedProperty'));
-        $this->assertTrue($class->docBlock->hasMethod('hintedMethod'));
-        $this->assertEquals('string', $class->docBlock->property('hintedProperty')->name());
-        $this->assertEquals('float', $class->docBlock->method('hintedMethod')->name());
+        $this->assertTrue($classScope->docBlock->hasProperty('hintedProperty'));
+        $this->assertTrue($classScope->docBlock->hasMethod('hintedMethod'));
+        $this->assertEquals('string', $classScope->docBlock->property('hintedProperty')->name());
+        $this->assertEquals('float', $classScope->docBlock->method('hintedMethod')->name());
 
         $this->assertTrue($property->docBlock->hasVar(''));
         $this->assertEquals('string|null', $property->docBlock->var('')->name());
@@ -371,25 +385,5 @@ PHP;
         }
 
         throw new Exception(sprintf('Class "%s" not found', $name));
-    }
-
-    private function getFileScopeMock(): FileScope|MockInterface
-    {
-        /**
-         * @var FileScope $mockFileScope
-         */
-        $mockFileScope = $this->mock(FileScope::class);
-
-        return $mockFileScope;
-    }
-
-    private function getFileParserMock(): PhpFileParser|MockInterface
-    {
-        /**
-         * @var PhpFileParser $mockFileParser
-         */
-        $mockFileParser = $this->mock(PhpFileParser::class);
-
-        return $mockFileParser;
     }
 }

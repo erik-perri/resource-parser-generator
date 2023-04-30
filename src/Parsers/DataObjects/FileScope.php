@@ -55,6 +55,11 @@ class FileScope
         return $this;
     }
 
+    public function hasClass(string $name): bool
+    {
+        return $this->classes->contains(fn(ClassScope $class) => $class->name === $name);
+    }
+
     /**
      * @return Collection<int, ClassScope>
      */

@@ -13,34 +13,19 @@ class ClassScope
      * @var Collection<string, ClassMethod>
      */
     private readonly Collection $methods;
-
     /**
      * @var Collection<string, ClassProperty>
      */
     private readonly Collection $properties;
 
+    public ClassScope|null $extends = null;
+    public DocBlock|null $docBlock = null;
+
     public function __construct(
-        public readonly FileScope $file,
         public readonly string $name,
-        public readonly ClassScope|null $extends,
-        public readonly DocBlock $docBlock,
     ) {
         $this->methods = collect();
         $this->properties = collect();
-    }
-
-    public static function create(
-        FileScope $file,
-        string $name,
-        ClassScope|null $extends,
-        DocBlock|null $docBlock,
-    ): self {
-        return resolve(self::class, [
-            'file' => $file,
-            'name' => $name,
-            'extends' => $extends,
-            'docBlock' => $docBlock ?? DocBlock::create(),
-        ]);
     }
 
     /**

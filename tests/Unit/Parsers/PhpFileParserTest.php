@@ -185,7 +185,6 @@ PHP;
 
         // Assert
         $class = $result->class('AnonymousClass3');
-        $this->assertEquals('ResourceParserGenerator\Tests\Examples', $class->file->namespace());
         $this->assertEquals('AnonymousClass3', $class->name);
     }
 

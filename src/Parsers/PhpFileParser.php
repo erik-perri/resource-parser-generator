@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace ResourceParserGenerator\Parsers;
 
+use Illuminate\Support\Facades\File;
 use PhpParser\Node\Stmt;
 use PhpParser\Node\Stmt\Class_;
 use PhpParser\Node\Stmt\GroupUse;
@@ -11,7 +12,12 @@ use PhpParser\Node\Stmt\Namespace_;
 use PhpParser\Node\Stmt\Use_;
 use PhpParser\NodeFinder;
 use PhpParser\Parser;
+use ResourceParserGenerator\Contracts\ClassFileLocatorContract;
+use ResourceParserGenerator\Contracts\ResolverContract;
+use ResourceParserGenerator\Parsers\DataObjects\ClassScope;
 use ResourceParserGenerator\Parsers\DataObjects\FileScope;
+use ResourceParserGenerator\Resolvers\ClassNameResolver;
+use ResourceParserGenerator\Resolvers\Resolver;
 use RuntimeException;
 
 class PhpFileParser
@@ -20,6 +26,7 @@ class PhpFileParser
         private readonly Parser $parser,
         private readonly NodeFinder $nodeFinder,
         private readonly PhpClassParser $classParser,
+        private readonly ClassFileLocatorContract $classFileLocator,
     ) {
         //
     }
@@ -159,9 +166,60 @@ class PhpFileParser
         }
 
         foreach ($classes as $class) {
-            $classScope = $this->classParser->parse($class, $scope, $this);
+            $className = $class->name
+                ? $class->name->toString()
+                : sprintf('AnonymousClass%d', $class->getLine());
 
+            /**
+             * @var ClassScope $classScope
+             */
+            $classScope = resolve(ClassScope::class, [
+                'name' => $className,
+            ]);
+
+            // Add an unparsed version of the class to the scope so we can make use of the resolver to find
+            // the fully qualified class name.
+            // TODO Restructure this so we can resolve the fully qualified name without this.
             $scope->addClass($classScope);
+
+            $classResolver = ClassNameResolver::create($scope);
+            $fullyQualifiedClassName = $classResolver->resolve($className);
+            if (!$fullyQualifiedClassName) {
+                throw new RuntimeException(sprintf('Could not resolve class "%s"', $className));
+            }
+
+            $resolver = Resolver::create($classResolver, $fullyQualifiedClassName);
+
+            $classScope->extends = $this->parseClassExtends($class, $resolver);
+
+            $this->classParser->parse($class, $classScope, $resolver);
         }
+    }
+
+    private function parseClassExtends(Class_ $class, ResolverContract $resolver): ClassScope|null
+    {
+        $parent = $class->extends?->toString();
+        if (!$parent) {
+            return null;
+        }
+
+        $parentClassName = $resolver->resolveClass($parent);
+        if (!$parentClassName) {
+            throw new RuntimeException(sprintf('Could not resolve class "%s"', $parent));
+        }
+
+        if (!$this->classFileLocator->exists($parentClassName)) {
+            throw new RuntimeException(sprintf('Could not find class file for "%s"', $parentClassName));
+        }
+
+        $parentClassFile = $this->classFileLocator->get($parentClassName);
+        $parentFileScope = $this->parse(File::get($parentClassFile));
+        $parentClassScope = $parentFileScope->classes()->first();
+
+        if (!$parentClassScope) {
+            throw new RuntimeException(sprintf('Could not find parent class "%s"', $parentClassName));
+        }
+
+        return $parentClassScope;
     }
 }

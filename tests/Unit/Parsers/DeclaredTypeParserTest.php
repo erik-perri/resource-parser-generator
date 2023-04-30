@@ -10,7 +10,7 @@ use Closure;
 use PhpParser\Node;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\DataProvider;
-use ResourceParserGenerator\Contracts\ClassNameResolverContract;
+use ResourceParserGenerator\Contracts\ResolverContract;
 use ResourceParserGenerator\Contracts\TypeContract;
 use ResourceParserGenerator\Parsers\DeclaredTypeParser;
 use ResourceParserGenerator\Tests\TestCase;
@@ -29,12 +29,12 @@ class DeclaredTypeParserTest extends TestCase
         $parser = $this->make(DeclaredTypeParser::class);
 
         /**
-         * @var ClassNameResolverContract $resolveMock
+         * @var ResolverContract $resolveMock
          */
         $resolveMock = $resolveMockFactory
             ? $resolveMockFactory->call($this)
-            : $this->mock(ClassNameResolverContract::class)
-                ->shouldReceive('resolve')
+            : $this->mock(ResolverContract::class)
+                ->shouldReceive('resolveClass')
                 ->never()
                 ->andReturnNull()
                 ->getMock();
@@ -97,8 +97,8 @@ class DeclaredTypeParserTest extends TestCase
             'class relative' => [
                 'input' => new Node\Name\Relative('Foo\Baz'),
                 'expected' => new Types\ClassType('App\Foo\Baz', 'Foo\Baz'),
-                'resolveMock' => fn() => $this->mock(ClassNameResolverContract::class)
-                    ->shouldReceive('resolve')
+                'resolveMock' => fn() => $this->mock(ResolverContract::class)
+                    ->shouldReceive('resolveClass')
                     ->once()
                     ->with('Foo\Baz')
                     ->andReturn('App\Foo\Baz')
@@ -107,8 +107,8 @@ class DeclaredTypeParserTest extends TestCase
             'class not qualified' => [
                 'input' => new Node\Name('Baz'),
                 'expected' => new Types\ClassType('App\Foo\Baz', 'Baz'),
-                'resolveMock' => fn() => $this->mock(ClassNameResolverContract::class)
-                    ->shouldReceive('resolve')
+                'resolveMock' => fn() => $this->mock(ResolverContract::class)
+                    ->shouldReceive('resolveClass')
                     ->once()
                     ->with('Baz')
                     ->andReturn('App\Foo\Baz')

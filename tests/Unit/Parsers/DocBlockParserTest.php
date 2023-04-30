@@ -13,7 +13,7 @@ use ResourceParserGenerator\Contracts\TypeContract;
 use ResourceParserGenerator\Parsers\DataObjects\DocBlock;
 use ResourceParserGenerator\Parsers\DocBlockParser;
 use ResourceParserGenerator\Parsers\DocBlockTypeParser;
-use ResourceParserGenerator\Resolvers\ClassNameResolver;
+use ResourceParserGenerator\Resolvers\Resolver;
 use ResourceParserGenerator\Tests\TestCase;
 
 #[CoversClass(DocBlock::class)]
@@ -27,10 +27,10 @@ class DocBlockParserTest extends TestCase
         // Arrange
         $parser = $this->make(DocBlockParser::class);
 
-        $classResolver = $this->getClassNameResolverMock();
+        $resolver = $this->getResolverMock();
 
         // Act
-        $result = $parser->parse($docBlock, $classResolver);
+        $result = $parser->parse($docBlock, $resolver);
 
         // Assert
         $this->assertEquals(
@@ -118,10 +118,10 @@ class DocBlockParserTest extends TestCase
         // Arrange
         $parser = $this->make(DocBlockParser::class);
 
-        $classResolver = $this->getClassNameResolverMock();
+        $resolver = $this->getResolverMock();
 
-        $classResolver
-            ->shouldReceive('resolve')
+        $resolver
+            ->shouldReceive('resolveClass')
             ->with('AliasedClass')
             ->once()
             ->andReturn('AliasedClass');
@@ -134,7 +134,7 @@ class DocBlockParserTest extends TestCase
                  * @property \App\FullyQualifiedClass $fullyQualifiedClass
                  */
             ',
-            $classResolver
+            $resolver,
         );
 
         // Assert
@@ -151,10 +151,10 @@ class DocBlockParserTest extends TestCase
         // Arrange
         $parser = $this->make(DocBlockParser::class);
 
-        $classResolver = $this->getClassNameResolverMock();
+        $resolver = $this->getResolverMock();
 
         // Act
-        $result = $parser->parse($docBlock, $classResolver);
+        $result = $parser->parse($docBlock, $resolver);
 
         // Assert
         if (!count($expectedResult)) {
@@ -212,10 +212,10 @@ class DocBlockParserTest extends TestCase
         // Arrange
         $parser = $this->make(DocBlockParser::class);
 
-        $classResolver = $this->getClassNameResolverMock();
+        $resolver = $this->getResolverMock();
 
         // Act
-        $result = $parser->parse($docBlock, $classResolver);
+        $result = $parser->parse($docBlock, $resolver);
 
         // Assert
         $this->assertEquals($expectedResult, $result->return()->name());
@@ -261,10 +261,10 @@ class DocBlockParserTest extends TestCase
         // Arrange
         $parser = $this->make(DocBlockParser::class);
 
-        $classResolver = $this->getClassNameResolverMock();
+        $resolver = $this->getResolverMock();
 
         // Act
-        $result = $parser->parse($docBlock, $classResolver);
+        $result = $parser->parse($docBlock, $resolver);
 
         // Assert
         $this->assertEquals(
@@ -347,10 +347,10 @@ class DocBlockParserTest extends TestCase
         // Arrange
         $parser = $this->make(DocBlockParser::class);
 
-        $classResolver = $this->getClassNameResolverMock();
+        $resolver = $this->getResolverMock();
 
         // Act
-        $result = $parser->parse($docBlock, $classResolver);
+        $result = $parser->parse($docBlock, $resolver);
 
         // Assert
         $this->assertEquals(
@@ -405,13 +405,13 @@ class DocBlockParserTest extends TestCase
         ];
     }
 
-    private function getClassNameResolverMock(): ClassNameResolver|MockInterface
+    private function getResolverMock(): Resolver|MockInterface
     {
         /**
-         * @var ClassNameResolver $mockClassResolver
+         * @var Resolver $mockResolver
          */
-        $mockClassResolver = $this->mock(ClassNameResolver::class);
+        $mockResolver = $this->mock(Resolver::class);
 
-        return $mockClassResolver;
+        return $mockResolver;
     }
 }

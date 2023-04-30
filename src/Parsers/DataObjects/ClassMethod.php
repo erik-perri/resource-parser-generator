@@ -15,7 +15,7 @@ class ClassMethod
      * @param TypeContract $returnType
      * @param int $flags
      * @param Collection<string, TypeContract> $parameters
-     * @param DocBlock $docBlock
+     * @param DocBlock|null $docBlock
      */
     public function __construct(
         public readonly string $name,

@@ -7,16 +7,17 @@ namespace ResourceParserGenerator\Parsers;
 use PHPStan\PhpDocParser\Ast\Type\ArrayTypeNode;
 use PHPStan\PhpDocParser\Ast\Type\GenericTypeNode;
 use PHPStan\PhpDocParser\Ast\Type\IdentifierTypeNode;
+use PHPStan\PhpDocParser\Ast\Type\ThisTypeNode;
 use PHPStan\PhpDocParser\Ast\Type\TypeNode;
 use PHPStan\PhpDocParser\Ast\Type\UnionTypeNode;
-use ResourceParserGenerator\Contracts\ClassNameResolverContract;
+use ResourceParserGenerator\Contracts\ResolverContract;
 use ResourceParserGenerator\Contracts\TypeContract;
 use ResourceParserGenerator\Types;
 use RuntimeException;
 
 class DocBlockTypeParser
 {
-    public function parse(TypeNode $type, ClassNameResolverContract $resolver): TypeContract
+    public function parse(TypeNode $type, ResolverContract $resolver): TypeContract
     {
         if ($type instanceof UnionTypeNode) {
             return new Types\UnionType(
@@ -51,6 +52,15 @@ class DocBlockTypeParser
             );
         }
 
+        if ($type instanceof ThisTypeNode) {
+            $thisType = $resolver->resolveThis();
+            if (!$thisType) {
+                throw new RuntimeException('Cannot resolve $this type');
+            }
+
+            return new Types\ClassType($thisType, null);
+        }
+
         if ($type instanceof IdentifierTypeNode) {
             switch ($type->name) {
                 case 'array':
@@ -80,9 +90,14 @@ class DocBlockTypeParser
             }
 
             if (str_starts_with($type->name, '\\')) {
-                return new Types\ClassType(ltrim($type->name, '\\'), null);
+                /**
+                 * @var class-string $className
+                 */
+                $className = ltrim($type->name, '\\');
+
+                return new Types\ClassType($className, null);
             } else {
-                $className = $resolver->resolve($type->name);
+                $className = $resolver->resolveClass($type->name);
                 if (!$className) {
                     throw new RuntimeException(sprintf('Could not resolve class name "%s"', $type->name));
                 }

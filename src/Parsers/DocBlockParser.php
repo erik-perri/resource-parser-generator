@@ -15,7 +15,7 @@ use PHPStan\PhpDocParser\Ast\PhpDoc\VarTagValueNode;
 use PHPStan\PhpDocParser\Lexer\Lexer;
 use PHPStan\PhpDocParser\Parser\PhpDocParser;
 use PHPStan\PhpDocParser\Parser\TokenIterator;
-use ResourceParserGenerator\Contracts\ClassNameResolverContract;
+use ResourceParserGenerator\Contracts\ResolverContract;
 use ResourceParserGenerator\Parsers\DataObjects\DocBlock;
 use ResourceParserGenerator\Types;
 use RuntimeException;
@@ -30,7 +30,7 @@ class DocBlockParser
         //
     }
 
-    public function parse(string $content, ClassNameResolverContract $classResolver): DocBlock
+    public function parse(string $content, ResolverContract $resolver): DocBlock
     {
         $docBlock = DocBlock::create();
 
@@ -48,52 +48,43 @@ class DocBlockParser
 
         $docNode = $this->phpDocParser->parse($tokenIterator);
 
-        $this->parseMethods($docNode, $classResolver, $docBlock);
-        $this->parseParams($docNode, $classResolver, $docBlock);
-        $this->parseProperties($docNode, $classResolver, $docBlock);
-        $this->parseReturn($docNode, $classResolver, $docBlock);
-        $this->parseVars($docNode, $classResolver, $docBlock);
+        $this->parseMethods($docNode, $resolver, $docBlock);
+        $this->parseParams($docNode, $resolver, $docBlock);
+        $this->parseProperties($docNode, $resolver, $docBlock);
+        $this->parseReturn($docNode, $resolver, $docBlock);
+        $this->parseVars($docNode, $resolver, $docBlock);
 
         return $docBlock;
     }
 
-    private function parseMethods(
-        PhpDocNode $docNode,
-        ClassNameResolverContract $classResolver,
-        DocBlock $docBlock
-    ): void {
+    private function parseMethods(PhpDocNode $docNode, ResolverContract $resolver, DocBlock $docBlock): void
+    {
         $methodNodes = $docNode->getTagsByName('@method');
         foreach ($methodNodes as $node) {
             if ($node->value instanceof MethodTagValueNode) {
                 $docBlock->setMethod(
                     $node->value->methodName,
                     $node->value->returnType
-                        ? $this->typeParser->parse($node->value->returnType, $classResolver)
+                        ? $this->typeParser->parse($node->value->returnType, $resolver)
                         : new Types\UntypedType(),
                 );
             }
         }
     }
 
-    private function parseParams(
-        PhpDocNode $docNode,
-        ClassNameResolverContract $classResolver,
-        DocBlock $docBlock
-    ): void {
+    private function parseParams(PhpDocNode $docNode, ResolverContract $resolver, DocBlock $docBlock): void
+    {
         $paramNodes = $docNode->getTagsByName('@param');
         foreach ($paramNodes as $node) {
             if ($node->value instanceof ParamTagValueNode) {
                 $name = ltrim($node->value->parameterName, '$');
-                $docBlock->setParam($name, $this->typeParser->parse($node->value->type, $classResolver));
+                $docBlock->setParam($name, $this->typeParser->parse($node->value->type, $resolver));
             }
         }
     }
 
-    private function parseProperties(
-        PhpDocNode $docNode,
-        ClassNameResolverContract $classResolver,
-        DocBlock $docBlock,
-    ): void {
+    private function parseProperties(PhpDocNode $docNode, ResolverContract $resolver, DocBlock $docBlock): void
+    {
         /**
          * @var Collection<int, PhpDocTagNode> $propertyNodes
          */
@@ -104,14 +95,14 @@ class DocBlockParser
         foreach ($propertyNodes as $node) {
             if ($node->value instanceof PropertyTagValueNode) {
                 $name = ltrim($node->value->propertyName, '$');
-                $docBlock->setProperty($name, $this->typeParser->parse($node->value->type, $classResolver));
+                $docBlock->setProperty($name, $this->typeParser->parse($node->value->type, $resolver));
             }
         }
     }
 
     private function parseReturn(
         PhpDocNode $docNode,
-        ClassNameResolverContract $classResolver,
+        ResolverContract $resolver,
         DocBlock $docBlock
     ): void {
         $returnNodes = $docNode->getTagsByName('@return');
@@ -126,12 +117,12 @@ class DocBlockParser
              */
             $returnNode = reset($returnNodes);
             if ($returnNode->value instanceof ReturnTagValueNode) {
-                $docBlock->setReturn($this->typeParser->parse($returnNode->value->type, $classResolver));
+                $docBlock->setReturn($this->typeParser->parse($returnNode->value->type, $resolver));
             }
         }
     }
 
-    private function parseVars(PhpDocNode $docNode, ClassNameResolverContract $classResolver, DocBlock $docBlock): void
+    private function parseVars(PhpDocNode $docNode, ResolverContract $resolver, DocBlock $docBlock): void
     {
         $varNodes = $docNode->getTagsByName('@var');
         foreach ($varNodes as $node) {
@@ -141,7 +132,7 @@ class DocBlockParser
                     $name = ltrim($node->value->variableName, '$');
                 }
 
-                $docBlock->setVar($name, $this->typeParser->parse($node->value->type, $classResolver));
+                $docBlock->setVar($name, $this->typeParser->parse($node->value->type, $resolver));
             }
         }
     }

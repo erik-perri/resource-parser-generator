@@ -8,6 +8,10 @@ use ResourceParserGenerator\Contracts\TypeContract;
 
 class ClassType implements TypeContract
 {
+    /**
+     * @param class-string $fullyQualifiedName
+     * @param string|null $alias
+     */
     public function __construct(
         private readonly string $fullyQualifiedName,
         private readonly string|null $alias,
@@ -15,6 +19,9 @@ class ClassType implements TypeContract
         //
     }
 
+    /**
+     * @return class-string
+     */
     public function name(): string
     {
         return $this->fullyQualifiedName;

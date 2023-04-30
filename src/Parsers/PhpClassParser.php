@@ -14,6 +14,8 @@ use ResourceParserGenerator\Parsers\DataObjects\ClassProperty;
 use ResourceParserGenerator\Parsers\DataObjects\ClassScope;
 use ResourceParserGenerator\Parsers\DataObjects\FileScope;
 use ResourceParserGenerator\Resolvers\ClassNameResolver;
+use ResourceParserGenerator\Resolvers\Resolver;
+use ResourceParserGenerator\Types;
 use RuntimeException;
 
 class PhpClassParser
@@ -32,7 +34,14 @@ class PhpClassParser
             ? $class->name->toString()
             : sprintf('AnonymousClass%d', $class->getLine());
 
-        $resolver = ClassNameResolver::create($scope);
+        $classResolver = ClassNameResolver::create($scope);
+        $fullyQualifiedClassName = $classResolver->resolve($className);
+        if (!$fullyQualifiedClassName) {
+            throw new RuntimeException(sprintf('Could not resolve class "%s"', $className));
+        }
+
+        $classType = new Types\ClassType($fullyQualifiedClassName, $className);
+        $resolver = Resolver::create($classResolver, $classType->name());
 
         $classScope = ClassScope::create(
             $scope,
@@ -52,14 +61,14 @@ class PhpClassParser
     private function parseExtends(
         Class_ $class,
         PhpFileParser $fileParser,
-        ClassNameResolver $resolver
+        Resolver $resolver
     ): ClassScope|null {
         $parent = $class->extends?->toString();
         if (!$parent) {
             return null;
         }
 
-        $parentClassName = $resolver->resolve($parent);
+        $parentClassName = $resolver->resolveClass($parent);
         if (!$parentClassName) {
             throw new RuntimeException(sprintf('Could not resolve class "%s"', $parent));
         }
@@ -79,7 +88,7 @@ class PhpClassParser
         return $parentClassScope;
     }
 
-    private function parseClassProperties(Class_ $class, ClassScope $classScope, ClassNameResolver $resolver): void
+    private function parseClassProperties(Class_ $class, ClassScope $classScope, Resolver $resolver): void
     {
         foreach ($class->getProperties() as $property) {
             foreach ($property->props as $prop) {
@@ -97,7 +106,7 @@ class PhpClassParser
         }
     }
 
-    private function parseClassMethods(Class_ $class, ClassScope $classScope, ClassNameResolver $resolver): void
+    private function parseClassMethods(Class_ $class, ClassScope $classScope, Resolver $resolver): void
     {
         foreach ($class->getMethods() as $methodNode) {
             $parameters = collect();

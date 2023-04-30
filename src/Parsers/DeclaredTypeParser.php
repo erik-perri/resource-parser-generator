@@ -11,14 +11,14 @@ use PhpParser\Node\Name;
 use PhpParser\Node\Name\FullyQualified;
 use PhpParser\Node\NullableType;
 use PhpParser\Node\UnionType;
-use ResourceParserGenerator\Contracts\ClassNameResolverContract;
+use ResourceParserGenerator\Contracts\ResolverContract;
 use ResourceParserGenerator\Contracts\TypeContract;
 use ResourceParserGenerator\Types;
 use RuntimeException;
 
 class DeclaredTypeParser
 {
-    public function parse(ComplexType|Identifier|Name|null $type, ClassNameResolverContract $resolver): TypeContract
+    public function parse(ComplexType|Identifier|Name|null $type, ResolverContract $resolver): TypeContract
     {
         if (!$type) {
             return new Types\UntypedType();
@@ -61,11 +61,16 @@ class DeclaredTypeParser
         }
 
         if ($type instanceof FullyQualified) {
-            return new Types\ClassType($type->toString(), null);
+            /**
+             * @var class-string $className
+             */
+            $className = $type->toString();
+
+            return new Types\ClassType($className, null);
         }
 
         if ($type instanceof Name) {
-            $resolved = $resolver->resolve($type->toString());
+            $resolved = $resolver->resolveClass($type->toString());
             if (!$resolved) {
                 throw new RuntimeException(sprintf('Unable to resolve class "%s"', $type->toString()));
             }

@@ -26,7 +26,7 @@ class DeclaredTypeParser
 
         if ($type instanceof Identifier) {
             return match ($type->name) {
-                'array' => new Types\ArrayType(null),
+                'array' => new Types\ArrayType(null, null),
                 'bool' => new Types\BoolType(),
                 'callable' => new Types\CallableType(),
                 'float' => new Types\FloatType(),

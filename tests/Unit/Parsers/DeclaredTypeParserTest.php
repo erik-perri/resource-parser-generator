@@ -52,7 +52,7 @@ class DeclaredTypeParserTest extends TestCase
         return [
             'array without type' => [
                 'input' => new Node\Identifier('array'),
-                'expected' => new Types\ArrayType(null),
+                'expected' => new Types\ArrayType(null, null),
             ],
             'bool' => [
                 'input' => new Node\Identifier('bool'),

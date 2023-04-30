@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace ResourceParserGenerator\Parsers;
 
+use PHPStan\PhpDocParser\Ast\Type\ArrayTypeNode;
+use PHPStan\PhpDocParser\Ast\Type\GenericTypeNode;
 use PHPStan\PhpDocParser\Ast\Type\IdentifierTypeNode;
 use PHPStan\PhpDocParser\Ast\Type\TypeNode;
 use PHPStan\PhpDocParser\Ast\Type\UnionTypeNode;
@@ -22,10 +24,37 @@ class DocBlockTypeParser
             );
         }
 
+        if ($type instanceof GenericTypeNode) {
+            $containerType = $this->parse($type->type, $resolver);
+            if ($containerType instanceof Types\ArrayType) {
+                if (count($type->genericTypes) === 1) {
+                    return new Types\ArrayType(
+                        null,
+                        $this->parse($type->genericTypes[0], $resolver),
+                    );
+                } elseif (count($type->genericTypes) === 2) {
+                    return new Types\ArrayType(
+                        $this->parse($type->genericTypes[0], $resolver),
+                        $this->parse($type->genericTypes[1], $resolver),
+                    );
+                }
+            }
+
+            // TODO Generic sub-types?
+            return $this->parse($type->type, $resolver);
+        }
+
+        if ($type instanceof ArrayTypeNode) {
+            return new Types\ArrayType(
+                null,
+                $this->parse($type->type, $resolver),
+            );
+        }
+
         if ($type instanceof IdentifierTypeNode) {
             switch ($type->name) {
                 case 'array':
-                    return new Types\ArrayType(null);
+                    return new Types\ArrayType(null, null);
                 case 'bool':
                     return new Types\BoolType();
                 case 'callable':

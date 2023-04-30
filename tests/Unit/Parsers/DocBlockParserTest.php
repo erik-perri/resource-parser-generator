@@ -94,6 +94,22 @@ class DocBlockParserTest extends TestCase
                     'mixed' => 'string|bool|float|null',
                 ],
             ],
+            'generic arrays' => [
+                'docBlock' => '
+                    /**
+                     * @property array<string> $stringArray
+                     * @property array<string|int> $unionArray
+                     * @property array<string, int> $stringKeyArray
+                     * @property array<string|int, string|int> $unionKeyAndValueArray
+                     */
+                ',
+                'expectedResult' => [
+                    'stringArray' => 'string[]',
+                    'unionArray' => 'array<string|int>',
+                    'stringKeyArray' => 'array<string, int>',
+                    'unionKeyAndValueArray' => 'array<string|int, string|int>',
+                ],
+            ],
         ];
     }
 

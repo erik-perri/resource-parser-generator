@@ -30,6 +30,13 @@ class ClassScope
         $this->properties = collect();
     }
 
+    public static function create(string $name): self
+    {
+        return resolve(self::class, [
+            'name' => $name,
+        ]);
+    }
+
     /**
      * @return Collection<string, ClassMethod>
      */

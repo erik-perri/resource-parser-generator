@@ -12,16 +12,16 @@ class ClassMethod
 {
     /**
      * @param string $name
+     * @param Collection<string, TypeContract> $parameters
      * @param TypeContract $returnType
      * @param int $flags
-     * @param Collection<string, TypeContract> $parameters
      * @param DocBlock|null $docBlock
      */
     public function __construct(
         public readonly string $name,
-        public readonly TypeContract $returnType,
-        public readonly int $flags,
         private readonly Collection $parameters,
+        public readonly TypeContract $returnType,
+        private readonly int $flags,
         public readonly DocBlock|null $docBlock,
     ) {
         //
@@ -29,24 +29,24 @@ class ClassMethod
 
     /**
      * @param string $name
+     * @param Collection<string, TypeContract> $parameters
      * @param TypeContract $returnType
      * @param int $flags
-     * @param Collection<string, TypeContract> $parameters
      * @param DocBlock|null $docBlock
      * @return ClassMethod
      */
     public static function create(
         string $name,
+        Collection $parameters,
         TypeContract $returnType,
         int $flags,
-        Collection $parameters,
         DocBlock|null $docBlock,
     ): self {
         return resolve(self::class, [
             'name' => $name,
+            'parameters' => $parameters,
             'returnType' => $returnType,
             'flags' => $flags,
-            'parameters' => $parameters,
             'docBlock' => $docBlock,
         ]);
     }

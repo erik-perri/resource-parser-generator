@@ -170,12 +170,7 @@ class PhpFileParser
                 ? $class->name->toString()
                 : sprintf('AnonymousClass%d', $class->getLine());
 
-            /**
-             * @var ClassScope $classScope
-             */
-            $classScope = resolve(ClassScope::class, [
-                'name' => $className,
-            ]);
+            $classScope = ClassScope::create($className);
 
             // Add an unparsed version of the class to the scope so we can make use of the resolver to find
             // the fully qualified class name.

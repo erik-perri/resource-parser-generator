@@ -69,9 +69,9 @@ class PhpClassParser
 
             $method = ClassMethod::create(
                 $methodNode->name->toString(),
+                $parameters,
                 $this->declaredTypeParser->parse($methodNode->returnType, $resolver),
                 $methodNode->flags,
-                $parameters,
                 $methodNode->getDocComment()
                     ? $this->docBlockParser->parse($methodNode->getDocComment()->getText(), $resolver)
                     : null,

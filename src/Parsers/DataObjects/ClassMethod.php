@@ -22,7 +22,7 @@ class ClassMethod
         public readonly TypeContract $returnType,
         public readonly int $flags,
         private readonly Collection $parameters,
-        public readonly DocBlock $docBlock,
+        public readonly DocBlock|null $docBlock,
     ) {
         //
     }
@@ -47,7 +47,7 @@ class ClassMethod
             'returnType' => $returnType,
             'flags' => $flags,
             'parameters' => $parameters,
-            'docBlock' => $docBlock ?? DocBlock::create(),
+            'docBlock' => $docBlock,
         ]);
     }
 

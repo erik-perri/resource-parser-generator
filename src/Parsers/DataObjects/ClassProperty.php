@@ -13,7 +13,7 @@ class ClassProperty
         public readonly string $name,
         public readonly TypeContract|null $type,
         public readonly int $flags,
-        public readonly DocBlock $docBlock,
+        public readonly DocBlock|null $docBlock,
     ) {
         //
     }
@@ -28,7 +28,7 @@ class ClassProperty
             'name' => $name,
             'type' => $type,
             'flags' => $flags,
-            'docBlock' => $docBlock ?? DocBlock::create(),
+            'docBlock' => $docBlock,
         ]);
     }
 

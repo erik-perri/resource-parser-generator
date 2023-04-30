@@ -25,7 +25,6 @@ class PhpFileParser
     public function __construct(
         private readonly Parser $parser,
         private readonly NodeFinder $nodeFinder,
-        private readonly PhpClassParser $classParser,
         private readonly ClassFileLocatorContract $classFileLocator,
     ) {
         //
@@ -165,32 +164,25 @@ class PhpFileParser
             return;
         }
 
+        $classResolver = ClassNameResolver::create($scope);
+
         foreach ($classes as $class) {
             $className = $class->name
                 ? $class->name->toString()
                 : sprintf('AnonymousClass%d', $class->getLine());
-
-            $classScope = ClassScope::create($className);
-
-            // Add an unparsed version of the class to the scope so we can make use of the resolver to find
-            // the fully qualified class name.
-            // TODO Restructure this so we can resolve the fully qualified name without this.
-            $scope->addClass($classScope);
-
-            $classResolver = ClassNameResolver::create($scope);
-            $fullyQualifiedClassName = $classResolver->resolve($className);
-            if (!$fullyQualifiedClassName) {
-                throw new RuntimeException(sprintf('Could not resolve class "%s"', $className));
-            }
+            $fullyQualifiedClassName = $scope->namespace()
+                ? sprintf('%s\\%s', $scope->namespace(), $className)
+                : $className;
 
             $resolver = Resolver::create($classResolver, $fullyQualifiedClassName);
 
-            if ($fullyQualifiedClassName !== $className) {
-                $classScope->fullyQualifiedName = $fullyQualifiedClassName;
-            }
-            $classScope->extends = $this->parseClassExtends($class, $resolver);
+            $classScope = ClassScope::create(
+                $class,
+                $this->parseClassExtends($class, $resolver),
+                $resolver,
+            );
 
-            $this->classParser->parse($class, $classScope, $resolver);
+            $scope->addClass($classScope);
         }
     }
 

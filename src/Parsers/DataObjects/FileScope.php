@@ -57,7 +57,7 @@ class FileScope
 
     public function hasClass(string $name): bool
     {
-        return $this->classes->contains(fn(ClassScope $class) => $class->name === $name);
+        return $this->classes->contains(fn(ClassScope $class) => $class->name() === $name);
     }
 
     /**
@@ -71,7 +71,7 @@ class FileScope
     public function class(string $name): ClassScope
     {
         $class = $this->classes->first(
-            fn(ClassScope $class) => $class->name === $name || $class->fullyQualifiedName === $name,
+            fn(ClassScope $class) => $class->name() === $name,
         );
         if ($class === null) {
             throw new RuntimeException(sprintf('Class "%s" not found', $name));

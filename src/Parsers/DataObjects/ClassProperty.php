@@ -5,56 +5,85 @@ declare(strict_types=1);
 namespace ResourceParserGenerator\Parsers\DataObjects;
 
 use PhpParser\Node\Stmt\Class_;
+use PhpParser\Node\Stmt\Property;
+use PhpParser\Node\Stmt\PropertyProperty;
+use ResourceParserGenerator\Contracts\ResolverContract;
 use ResourceParserGenerator\Contracts\TypeContract;
+use ResourceParserGenerator\Parsers\DeclaredTypeParser;
+use ResourceParserGenerator\Parsers\DocBlockParser;
 
 class ClassProperty
 {
+    private DocBlock|null $docBlock = null;
+    private TypeContract $type;
+
     public function __construct(
-        public readonly string $name,
-        public readonly TypeContract|null $type,
-        public readonly int $flags,
-        public readonly DocBlock|null $docBlock,
+        private readonly Property $property,
+        private readonly PropertyProperty $propertyProperty,
+        private readonly ResolverContract $resolver,
+        private readonly DeclaredTypeParser $declaredTypeParser,
+        private readonly DocBlockParser $docBlockParser,
     ) {
         //
     }
 
     public static function create(
-        string $name,
-        TypeContract|null $type,
-        int $flags,
-        DocBlock|null $docBlock,
+        Property $property,
+        PropertyProperty $propertyProperty,
+        ResolverContract $resolver
     ): self {
         return resolve(self::class, [
-            'name' => $name,
-            'type' => $type,
-            'flags' => $flags,
-            'docBlock' => $docBlock,
+            'property' => $property,
+            'propertyProperty' => $propertyProperty,
+            'resolver' => $resolver,
         ]);
+    }
+
+    public function docBlock(): DocBlock|null
+    {
+        if ($this->docBlock === null && $this->property->getDocComment() !== null) {
+            $this->docBlock = $this->docBlockParser->parse(
+                $this->property->getDocComment()->getText(),
+                $this->resolver,
+            );
+        }
+
+        return $this->docBlock;
+    }
+
+    public function name(): string
+    {
+        return $this->propertyProperty->name->toString();
+    }
+
+    public function type(): TypeContract
+    {
+        return $this->type ??= $this->declaredTypeParser->parse($this->property->type, $this->resolver);
     }
 
     public function isPrivate(): bool
     {
-        return (bool)($this->flags & Class_::MODIFIER_PRIVATE);
+        return (bool)($this->property->flags & Class_::MODIFIER_PRIVATE);
     }
 
     public function isProtected(): bool
     {
-        return (bool)($this->flags & Class_::MODIFIER_PROTECTED);
+        return (bool)($this->property->flags & Class_::MODIFIER_PROTECTED);
     }
 
     public function isPublic(): bool
     {
-        return ($this->flags & Class_::MODIFIER_PUBLIC) !== 0
-            || ($this->flags & Class_::VISIBILITY_MODIFIER_MASK) === 0;
+        return ($this->property->flags & Class_::MODIFIER_PUBLIC) !== 0
+            || ($this->property->flags & Class_::VISIBILITY_MODIFIER_MASK) === 0;
     }
 
     public function isReadonly(): bool
     {
-        return (bool)($this->flags & Class_::MODIFIER_READONLY);
+        return (bool)($this->property->flags & Class_::MODIFIER_READONLY);
     }
 
     public function isStatic(): bool
     {
-        return (bool)($this->flags & Class_::MODIFIER_STATIC);
+        return (bool)($this->property->flags & Class_::MODIFIER_STATIC);
     }
 }

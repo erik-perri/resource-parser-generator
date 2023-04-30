@@ -6,14 +6,16 @@ namespace ResourceParserGenerator\Tests\Unit\Parsers;
 
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\DataProvider;
+use ResourceParserGenerator\Parsers\DataObjects\ClassProperty;
 use ResourceParserGenerator\Parsers\DataObjects\ClassScope;
 use ResourceParserGenerator\Parsers\DataObjects\FileScope;
 use ResourceParserGenerator\Parsers\PhpFileParser;
 use ResourceParserGenerator\Tests\TestCase;
 use RuntimeException;
 
-#[CoversClass(ClassScope::class)]
 #[CoversClass(FileScope::class)]
+#[CoversClass(ClassScope::class)]
+#[CoversClass(ClassProperty::class)]
 #[CoversClass(PhpFileParser::class)]
 class PhpFileParserTest extends TestCase
 {
@@ -185,7 +187,7 @@ PHP;
 
         // Assert
         $class = $result->class('AnonymousClass3');
-        $this->assertEquals('AnonymousClass3', $class->name);
+        $this->assertEquals('AnonymousClass3', $class->name());
     }
 
     public function testHelpsResolveClassNames(): void
@@ -213,19 +215,19 @@ PHP;
         $class = $result->class('TestClass');
         $this->assertEquals(
             'ResourceParserGenerator\Tests\Examples\AdjacentClass',
-            $class->property('propertyOne')->type->name(),
+            $class->property('propertyOne')->type()->name(),
         );
         $this->assertEquals(
             'ResourceParserGenerator\Imports\ImportedClass',
-            $class->property('propertyTwo')->type->name(),
+            $class->property('propertyTwo')->type()->name(),
         );
         $this->assertEquals(
             'ResourceParserGenerator\Imports\RelativePath\RelativeClass',
-            $class->property('propertyThree')->type->name(),
+            $class->property('propertyThree')->type()->name(),
         );
         $this->assertEquals(
             'ResourceParserGenerator\Tests\Examples\AbsoluteClass',
-            $class->property('propertyFour')->type->name(),
+            $class->property('propertyFour')->type()->name(),
         );
     }
 
@@ -241,9 +243,9 @@ PHP;
         $class = $result->class('ClassC');
 
         // Assert
-        $this->assertEquals('mixed', $class->property('variableZ')->type->name());
-        $this->assertEquals('int', $class->property('variableA')->type->name());
-        $this->assertEquals('string', $class->property('variableB')->type->name());
-        $this->assertEquals('bool', $class->property('variableC')->type->name());
+        $this->assertEquals('mixed', $class->property('variableZ')->type()->name());
+        $this->assertEquals('int', $class->property('variableA')->type()->name());
+        $this->assertEquals('string', $class->property('variableB')->type()->name());
+        $this->assertEquals('bool', $class->property('variableC')->type()->name());
     }
 }

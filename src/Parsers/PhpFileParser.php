@@ -190,6 +190,9 @@ class PhpFileParser
 
             $resolver = Resolver::create($classResolver, $fullyQualifiedClassName);
 
+            if ($fullyQualifiedClassName !== $className) {
+                $classScope->fullyQualifiedName = $fullyQualifiedClassName;
+            }
             $classScope->extends = $this->parseClassExtends($class, $resolver);
 
             $this->classParser->parse($class, $classScope, $resolver);

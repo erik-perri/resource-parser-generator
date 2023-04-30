@@ -13,6 +13,7 @@ class ClassScope
      * @var Collection<string, ClassMethod>
      */
     private readonly Collection $methods;
+
     /**
      * @var Collection<string, ClassProperty>
      */
@@ -20,6 +21,7 @@ class ClassScope
 
     public ClassScope|null $extends = null;
     public DocBlock|null $docBlock = null;
+    public string|null $fullyQualifiedName = null;
 
     public function __construct(
         public readonly string $name,

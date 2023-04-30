@@ -70,7 +70,9 @@ class FileScope
 
     public function class(string $name): ClassScope
     {
-        $class = $this->classes->first(fn(ClassScope $class) => $class->name === $name);
+        $class = $this->classes->first(
+            fn(ClassScope $class) => $class->name === $name || $class->fullyQualifiedName === $name,
+        );
         if ($class === null) {
             throw new RuntimeException(sprintf('Class "%s" not found', $name));
         }

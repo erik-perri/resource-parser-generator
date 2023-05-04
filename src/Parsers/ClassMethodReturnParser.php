@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace ResourceParserGenerator\Parsers;
 
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\File;
 use PhpParser\Node\Expr\Array_;
 use PhpParser\Node\Scalar\String_;
@@ -97,6 +98,8 @@ class ClassMethodReturnParser
             }
         }
 
+        $types = $this->combineArrayReturns($types);
+
         if (count($types) === 0) {
             return new Types\UntypedType();
         }
@@ -106,5 +109,69 @@ class ClassMethodReturnParser
         }
 
         return new Types\UnionType(...$types);
+    }
+
+    /**
+     * @param array<int, TypeContract> $types
+     * @return array<int, TypeContract>
+     */
+    private function combineArrayReturns(array $types): array
+    {
+        $types = collect($types);
+
+        $arrayTypes = $types->filter(
+            fn(TypeContract $type) => $type instanceof Types\ArrayWithPropertiesType,
+        );
+        $otherTypes = $types->filter(
+            fn(TypeContract $type) => !($type instanceof Types\ArrayWithPropertiesType),
+        );
+
+        $arrayReturns = $arrayTypes->map(
+            fn(Types\ArrayWithPropertiesType $type) => $type->properties(),
+        );
+        /**
+         * @var Collection<int, string> $arrayKeys
+         */
+        $arrayKeys = $arrayReturns->flatMap(fn(Collection $properties) => $properties->keys()->toArray())->unique();
+
+        /**
+         * @var Collection<string, TypeContract> $mergedArrays
+         */
+        $mergedArrays = $arrayKeys->mapWithKeys(function (string $key) use ($arrayReturns) {
+            /**
+             * @var Collection<int, TypeContract> $types
+             */
+            $types = $arrayReturns->map(
+                fn(Collection $properties) => $properties->get($key) ?? new Types\UndefinedType(),
+            );
+
+            /**
+             * @var array<int, TypeContract> $splitTypes
+             */
+            $splitTypes = $types
+                ->map(function (TypeContract $type) {
+                    if ($type instanceof Types\UnionType) {
+                        return $type->types()->all();
+                    } else {
+                        return [$type];
+                    }
+                })
+                ->flatten()
+                ->values()
+                ->toArray();
+
+            if (count($splitTypes) > 1) {
+                $type = new Types\UnionType(...$splitTypes);
+            } else {
+                $type = $splitTypes[0];
+            }
+
+            return [$key => $type];
+        });
+
+        return $otherTypes
+            ->merge([new Types\ArrayWithPropertiesType($mergedArrays)])
+            ->values()
+            ->all();
     }
 }

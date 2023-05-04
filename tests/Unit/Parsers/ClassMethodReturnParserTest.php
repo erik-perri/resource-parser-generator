@@ -43,8 +43,8 @@ class ClassMethodReturnParserTest extends TestCase
                     'id' => 'string',
                     'name' => 'string',
                     'email' => 'string',
-                    'created_at' => 'string|null',
-                    'updated_at' => 'string|null',
+                    'created_at' => 'null|string',
+                    'updated_at' => 'null|string',
                 ],
             ],
             'UserResource::authentication' => [

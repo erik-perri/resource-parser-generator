@@ -37,6 +37,7 @@ class UnionType implements TypeContract
     {
         return $this->types
             ->map(fn(TypeContract $type) => $type->name())
+            ->sort(fn(string $a, string $b) => strnatcasecmp($a, $b))
             ->unique()
             ->implode('|');
     }

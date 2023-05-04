@@ -36,7 +36,7 @@ class ClassMethodReturnParserTest extends TestCase
     public static function methodReturnProvider(): array
     {
         return [
-            class_basename(UserResource::class) . '::adminList' => [
+            'UserResource::adminList' => [
                 'className' => UserResource::class,
                 'methodName' => 'adminList',
                 'expected' => [
@@ -45,6 +45,45 @@ class ClassMethodReturnParserTest extends TestCase
                     'email' => 'string',
                     'created_at' => 'string|null',
                     'updated_at' => 'string|null',
+                ],
+            ],
+            'UserResource::authentication' => [
+                'className' => UserResource::class,
+                'methodName' => 'authentication',
+                'expected' => [
+                    'id' => 'string',
+                    'email' => 'string',
+                    'name' => 'string',
+                ],
+            ],
+            'UserResource::combined' => [
+                'className' => UserResource::class,
+                'methodName' => 'combined',
+                'expected' => [
+                    'email' => 'null|string',
+                    'name' => 'string|undefined',
+                ],
+            ],
+            'UserResource::ternaries' => [
+                'className' => UserResource::class,
+                'methodName' => 'ternaries',
+                'expected' => [
+                    'ternary_to_int' => 'int',
+                    'ternary_to_compound' => 'bool|int|string',
+                ],
+            ],
+            'UserResource::scalars' => [
+                'className' => UserResource::class,
+                'methodName' => 'scalars',
+                'expectedReturns' => [
+                    'string' => 'string',
+                    'negative_number' => 'int',
+                    'positive_number' => 'int',
+                    'neutral_number' => 'int',
+                    'float' => 'float',
+                    'boolean_true' => 'bool',
+                    'boolean_false' => 'bool',
+                    'null' => 'null',
                 ],
             ],
         ];

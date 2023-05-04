@@ -11,9 +11,12 @@ use ResourceParserGenerator\Contracts\ClassPropertyContract;
 use ResourceParserGenerator\Contracts\ClassScopeContract;
 use ResourceParserGenerator\Contracts\ResolverContract;
 use ResourceParserGenerator\Contracts\TypeContract;
+use ResourceParserGenerator\Parsers\DocBlockParser;
 
 class ClassScope implements ClassScopeContract
 {
+    private DocBlock|null $docBlock = null;
+
     /**
      * @var Collection<string, ClassMethodScope>
      */
@@ -29,12 +32,14 @@ class ClassScope implements ClassScopeContract
      * @param ResolverContract $resolver
      * @param ClassScopeContract|null $extends
      * @param array<int, ClassScopeContract> $traits
+     * @param DocBlockParser $docBlockParser
      */
     public function __construct(
         private readonly ClassLike $node,
         private readonly ResolverContract $resolver,
         private readonly ClassScopeContract|null $extends,
         private readonly array $traits,
+        private readonly DocBlockParser $docBlockParser,
     ) {
         $this->methods = collect();
         $this->properties = collect();
@@ -66,6 +71,18 @@ class ClassScope implements ClassScopeContract
         ]);
     }
 
+    public function docBlock(): DocBlock|null
+    {
+        if ($this->docBlock === null && $this->node->getDocComment() !== null) {
+            $this->docBlock = $this->docBlockParser->parse(
+                $this->node->getDocComment()->getText(),
+                $this->resolver,
+            );
+        }
+
+        return $this->docBlock;
+    }
+
     public function extends(): ClassScopeContract|null
     {
         return $this->extends;
@@ -88,6 +105,10 @@ class ClassScope implements ClassScopeContract
 
     public function method(string $name): ClassMethodScopeContract|null
     {
+        if ($this->docBlock()?->hasMethod($name)) {
+            return VirtualClassMethodScope::create($this->docBlock()->method($name));
+        }
+
         $method = $this->methods->get($name);
 
         if ($method === null && $this->extends()) {
@@ -117,6 +138,10 @@ class ClassScope implements ClassScopeContract
 
     public function property(string $name): ClassPropertyContract|null
     {
+        if ($this->docBlock()?->hasProperty($name)) {
+            return VirtualClassProperty::create($this->docBlock()->property($name));
+        }
+
         $property = $this->properties->get($name);
 
         if ($property === null && $this->extends()) {

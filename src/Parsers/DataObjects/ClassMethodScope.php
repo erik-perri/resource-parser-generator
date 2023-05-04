@@ -70,7 +70,8 @@ class ClassMethodScope implements ClassMethodScopeContract
 
     public function returnType(): TypeContract
     {
-        return $this->returnType ??= $this->declaredTypeParser->parse($this->node->returnType, $this->resolver);
+        return $this->docBlock()?->return()
+            ?? ($this->returnType ??= $this->declaredTypeParser->parse($this->node->returnType, $this->resolver));
     }
 
     /**

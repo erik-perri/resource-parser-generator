@@ -16,6 +16,7 @@ use ResourceParserGenerator\Converters\ExpressionTypeConverter;
 use ResourceParserGenerator\Parsers\DataObjects\ClassMethodScope;
 use ResourceParserGenerator\Resolvers\ClassNameResolver;
 use ResourceParserGenerator\Resolvers\Resolver;
+use ResourceParserGenerator\Resolvers\VariableResolver;
 use ResourceParserGenerator\Types;
 use RuntimeException;
 
@@ -46,16 +47,21 @@ class ClassMethodReturnParser
             );
         }
 
-        $classResolver = ClassNameResolver::create($fileScope);
-        $resolver = Resolver::create($classResolver, $className);
-
-        $nodeFinder = new NodeFinder();
-
         if (!($methodScope instanceof ClassMethodScope)) {
             throw new RuntimeException(
                 sprintf('Cannot inspect return types on non-concrete method "%s"', $methodName),
             );
         }
+
+        $classResolver = ClassNameResolver::create($fileScope);
+        $resolver = Resolver::create(
+            $classResolver,
+            VariableResolver::create($methodScope->parameters()),
+            $className,
+        );
+
+        $nodeFinder = new NodeFinder();
+
 
         /**
          * @var Return_[] $returnNodes

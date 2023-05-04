@@ -59,6 +59,13 @@ class ClassProperty implements ClassPropertyContract
 
     public function type(): TypeContract
     {
+        $docBlock = $this->docBlock();
+        if ($docBlock?->hasVar('')) {
+            return $docBlock->var('');
+        }
+        if ($docBlock?->hasVar($this->name())) {
+            return $docBlock->var($this->name());
+        }
         return $this->type ??= $this->declaredTypeParser->convert($this->property->type, $this->resolver);
     }
 

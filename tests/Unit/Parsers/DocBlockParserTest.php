@@ -207,7 +207,7 @@ class DocBlockParserTest extends TestCase
     }
 
     #[DataProvider('parseReturnProvider')]
-    public function testParseProvidesExpectedResultForReturn(string $docBlock, string $expectedResult): void
+    public function testParseProvidesExpectedResultForReturn(string $docBlock, string|null $expectedResult): void
     {
         // Arrange
         $parser = $this->make(DocBlockParser::class);
@@ -218,7 +218,7 @@ class DocBlockParserTest extends TestCase
         $result = $parser->parse($docBlock, $resolver);
 
         // Assert
-        $this->assertEquals($expectedResult, $result->return()->name());
+        $this->assertEquals($expectedResult, $result->return()?->name());
     }
 
     public static function parseReturnProvider(): array
@@ -226,7 +226,7 @@ class DocBlockParserTest extends TestCase
         return [
             'empty' => [
                 'docBlock' => '',
-                'expectedResult' => 'untyped',
+                'expectedResult' => null,
             ],
             'no return' => [
                 'docBlock' => '
@@ -234,7 +234,7 @@ class DocBlockParserTest extends TestCase
                      * @property string $string
                      */
                 ',
-                'expectedResult' => 'untyped',
+                'expectedResult' => null,
             ],
             'single return' => [
                 'docBlock' => '

@@ -180,7 +180,7 @@ class PhpFileParser
                 ? sprintf('%s\\%s', $scope->namespace(), $className)
                 : $className;
 
-            $resolver = Resolver::create($classResolver, $fullyQualifiedClassName);
+            $resolver = Resolver::create($classResolver, null, $fullyQualifiedClassName);
 
             $classScope = ClassScope::create(
                 $class,
@@ -219,7 +219,7 @@ class PhpFileParser
                 ? sprintf('%s\\%s', $scope->namespace(), $traitName)
                 : $traitName;
 
-            $resolver = Resolver::create($classResolver, $fullyQualifiedTraitName);
+            $resolver = Resolver::create($classResolver, null, $fullyQualifiedTraitName);
 
             $traitScope = ClassScope::create(
                 $trait,

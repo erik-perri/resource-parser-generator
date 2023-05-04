@@ -86,6 +86,13 @@ class ClassMethodReturnParserTest extends TestCase
                     'null' => 'null',
                 ],
             ],
+            'UserResource::usingParameter' => [
+                'className' => UserResource::class,
+                'methodName' => 'usingParameter',
+                'expectedReturns' => [
+                    'path' => 'null|string',
+                ],
+            ],
         ];
     }
 }

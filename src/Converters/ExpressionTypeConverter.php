@@ -49,11 +49,12 @@ class ExpressionTypeConverter
         }
 
         if ($expr instanceof Variable) {
-            if ($expr->name instanceof Expr) {
+            $name = $expr->name;
+            if ($name instanceof Expr) {
                 throw new RuntimeException('Unexpected expression in variable name');
             }
 
-            if ($expr->name === 'this') {
+            if ($name === 'this') {
                 $thisType = $resolver->resolveThis();
                 if (!$thisType) {
                     throw new RuntimeException('Unable to resolve $this');
@@ -61,7 +62,13 @@ class ExpressionTypeConverter
                 return new Types\ClassType($thisType, null);
             }
 
-            throw new RuntimeException(sprintf('Cannot resolve variable "%s"', $expr->name));
+            $variableType = $resolver->resolveVariable($name);
+
+            if (!$variableType) {
+                throw new RuntimeException(sprintf('Cannot resolve variable "%s"', $name));
+            }
+
+            return $variableType;
         }
 
         if ($expr instanceof PropertyFetch) {
@@ -189,14 +196,14 @@ class ExpressionTypeConverter
         if ($value instanceof NullsafeMethodCall) {
             if (!($leftSide instanceof Types\UnionType)) {
                 throw new RuntimeException(
-                    sprintf('Unexpected left side "%s"', $leftSide->name()),
+                    sprintf('Unexpected left side %s, "%s"', $value->name, $leftSide->name()),
                 );
             }
 
             $leftTypes = $leftSide->types()->filter(fn(TypeContract $type) => !($type instanceof Types\NullType));
             if ($leftTypes->count() !== 1) {
                 throw new RuntimeException(
-                    sprintf('Unexpected left side "%s"', $leftSide->name()),
+                    sprintf('Unexpected left side %s, "%s"', $value->name, $leftSide->name()),
                 );
             }
 
@@ -204,7 +211,9 @@ class ExpressionTypeConverter
         }
 
         if (!($leftSide instanceof Types\ClassType)) {
-            throw new RuntimeException('Left side is not a class type');
+            throw new RuntimeException(
+                sprintf('Left side %s is not a class type', $value->name),
+            );
         }
 
         $leftSideFile = $this->classLocator->get($leftSide->name());
@@ -212,7 +221,7 @@ class ExpressionTypeConverter
         $leftSideClassScope = $leftSideFileScope->classes()->first();
         if (!$leftSideClassScope) {
             throw new RuntimeException(
-                sprintf('Unknown class "%s" for left side of method call', $leftSide->name()),
+                sprintf('Unknown class "%s" for left side %s of method call', $leftSide->name(), $value->name),
             );
         }
 

@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace ResourceParserGenerator\Resolvers\Contracts;
 
+use ResourceParserGenerator\Contracts\TypeContract;
+
 interface ResolverContract
 {
     /**
@@ -16,4 +18,10 @@ interface ResolverContract
      * @return class-string|null
      */
     public function resolveThis(): string|null;
+
+    /**
+     * @param string $name
+     * @return TypeContract|null
+     */
+    public function resolveVariable(string $name): TypeContract|null;
 }

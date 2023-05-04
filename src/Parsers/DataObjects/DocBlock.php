@@ -7,19 +7,18 @@ namespace ResourceParserGenerator\Parsers\DataObjects;
 use Illuminate\Support\Collection;
 use InvalidArgumentException;
 use ResourceParserGenerator\Contracts\TypeContract;
-use ResourceParserGenerator\Types;
 
 class DocBlock
 {
     /**
-     * @param TypeContract $return
+     * @param TypeContract|null $return
      * @param Collection<string, TypeContract> $params
      * @param Collection<string, TypeContract> $properties
      * @param Collection<string, TypeContract> $methods
      * @param Collection<string, TypeContract> $vars
      */
     public function __construct(
-        private TypeContract $return,
+        private TypeContract|null $return,
         private readonly Collection $params,
         private readonly Collection $properties,
         private readonly Collection $methods,
@@ -32,7 +31,7 @@ class DocBlock
         TypeContract|null $return = null
     ): self {
         return resolve(self::class, [
-            'return' => $return ?? new Types\UntypedType(),
+            'return' => $return,
             'params' => collect(),
             'properties' => collect(),
             'methods' => collect(),
@@ -111,7 +110,7 @@ class DocBlock
         return $this->properties[$name];
     }
 
-    public function return(): TypeContract
+    public function return(): TypeContract|null
     {
         return $this->return;
     }

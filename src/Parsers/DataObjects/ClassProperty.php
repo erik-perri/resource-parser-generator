@@ -8,10 +8,10 @@ use PhpParser\Node\Stmt\Class_;
 use PhpParser\Node\Stmt\Property;
 use PhpParser\Node\Stmt\PropertyProperty;
 use ResourceParserGenerator\Contracts\ClassPropertyContract;
-use ResourceParserGenerator\Contracts\ResolverContract;
 use ResourceParserGenerator\Contracts\TypeContract;
 use ResourceParserGenerator\Converters\DeclaredTypeConverter;
 use ResourceParserGenerator\Parsers\DocBlockParser;
+use ResourceParserGenerator\Resolvers\Contracts\ResolverContract;
 
 class ClassProperty implements ClassPropertyContract
 {

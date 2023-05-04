@@ -10,9 +10,9 @@ use Closure;
 use PhpParser\Node;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\DataProvider;
-use ResourceParserGenerator\Contracts\ResolverContract;
 use ResourceParserGenerator\Contracts\TypeContract;
 use ResourceParserGenerator\Converters\DeclaredTypeConverter;
+use ResourceParserGenerator\Resolvers\Contracts\ResolverContract;
 use ResourceParserGenerator\Tests\TestCase;
 use ResourceParserGenerator\Types;
 

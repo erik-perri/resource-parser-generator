@@ -4,22 +4,23 @@ declare(strict_types=1);
 
 namespace ResourceParserGenerator\Resolvers;
 
-use ResourceParserGenerator\Contracts\ResolverContract;
+use ResourceParserGenerator\Resolvers\Contracts\ClassNameResolverContract;
+use ResourceParserGenerator\Resolvers\Contracts\ResolverContract;
 
 class Resolver implements ResolverContract
 {
     /**
-     * @param ClassNameResolver $classResolver
+     * @param ClassNameResolverContract $classResolver
      * @param class-string|null $thisType
      */
     public function __construct(
-        private readonly ClassNameResolver $classResolver,
+        private readonly ClassNameResolverContract $classResolver,
         private readonly string|null $thisType,
     ) {
         //
     }
 
-    public static function create(ClassNameResolver $classResolver, string|null $thisType): self
+    public static function create(ClassNameResolverContract $classResolver, string|null $thisType): self
     {
         return resolve(self::class, [
             'classResolver' => $classResolver,

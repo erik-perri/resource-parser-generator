@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace ResourceParserGenerator\Contracts;
+namespace ResourceParserGenerator\Resolvers\Contracts;
 
 interface ResolverContract
 {

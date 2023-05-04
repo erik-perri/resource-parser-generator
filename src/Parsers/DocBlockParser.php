@@ -15,8 +15,8 @@ use PHPStan\PhpDocParser\Ast\PhpDoc\VarTagValueNode;
 use PHPStan\PhpDocParser\Lexer\Lexer;
 use PHPStan\PhpDocParser\Parser\PhpDocParser;
 use PHPStan\PhpDocParser\Parser\TokenIterator;
-use ResourceParserGenerator\Contracts\ResolverContract;
 use ResourceParserGenerator\Parsers\DataObjects\DocBlock;
+use ResourceParserGenerator\Resolvers\Contracts\ResolverContract;
 use ResourceParserGenerator\Types;
 use RuntimeException;
 

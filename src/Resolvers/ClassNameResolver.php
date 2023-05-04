@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace ResourceParserGenerator\Resolvers;
 
-use ResourceParserGenerator\Contracts\ClassNameResolverContract;
 use ResourceParserGenerator\Parsers\DataObjects\FileScope;
+use ResourceParserGenerator\Resolvers\Contracts\ClassNameResolverContract;
 
 class ClassNameResolver implements ClassNameResolverContract
 {

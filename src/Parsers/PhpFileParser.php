@@ -17,11 +17,11 @@ use PhpParser\Parser;
 use ReflectionClass;
 use ResourceParserGenerator\Contracts\ClassFileLocatorContract;
 use ResourceParserGenerator\Contracts\ClassScopeContract;
-use ResourceParserGenerator\Contracts\ResolverContract;
 use ResourceParserGenerator\Parsers\DataObjects\ClassScope;
 use ResourceParserGenerator\Parsers\DataObjects\FileScope;
 use ResourceParserGenerator\Parsers\DataObjects\ReflectedClassScope;
 use ResourceParserGenerator\Resolvers\ClassNameResolver;
+use ResourceParserGenerator\Resolvers\Contracts\ResolverContract;
 use ResourceParserGenerator\Resolvers\Resolver;
 use RuntimeException;
 

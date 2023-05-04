@@ -9,9 +9,9 @@ use PhpParser\Node\Stmt\ClassLike;
 use ResourceParserGenerator\Contracts\ClassMethodScopeContract;
 use ResourceParserGenerator\Contracts\ClassPropertyContract;
 use ResourceParserGenerator\Contracts\ClassScopeContract;
-use ResourceParserGenerator\Contracts\ResolverContract;
 use ResourceParserGenerator\Contracts\TypeContract;
 use ResourceParserGenerator\Parsers\DocBlockParser;
+use ResourceParserGenerator\Resolvers\Contracts\ResolverContract;
 
 class ClassScope implements ClassScopeContract
 {

@@ -10,10 +10,10 @@ use PhpParser\Node\Expr\Variable;
 use PhpParser\Node\Stmt\Class_;
 use PhpParser\Node\Stmt\ClassMethod;
 use ResourceParserGenerator\Contracts\ClassMethodScopeContract;
-use ResourceParserGenerator\Contracts\ResolverContract;
 use ResourceParserGenerator\Contracts\TypeContract;
 use ResourceParserGenerator\Converters\DeclaredTypeConverter;
 use ResourceParserGenerator\Parsers\DocBlockParser;
+use ResourceParserGenerator\Resolvers\Contracts\ResolverContract;
 use RuntimeException;
 
 class ClassMethodScope implements ClassMethodScopeContract

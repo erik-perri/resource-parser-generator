@@ -15,6 +15,11 @@ class FileScope
     private readonly Collection $classes;
 
     /**
+     * @var Collection<int, ClassScope>
+     */
+    private readonly Collection $traits;
+
+    /**
      * @var Collection<string, class-string>
      */
     private readonly Collection $imports;
@@ -24,6 +29,7 @@ class FileScope
     public function __construct()
     {
         $this->classes = collect();
+        $this->traits = collect();
         $this->imports = collect();
     }
 
@@ -51,6 +57,13 @@ class FileScope
         }
 
         $this->imports->put($alias, $class);
+
+        return $this;
+    }
+
+    public function addTrait(ClassScope $traitScope): self
+    {
+        $this->traits->push($traitScope);
 
         return $this;
     }
@@ -98,5 +111,13 @@ class FileScope
         $this->namespace = $namespace;
 
         return $this;
+    }
+
+    /**
+     * @return Collection<int, ClassScope>
+     */
+    public function traits(): Collection
+    {
+        return $this->traits->collect();
     }
 }

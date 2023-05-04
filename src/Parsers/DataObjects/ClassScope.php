@@ -5,12 +5,12 @@ declare(strict_types=1);
 namespace ResourceParserGenerator\Parsers\DataObjects;
 
 use Illuminate\Support\Collection;
-use PhpParser\Node\Stmt\Class_;
+use PhpParser\Node\Stmt\ClassLike;
 use ResourceParserGenerator\Contracts\ClassMethodScopeContract;
 use ResourceParserGenerator\Contracts\ClassPropertyContract;
 use ResourceParserGenerator\Contracts\ClassScopeContract;
 use ResourceParserGenerator\Contracts\ResolverContract;
-use RuntimeException;
+use ResourceParserGenerator\Contracts\TypeContract;
 
 class ClassScope implements ClassScopeContract
 {
@@ -24,10 +24,17 @@ class ClassScope implements ClassScopeContract
      */
     private readonly Collection $properties;
 
+    /**
+     * @param ClassLike $node
+     * @param ResolverContract $resolver
+     * @param ClassScopeContract|null $extends
+     * @param array<int, ClassScopeContract> $traits
+     */
     public function __construct(
-        private readonly Class_ $node,
-        private readonly ClassScope|null $extends,
+        private readonly ClassLike $node,
         private readonly ResolverContract $resolver,
+        private readonly ClassScopeContract|null $extends,
+        private readonly array $traits,
     ) {
         $this->methods = collect();
         $this->properties = collect();
@@ -46,14 +53,16 @@ class ClassScope implements ClassScopeContract
     }
 
     public static function create(
-        Class_ $node,
-        ClassScope|null $extends,
+        ClassLike $node,
         ResolverContract $resolver,
+        ClassScopeContract|null $extends,
+        ClassScopeContract ...$traits,
     ): self {
         return resolve(self::class, [
             'node' => $node,
-            'extends' => $extends,
             'resolver' => $resolver,
+            'extends' => $extends,
+            'traits' => $traits,
         ]);
     }
 
@@ -77,7 +86,7 @@ class ClassScope implements ClassScopeContract
         return $this->methods->collect();
     }
 
-    public function method(string $name): ClassMethodScopeContract
+    public function method(string $name): ClassMethodScopeContract|null
     {
         $method = $this->methods->get($name);
 
@@ -85,8 +94,14 @@ class ClassScope implements ClassScopeContract
             $method = $this->extends()->method($name);
         }
 
-        if ($method === null) {
-            throw new RuntimeException(sprintf('Method "%s" not found', $name));
+        if ($method === null && count($this->traits)) {
+            foreach ($this->traits as $trait) {
+                $method = $trait->method($name);
+
+                if ($method !== null) {
+                    break;
+                }
+            }
         }
 
         return $method;
@@ -100,7 +115,7 @@ class ClassScope implements ClassScopeContract
         return $this->properties->collect();
     }
 
-    public function property(string $name): ClassPropertyContract
+    public function property(string $name): ClassPropertyContract|null
     {
         $property = $this->properties->get($name);
 
@@ -108,10 +123,11 @@ class ClassScope implements ClassScopeContract
             $property = $this->extends()->property($name);
         }
 
-        if ($property === null) {
-            throw new RuntimeException(sprintf('Property "%s" not found', $name));
-        }
-
         return $property;
+    }
+
+    public function propertyType(string $name): TypeContract|null
+    {
+        return $this->property($name)?->type();
     }
 }

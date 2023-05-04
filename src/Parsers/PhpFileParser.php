@@ -7,15 +7,20 @@ namespace ResourceParserGenerator\Parsers;
 use Illuminate\Support\Facades\File;
 use PhpParser\Node\Stmt;
 use PhpParser\Node\Stmt\Class_;
+use PhpParser\Node\Stmt\ClassLike;
 use PhpParser\Node\Stmt\GroupUse;
 use PhpParser\Node\Stmt\Namespace_;
+use PhpParser\Node\Stmt\Trait_;
 use PhpParser\Node\Stmt\Use_;
 use PhpParser\NodeFinder;
 use PhpParser\Parser;
+use ReflectionClass;
 use ResourceParserGenerator\Contracts\ClassFileLocatorContract;
+use ResourceParserGenerator\Contracts\ClassScopeContract;
 use ResourceParserGenerator\Contracts\ResolverContract;
 use ResourceParserGenerator\Parsers\DataObjects\ClassScope;
 use ResourceParserGenerator\Parsers\DataObjects\FileScope;
+use ResourceParserGenerator\Parsers\DataObjects\ReflectedClassScope;
 use ResourceParserGenerator\Resolvers\ClassNameResolver;
 use ResourceParserGenerator\Resolvers\Resolver;
 use RuntimeException;
@@ -44,6 +49,7 @@ class PhpFileParser
         $this->parseUseStatements($ast, $scope);
         $this->parseGroupUseStatements($ast, $scope);
         $this->parseClassStatements($ast, $scope);
+        $this->parseTraitStatements($ast, $scope);
 
         return $scope;
     }
@@ -178,15 +184,55 @@ class PhpFileParser
 
             $classScope = ClassScope::create(
                 $class,
-                $this->parseClassExtends($class, $resolver),
                 $resolver,
+                $this->parseClassExtends($class, $resolver),
+                ...$this->parseClassTraits($class, $resolver),
             );
 
             $scope->addClass($classScope);
         }
     }
 
-    private function parseClassExtends(Class_ $class, ResolverContract $resolver): ClassScope|null
+    /**
+     * @param Stmt[] $ast
+     * @param FileScope $scope
+     * @return void
+     */
+    private function parseTraitStatements(array $ast, FileScope $scope): void
+    {
+        /**
+         * @var Trait_[] $traits
+         */
+        $traits = $this->nodeFinder->findInstanceOf($ast, Trait_::class);
+
+        if (!count($traits)) {
+            return;
+        }
+
+        $classResolver = ClassNameResolver::create($scope);
+
+        foreach ($traits as $trait) {
+            $traitName = $trait->name
+                ? $trait->name->toString()
+                : sprintf('AnonymousTrait%d', $trait->getLine());
+            $fullyQualifiedTraitName = $scope->namespace()
+                ? sprintf('%s\\%s', $scope->namespace(), $traitName)
+                : $traitName;
+
+            $resolver = Resolver::create($classResolver, $fullyQualifiedTraitName);
+
+            $traitScope = ClassScope::create(
+                $trait,
+                $resolver,
+                null,
+                ...$this->parseClassTraits($trait, $resolver),
+            );
+
+            $scope->addTrait($traitScope);
+        }
+    }
+
+    private function parseClassExtends(Class_ $class, ResolverContract $resolver): ClassScopeContract|null
     {
         $parent = $class->extends?->toString();
         if (!$parent) {
@@ -196,6 +242,10 @@ class PhpFileParser
         $parentClassName = $resolver->resolveClass($parent);
         if (!$parentClassName) {
             throw new RuntimeException(sprintf('Could not resolve class "%s"', $parent));
+        }
+
+        if (class_exists($parentClassName) && !$this->classFileLocator->exists($parentClassName)) {
+            return new ReflectedClassScope(new ReflectionClass($parentClassName));
         }
 
         if (!$this->classFileLocator->exists($parentClassName)) {
@@ -211,5 +261,41 @@ class PhpFileParser
         }
 
         return $parentClassScope;
+    }
+
+    /**
+     * @param ClassLike $class
+     * @param Resolver $resolver
+     * @return array<int, ClassScopeContract>
+     */
+    private function parseClassTraits(ClassLike $class, Resolver $resolver): array
+    {
+        $traits = [];
+
+        foreach ($class->getTraitUses() as $traitUse) {
+            foreach ($traitUse->traits as $trait) {
+                $traitName = $trait->toString();
+                $traitClassName = $resolver->resolveClass($traitName);
+                if (!$traitClassName) {
+                    throw new RuntimeException(sprintf('Could not resolve trait "%s"', $traitName));
+                }
+
+                if (!$this->classFileLocator->exists($traitClassName)) {
+                    throw new RuntimeException(sprintf('Could not find class file for "%s"', $traitClassName));
+                }
+
+                $traitClassFile = $this->classFileLocator->get($traitClassName);
+                $traitFileScope = $this->parse(File::get($traitClassFile));
+                $traitClassScope = $traitFileScope->traits()->first();
+
+                if (!$traitClassScope) {
+                    throw new RuntimeException(sprintf('Could not find trait class "%s"', $traitClassName));
+                }
+
+                $traits[] = $traitClassScope;
+            }
+        }
+
+        return $traits;
     }
 }

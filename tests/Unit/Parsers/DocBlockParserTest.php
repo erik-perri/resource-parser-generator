@@ -90,8 +90,8 @@ class DocBlockParserTest extends TestCase
                     'callable' => 'callable',
                     'resource' => 'resource',
                     'nothing' => 'null',
-                    'maybe' => 'string|null',
-                    'mixed' => 'string|bool|float|null',
+                    'maybe' => 'null|string',
+                    'mixed' => 'bool|float|null|string',
                 ],
             ],
             'generic arrays' => [
@@ -105,9 +105,9 @@ class DocBlockParserTest extends TestCase
                 ',
                 'expectedResult' => [
                     'stringArray' => 'string[]',
-                    'unionArray' => 'array<string|int>',
+                    'unionArray' => 'array<int|string>',
                     'stringKeyArray' => 'array<string, int>',
-                    'unionKeyAndValueArray' => 'array<string|int, string|int>',
+                    'unionKeyAndValueArray' => 'array<int|string, int|string>',
                 ],
             ],
         ];
@@ -250,7 +250,7 @@ class DocBlockParserTest extends TestCase
                      * @return void|string
                      */
                 ',
-                'expectedResult' => 'void|string',
+                'expectedResult' => 'string|void',
             ],
         ];
     }
@@ -334,8 +334,8 @@ class DocBlockParserTest extends TestCase
                     'callable' => 'callable',
                     'resource' => 'resource',
                     'nothing' => 'null',
-                    'maybe' => 'string|null',
-                    'mixed' => 'string|bool|float|null',
+                    'maybe' => 'null|string',
+                    'mixed' => 'bool|float|null|string',
                 ],
             ],
         ];
@@ -398,8 +398,8 @@ class DocBlockParserTest extends TestCase
                 'expectedResult' => [
                     'string' => 'string',
                     'number' => 'int',
-                    'maybe' => 'string|null',
-                    'mixed' => 'string|bool|float|null',
+                    'maybe' => 'null|string',
+                    'mixed' => 'bool|float|null|string',
                 ],
             ],
         ];

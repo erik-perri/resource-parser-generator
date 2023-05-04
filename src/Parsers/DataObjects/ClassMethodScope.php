@@ -12,7 +12,7 @@ use PhpParser\Node\Stmt\ClassMethod;
 use ResourceParserGenerator\Contracts\ClassMethodScopeContract;
 use ResourceParserGenerator\Contracts\ResolverContract;
 use ResourceParserGenerator\Contracts\TypeContract;
-use ResourceParserGenerator\Parsers\DeclaredTypeParser;
+use ResourceParserGenerator\Converters\DeclaredTypeConverter;
 use ResourceParserGenerator\Parsers\DocBlockParser;
 use RuntimeException;
 
@@ -29,7 +29,7 @@ class ClassMethodScope implements ClassMethodScopeContract
     public function __construct(
         private readonly ClassMethod $node,
         private readonly ResolverContract $resolver,
-        private readonly DeclaredTypeParser $declaredTypeParser,
+        private readonly DeclaredTypeConverter $declaredTypeParser,
         private readonly DocBlockParser $docBlockParser,
     ) {
         //
@@ -76,7 +76,7 @@ class ClassMethodScope implements ClassMethodScopeContract
     public function returnType(): TypeContract
     {
         return $this->docBlock()?->return()
-            ?? ($this->returnType ??= $this->declaredTypeParser->parse($this->node->returnType, $this->resolver));
+            ?? ($this->returnType ??= $this->declaredTypeParser->convert($this->node->returnType, $this->resolver));
     }
 
     /**
@@ -91,7 +91,7 @@ class ClassMethodScope implements ClassMethodScopeContract
             if ($name instanceof Variable) {
                 $name = $name->name;
                 if (!($name instanceof Expr)) {
-                    $parameters->put($name, $this->declaredTypeParser->parse($param->type, $this->resolver));
+                    $parameters->put($name, $this->declaredTypeParser->convert($param->type, $this->resolver));
                 } else {
                     throw new RuntimeException('Unexpected expression in variable name');
                 }

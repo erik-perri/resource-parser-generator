@@ -4,7 +4,7 @@
 
 declare(strict_types=1);
 
-namespace ResourceParserGenerator\Tests\Unit\Parsers;
+namespace ResourceParserGenerator\Tests\Unit\Converters;
 
 use Closure;
 use PhpParser\Node;
@@ -12,12 +12,12 @@ use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\DataProvider;
 use ResourceParserGenerator\Contracts\ResolverContract;
 use ResourceParserGenerator\Contracts\TypeContract;
-use ResourceParserGenerator\Parsers\DeclaredTypeParser;
+use ResourceParserGenerator\Converters\DeclaredTypeConverter;
 use ResourceParserGenerator\Tests\TestCase;
 use ResourceParserGenerator\Types;
 
-#[CoversClass(DeclaredTypeParser::class)]
-class DeclaredTypeParserTest extends TestCase
+#[CoversClass(DeclaredTypeConverter::class)]
+class DeclaredTypeConverterTest extends TestCase
 {
     #[DataProvider('identifierProvider')]
     #[DataProvider('intersectionProvider')]
@@ -26,7 +26,7 @@ class DeclaredTypeParserTest extends TestCase
     public function testParses(mixed $input, TypeContract $expected, ?Closure $resolveMockFactory = null): void
     {
         // Arrange
-        $parser = $this->make(DeclaredTypeParser::class);
+        $parser = $this->make(DeclaredTypeConverter::class);
 
         /**
          * @var ResolverContract $resolveMock
@@ -40,7 +40,7 @@ class DeclaredTypeParserTest extends TestCase
                 ->getMock();
 
         // Act
-        $result = $parser->parse($input, $resolveMock);
+        $result = $parser->convert($input, $resolveMock);
 
         // Assert
         $this->assertInstanceOf(get_class($expected), $result);

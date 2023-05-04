@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace ResourceParserGenerator\Parsers;
+namespace ResourceParserGenerator\Converters;
 
 use PhpParser\Node\ComplexType;
 use PhpParser\Node\Identifier;
@@ -16,9 +16,9 @@ use ResourceParserGenerator\Contracts\TypeContract;
 use ResourceParserGenerator\Types;
 use RuntimeException;
 
-class DeclaredTypeParser
+class DeclaredTypeConverter
 {
-    public function parse(ComplexType|Identifier|Name|null $type, ResolverContract $resolver): TypeContract
+    public function convert(ComplexType|Identifier|Name|null $type, ResolverContract $resolver): TypeContract
     {
         if (!$type) {
             return new Types\UntypedType();
@@ -43,20 +43,20 @@ class DeclaredTypeParser
 
         if ($type instanceof UnionType) {
             return new Types\UnionType(
-                ...array_map(fn(ComplexType|Identifier|Name $type) => $this->parse($type, $resolver), $type->types),
+                ...array_map(fn(ComplexType|Identifier|Name $type) => $this->convert($type, $resolver), $type->types),
             );
         }
 
         if ($type instanceof IntersectionType) {
             return new Types\IntersectionType(
-                ...array_map(fn(ComplexType|Identifier|Name $type) => $this->parse($type, $resolver), $type->types),
+                ...array_map(fn(ComplexType|Identifier|Name $type) => $this->convert($type, $resolver), $type->types),
             );
         }
 
         if ($type instanceof NullableType) {
             return new Types\UnionType(
                 new Types\NullType(),
-                $this->parse($type->type, $resolver),
+                $this->convert($type->type, $resolver),
             );
         }
 

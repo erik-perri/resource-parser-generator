@@ -10,7 +10,7 @@ use PhpParser\Node\Stmt\PropertyProperty;
 use ResourceParserGenerator\Contracts\ClassPropertyContract;
 use ResourceParserGenerator\Contracts\ResolverContract;
 use ResourceParserGenerator\Contracts\TypeContract;
-use ResourceParserGenerator\Parsers\DeclaredTypeParser;
+use ResourceParserGenerator\Converters\DeclaredTypeConverter;
 use ResourceParserGenerator\Parsers\DocBlockParser;
 
 class ClassProperty implements ClassPropertyContract
@@ -22,7 +22,7 @@ class ClassProperty implements ClassPropertyContract
         private readonly Property $property,
         private readonly PropertyProperty $propertyProperty,
         private readonly ResolverContract $resolver,
-        private readonly DeclaredTypeParser $declaredTypeParser,
+        private readonly DeclaredTypeConverter $declaredTypeParser,
         private readonly DocBlockParser $docBlockParser,
     ) {
         //
@@ -59,7 +59,7 @@ class ClassProperty implements ClassPropertyContract
 
     public function type(): TypeContract
     {
-        return $this->type ??= $this->declaredTypeParser->parse($this->property->type, $this->resolver);
+        return $this->type ??= $this->declaredTypeParser->convert($this->property->type, $this->resolver);
     }
 
     public function isPrivate(): bool

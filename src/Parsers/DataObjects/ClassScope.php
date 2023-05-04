@@ -6,10 +6,13 @@ namespace ResourceParserGenerator\Parsers\DataObjects;
 
 use Illuminate\Support\Collection;
 use PhpParser\Node\Stmt\Class_;
+use ResourceParserGenerator\Contracts\ClassMethodScopeContract;
+use ResourceParserGenerator\Contracts\ClassPropertyContract;
+use ResourceParserGenerator\Contracts\ClassScopeContract;
 use ResourceParserGenerator\Contracts\ResolverContract;
 use RuntimeException;
 
-class ClassScope
+class ClassScope implements ClassScopeContract
 {
     /**
      * @var Collection<string, ClassMethodScope>
@@ -54,7 +57,7 @@ class ClassScope
         ]);
     }
 
-    public function extends(): ClassScope|null
+    public function extends(): ClassScopeContract|null
     {
         return $this->extends;
     }
@@ -74,7 +77,7 @@ class ClassScope
         return $this->methods->collect();
     }
 
-    public function method(string $name): ClassMethodScope
+    public function method(string $name): ClassMethodScopeContract
     {
         $method = $this->methods->get($name);
 
@@ -97,7 +100,7 @@ class ClassScope
         return $this->properties->collect();
     }
 
-    public function property(string $name): ClassProperty
+    public function property(string $name): ClassPropertyContract
     {
         $property = $this->properties->get($name);
 

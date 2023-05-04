@@ -7,12 +7,13 @@ namespace ResourceParserGenerator\Parsers\DataObjects;
 use PhpParser\Node\Stmt\Class_;
 use PhpParser\Node\Stmt\Property;
 use PhpParser\Node\Stmt\PropertyProperty;
+use ResourceParserGenerator\Contracts\ClassPropertyContract;
 use ResourceParserGenerator\Contracts\ResolverContract;
 use ResourceParserGenerator\Contracts\TypeContract;
 use ResourceParserGenerator\Parsers\DeclaredTypeParser;
 use ResourceParserGenerator\Parsers\DocBlockParser;
 
-class ClassProperty
+class ClassProperty implements ClassPropertyContract
 {
     private DocBlock|null $docBlock = null;
     private TypeContract $type;

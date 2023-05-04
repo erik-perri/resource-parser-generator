@@ -9,13 +9,14 @@ use PhpParser\Node\Expr;
 use PhpParser\Node\Expr\Variable;
 use PhpParser\Node\Stmt\Class_;
 use PhpParser\Node\Stmt\ClassMethod;
+use ResourceParserGenerator\Contracts\ClassMethodScopeContract;
 use ResourceParserGenerator\Contracts\ResolverContract;
 use ResourceParserGenerator\Contracts\TypeContract;
 use ResourceParserGenerator\Parsers\DeclaredTypeParser;
 use ResourceParserGenerator\Parsers\DocBlockParser;
 use RuntimeException;
 
-class ClassMethodScope
+class ClassMethodScope implements ClassMethodScopeContract
 {
     private DocBlock|null $docBlock = null;
 

@@ -60,6 +60,11 @@ class ClassMethodScope implements ClassMethodScopeContract
         return $this->node->name->toString();
     }
 
+    public function node(): ClassMethod
+    {
+        return $this->node;
+    }
+
     /**
      * @return Collection<string, TypeContract>
      */

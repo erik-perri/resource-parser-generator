@@ -17,11 +17,11 @@ class UserResource extends JsonResource
     public function adminList(): array
     {
         return [
-//            'id' => $this->resource->getRouteKey(),
-//            'email' => $this->resource->email,
-//            'name' => $this->resource->name,
+            'id' => $this->resource->getRouteKey(),
+            'email' => $this->resource->email,
+            'name' => $this->resource->name,
             'created_at' => $this->resource->created_at?->toIso8601ZuluString(),
-//            'updated_at' => $this->resource->updated_at?->toIso8601ZuluString(),
+            'updated_at' => $this->resource->updated_at?->toIso8601ZuluString(),
         ];
     }
 

@@ -10,9 +10,9 @@ use PHPStan\PhpDocParser\Ast\Type\IdentifierTypeNode;
 use PHPStan\PhpDocParser\Ast\Type\ThisTypeNode;
 use PHPStan\PhpDocParser\Ast\Type\TypeNode;
 use PHPStan\PhpDocParser\Ast\Type\UnionTypeNode;
-use ResourceParserGenerator\Contracts\TypeContract;
 use ResourceParserGenerator\Resolvers\Contracts\ResolverContract;
 use ResourceParserGenerator\Types;
+use ResourceParserGenerator\Types\Contracts\TypeContract;
 use RuntimeException;
 
 class DocBlockTypeParser

@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace ResourceParserGenerator\Parsers\DataObjects;
+namespace ResourceParserGenerator\Parsers\Data;
 
 use ResourceParserGenerator\Contracts\ClassPropertyContract;
-use ResourceParserGenerator\Contracts\TypeContract;
+use ResourceParserGenerator\Types\Contracts\TypeContract;
 
 class VirtualClassProperty implements ClassPropertyContract
 {

@@ -2,16 +2,16 @@
 
 declare(strict_types=1);
 
-namespace ResourceParserGenerator\Parsers\DataObjects;
+namespace ResourceParserGenerator\Parsers\Data;
 
 use Illuminate\Support\Collection;
 use PhpParser\Node\Stmt\ClassLike;
 use ResourceParserGenerator\Contracts\ClassMethodScopeContract;
 use ResourceParserGenerator\Contracts\ClassPropertyContract;
 use ResourceParserGenerator\Contracts\ClassScopeContract;
-use ResourceParserGenerator\Contracts\TypeContract;
 use ResourceParserGenerator\Parsers\DocBlockParser;
 use ResourceParserGenerator\Resolvers\Contracts\ResolverContract;
+use ResourceParserGenerator\Types\Contracts\TypeContract;
 
 class ClassScope implements ClassScopeContract
 {

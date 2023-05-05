@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace ResourceParserGenerator\Parsers\DataObjects;
+namespace ResourceParserGenerator\Parsers\Data;
 
 use Illuminate\Support\Collection;
 use PhpParser\Node\Expr;
@@ -10,10 +10,10 @@ use PhpParser\Node\Expr\Variable;
 use PhpParser\Node\Stmt\Class_;
 use PhpParser\Node\Stmt\ClassMethod;
 use ResourceParserGenerator\Contracts\ClassMethodScopeContract;
-use ResourceParserGenerator\Contracts\TypeContract;
 use ResourceParserGenerator\Converters\DeclaredTypeConverter;
 use ResourceParserGenerator\Parsers\DocBlockParser;
 use ResourceParserGenerator\Resolvers\Contracts\ResolverContract;
+use ResourceParserGenerator\Types\Contracts\TypeContract;
 use RuntimeException;
 
 class ClassMethodScope implements ClassMethodScopeContract

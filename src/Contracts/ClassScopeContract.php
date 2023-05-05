@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace ResourceParserGenerator\Contracts;
 
+use ResourceParserGenerator\Types\Contracts\TypeContract;
+
 interface ClassScopeContract
 {
     public function name(): string;

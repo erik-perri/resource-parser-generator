@@ -7,7 +7,7 @@ namespace ResourceParserGenerator\Tests\Unit\Resolvers;
 use Closure;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\DataProvider;
-use ResourceParserGenerator\Parsers\DataObjects\FileScope;
+use ResourceParserGenerator\Parsers\Data\FileScope;
 use ResourceParserGenerator\Resolvers\ClassNameResolver;
 use ResourceParserGenerator\Tests\TestCase;
 

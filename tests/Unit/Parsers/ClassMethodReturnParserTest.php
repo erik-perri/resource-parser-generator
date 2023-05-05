@@ -6,11 +6,11 @@ namespace ResourceParserGenerator\Tests\Unit\Parsers;
 
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\DataProvider;
-use ResourceParserGenerator\Contracts\TypeContract;
 use ResourceParserGenerator\Parsers\ClassMethodReturnParser;
 use ResourceParserGenerator\Tests\Examples\UserResource;
 use ResourceParserGenerator\Tests\TestCase;
 use ResourceParserGenerator\Types\ArrayWithPropertiesType;
+use ResourceParserGenerator\Types\Contracts\TypeContract;
 
 #[CoversClass(ClassMethodReturnParser::class)]
 class ClassMethodReturnParserTest extends TestCase

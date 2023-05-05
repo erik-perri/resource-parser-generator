@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace ResourceParserGenerator\Parsers\DataObjects;
+namespace ResourceParserGenerator\Parsers\Data;
 
 use Illuminate\Support\Collection;
 use RuntimeException;

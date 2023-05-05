@@ -6,9 +6,9 @@ namespace ResourceParserGenerator\Tests\Unit\Parsers;
 
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\DataProvider;
-use ResourceParserGenerator\Parsers\DataObjects\ClassProperty;
-use ResourceParserGenerator\Parsers\DataObjects\ClassScope;
-use ResourceParserGenerator\Parsers\DataObjects\FileScope;
+use ResourceParserGenerator\Parsers\Data\ClassProperty;
+use ResourceParserGenerator\Parsers\Data\ClassScope;
+use ResourceParserGenerator\Parsers\Data\FileScope;
 use ResourceParserGenerator\Parsers\PhpFileParser;
 use ResourceParserGenerator\Tests\TestCase;
 use RuntimeException;

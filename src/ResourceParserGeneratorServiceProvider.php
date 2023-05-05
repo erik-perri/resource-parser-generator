@@ -13,8 +13,8 @@ use PHPStan\PhpDocParser\Lexer\Lexer;
 use PHPStan\PhpDocParser\Parser\ConstExprParser;
 use PHPStan\PhpDocParser\Parser\PhpDocParser;
 use PHPStan\PhpDocParser\Parser\TypeParser;
-use ResourceParserGenerator\Contracts\ClassFileLocatorContract;
 use ResourceParserGenerator\Filesystem\ClassFileLocator;
+use ResourceParserGenerator\Filesystem\Contracts\ClassFileLocatorContract;
 
 class ResourceParserGeneratorServiceProvider extends ServiceProvider
 {

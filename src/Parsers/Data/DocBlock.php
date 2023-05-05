@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace ResourceParserGenerator\Parsers\DataObjects;
+namespace ResourceParserGenerator\Parsers\Data;
 
 use Illuminate\Support\Collection;
 use InvalidArgumentException;
-use ResourceParserGenerator\Contracts\TypeContract;
+use ResourceParserGenerator\Types\Contracts\TypeContract;
 
 class DocBlock
 {

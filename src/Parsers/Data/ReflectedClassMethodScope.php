@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace ResourceParserGenerator\Parsers\DataObjects;
+namespace ResourceParserGenerator\Parsers\Data;
 
 use ReflectionMethod;
 use ResourceParserGenerator\Contracts\ClassMethodScopeContract;
-use ResourceParserGenerator\Contracts\TypeContract;
 use ResourceParserGenerator\Converters\ReflectionTypeConverter;
+use ResourceParserGenerator\Types\Contracts\TypeContract;
 
 class ReflectedClassMethodScope implements ClassMethodScopeContract
 {

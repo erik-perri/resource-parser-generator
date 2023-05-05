@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace ResourceParserGenerator\Types;
 
 use Illuminate\Support\Collection;
-use ResourceParserGenerator\Contracts\TypeContract;
+use ResourceParserGenerator\Types\Contracts\TypeContract;
 
 class IntersectionType implements TypeContract
 {

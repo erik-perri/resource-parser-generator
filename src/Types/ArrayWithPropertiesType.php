@@ -18,7 +18,7 @@ class ArrayWithPropertiesType implements TypeContract
         //
     }
 
-    public function name(): string
+    public function describe(): string
     {
         return 'array[...]';
     }

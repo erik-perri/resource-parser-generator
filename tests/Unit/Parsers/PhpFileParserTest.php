@@ -215,19 +215,19 @@ PHP;
         $class = $result->class('TestClass');
         $this->assertEquals(
             'ResourceParserGenerator\Tests\Examples\AdjacentClass',
-            $class->property('propertyOne')->type()->name(),
+            $class->property('propertyOne')->type()->describe(),
         );
         $this->assertEquals(
             'ResourceParserGenerator\Imports\ImportedClass',
-            $class->property('propertyTwo')->type()->name(),
+            $class->property('propertyTwo')->type()->describe(),
         );
         $this->assertEquals(
             'ResourceParserGenerator\Imports\RelativePath\RelativeClass',
-            $class->property('propertyThree')->type()->name(),
+            $class->property('propertyThree')->type()->describe(),
         );
         $this->assertEquals(
             'ResourceParserGenerator\Tests\Examples\AbsoluteClass',
-            $class->property('propertyFour')->type()->name(),
+            $class->property('propertyFour')->type()->describe(),
         );
     }
 
@@ -243,9 +243,9 @@ PHP;
         $class = $result->class('ClassC');
 
         // Assert
-        $this->assertEquals('mixed', $class->property('variableZ')->type()->name());
-        $this->assertEquals('int', $class->property('variableA')->type()->name());
-        $this->assertEquals('string', $class->property('variableB')->type()->name());
-        $this->assertEquals('bool', $class->property('variableC')->type()->name());
+        $this->assertEquals('mixed', $class->property('variableZ')->type()->describe());
+        $this->assertEquals('int', $class->property('variableA')->type()->describe());
+        $this->assertEquals('string', $class->property('variableB')->type()->describe());
+        $this->assertEquals('bool', $class->property('variableC')->type()->describe());
     }
 }

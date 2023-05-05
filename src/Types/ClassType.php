@@ -22,7 +22,7 @@ class ClassType implements TypeContract
     /**
      * @return class-string
      */
-    public function name(): string
+    public function describe(): string
     {
         return $this->fullyQualifiedName;
     }

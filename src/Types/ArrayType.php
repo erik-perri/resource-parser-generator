@@ -15,18 +15,18 @@ class ArrayType implements TypeContract
         //
     }
 
-    public function name(): string
+    public function describe(): string
     {
         if ($this->keys && $this->values) {
-            return sprintf('array<%s, %s>', $this->keys->name(), $this->values->name());
+            return sprintf('array<%s, %s>', $this->keys->describe(), $this->values->describe());
         }
 
         if ($this->values instanceof UnionType) {
-            return sprintf('array<%s>', $this->values->name());
+            return sprintf('array<%s>', $this->values->describe());
         }
 
         if ($this->values) {
-            return $this->values->name() . '[]';
+            return $this->values->describe() . '[]';
         }
 
         return 'array';

@@ -8,7 +8,7 @@ use ResourceParserGenerator\Contracts\TypeContract;
 
 class CallableType implements TypeContract
 {
-    public function name(): string
+    public function describe(): string
     {
         return 'callable';
     }

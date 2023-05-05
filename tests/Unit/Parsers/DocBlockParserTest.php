@@ -36,7 +36,7 @@ class DocBlockParserTest extends TestCase
         $this->assertEquals(
             $expectedResult,
             $result->properties()
-                ->map(fn(TypeContract $type) => $type->name())
+                ->map(fn(TypeContract $type) => $type->describe())
                 ->toArray(),
         );
     }
@@ -139,10 +139,10 @@ class DocBlockParserTest extends TestCase
 
         // Assert
         $property = $result->property('aliasedClass');
-        $this->assertEquals('AliasedClass', $property->name());
+        $this->assertEquals('AliasedClass', $property->describe());
 
         $property = $result->property('fullyQualifiedClass');
-        $this->assertEquals('App\FullyQualifiedClass', $property->name());
+        $this->assertEquals('App\FullyQualifiedClass', $property->describe());
     }
 
     #[DataProvider('parseMethodProvider')]
@@ -161,7 +161,7 @@ class DocBlockParserTest extends TestCase
             $this->assertEmpty($result->methods());
         } else {
             foreach ($expectedResult as $method => $types) {
-                $this->assertEquals($types, $result->method($method)->name());
+                $this->assertEquals($types, $result->method($method)->describe());
             }
         }
     }
@@ -218,7 +218,7 @@ class DocBlockParserTest extends TestCase
         $result = $parser->parse($docBlock, $resolver);
 
         // Assert
-        $this->assertEquals($expectedResult, $result->return()?->name());
+        $this->assertEquals($expectedResult, $result->return()?->describe());
     }
 
     public static function parseReturnProvider(): array
@@ -270,7 +270,7 @@ class DocBlockParserTest extends TestCase
         $this->assertEquals(
             $expectedResult,
             $result->vars()
-                ->map(fn(TypeContract $type) => $type->name())
+                ->map(fn(TypeContract $type) => $type->describe())
                 ->toArray()
         );
     }
@@ -356,7 +356,7 @@ class DocBlockParserTest extends TestCase
         $this->assertEquals(
             $expectedResult,
             $result->params()
-                ->map(fn(TypeContract $type) => $type->name())
+                ->map(fn(TypeContract $type) => $type->describe())
                 ->toArray()
         );
     }

@@ -6,6 +6,7 @@ namespace ResourceParserGenerator\Tests\Unit\Parsers;
 
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\DataProvider;
+use ResourceParserGenerator\Contracts\TypeContract;
 use ResourceParserGenerator\Parsers\ClassMethodReturnParser;
 use ResourceParserGenerator\Tests\Examples\UserResource;
 use ResourceParserGenerator\Tests\TestCase;
@@ -24,9 +25,9 @@ class ClassMethodReturnParserTest extends TestCase
         $result = $parser->parse($className, $methodName);
 
         if ($result instanceof ArrayWithPropertiesType) {
-            $result = $result->properties()->map(fn($property) => $property->name())->toArray();
+            $result = $result->properties()->map(fn(TypeContract $type) => $type->describe())->toArray();
         } else {
-            $result = $result->name();
+            $result = $result->describe();
         }
 
         // Assert

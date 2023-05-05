@@ -25,10 +25,10 @@ class IntersectionType implements TypeContract
         $this->types = $types;
     }
 
-    public function name(): string
+    public function describe(): string
     {
         return $this->types
-            ->map(fn(TypeContract $type) => $type->name())
+            ->map(fn(TypeContract $type) => $type->describe())
             ->unique()
             ->implode('&');
     }

@@ -180,7 +180,7 @@ class ExpressionTypeConverter
         $ifType = $this->convert($value->if, $resolver);
         $elseType = $this->convert($value->else, $resolver);
 
-        if ($ifType->name() === $elseType->name()) {
+        if ($ifType->describe() === $elseType->describe()) {
             return $ifType;
         }
 
@@ -196,14 +196,14 @@ class ExpressionTypeConverter
         if ($value instanceof NullsafeMethodCall) {
             if (!($leftSide instanceof Types\UnionType)) {
                 throw new RuntimeException(
-                    sprintf('Unexpected left side %s, "%s"', $value->name, $leftSide->name()),
+                    sprintf('Unexpected left side %s, "%s"', $value->name, $leftSide->describe()),
                 );
             }
 
             $leftTypes = $leftSide->types()->filter(fn(TypeContract $type) => !($type instanceof Types\NullType));
             if ($leftTypes->count() !== 1) {
                 throw new RuntimeException(
-                    sprintf('Unexpected left side %s, "%s"', $value->name, $leftSide->name()),
+                    sprintf('Unexpected left side %s, "%s"', $value->name, $leftSide->describe()),
                 );
             }
 
@@ -216,12 +216,12 @@ class ExpressionTypeConverter
             );
         }
 
-        $leftSideFile = $this->classLocator->get($leftSide->name());
+        $leftSideFile = $this->classLocator->get($leftSide->describe());
         $leftSideFileScope = $this->fileParser->parse(File::get($leftSideFile));
         $leftSideClassScope = $leftSideFileScope->classes()->first();
         if (!$leftSideClassScope) {
             throw new RuntimeException(
-                sprintf('Unknown class "%s" for left side %s of method call', $leftSide->name(), $value->name),
+                sprintf('Unknown class "%s" for left side %s of method call', $leftSide->describe(), $value->name),
             );
         }
 

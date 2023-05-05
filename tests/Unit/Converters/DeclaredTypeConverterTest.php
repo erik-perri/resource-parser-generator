@@ -44,7 +44,7 @@ class DeclaredTypeConverterTest extends TestCase
 
         // Assert
         $this->assertInstanceOf(get_class($expected), $result);
-        $this->assertEquals($expected->name(), $result->name());
+        $this->assertEquals($expected->describe(), $result->describe());
     }
 
     public static function identifierProvider(): array

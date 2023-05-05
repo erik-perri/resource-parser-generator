@@ -33,10 +33,10 @@ class UnionType implements TypeContract
         );
     }
 
-    public function name(): string
+    public function describe(): string
     {
         return $this->types
-            ->map(fn(TypeContract $type) => $type->name())
+            ->map(fn(TypeContract $type) => $type->describe())
             ->sort(fn(string $a, string $b) => strnatcasecmp($a, $b))
             ->unique()
             ->implode('|');

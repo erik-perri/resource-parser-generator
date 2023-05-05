@@ -8,7 +8,7 @@ use ResourceParserGenerator\Contracts\TypeContract;
 
 class UntypedType implements TypeContract
 {
-    public function name(): string
+    public function describe(): string
     {
         return 'untyped';
     }

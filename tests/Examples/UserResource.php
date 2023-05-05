@@ -48,16 +48,6 @@ class UserResource extends JsonResource
         }
     }
 
-    public function override(): array
-    {
-        return [
-            /**
-             * @var int $id
-             */
-            'id' => 'definitely a string',
-        ];
-    }
-
     public function scalars(): array
     {
         return [
@@ -90,7 +80,14 @@ class UserResource extends JsonResource
     public function usingWhenLoaded(): array
     {
         return [
-            'alias' => $this->whenLoaded('nameAlias', fn() => $this->resource->nameAlias->name),
+            'related' => $this->whenLoaded('related', fn() => $this->resource->related->name),
+        ];
+    }
+
+    public function usingWhenLoadedFallback(): array
+    {
+        return [
+            'related' => $this->whenLoaded('related', fn() => $this->resource->related->name, 'none'),
         ];
     }
 }

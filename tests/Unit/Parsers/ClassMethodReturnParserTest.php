@@ -94,6 +94,20 @@ class ClassMethodReturnParserTest extends TestCase
                     'path' => 'null|string',
                 ],
             ],
+            'UserResource::usingWhenLoaded' => [
+                'className' => UserResource::class,
+                'methodName' => 'usingWhenLoaded',
+                'expected' => [
+                    'related' => 'string|undefined',
+                ],
+            ],
+            'UserResource::usingWhenLoadedFallback' => [
+                'className' => UserResource::class,
+                'methodName' => 'usingWhenLoadedFallback',
+                'expected' => [
+                    'related' => 'string',
+                ],
+            ],
         ];
     }
 }

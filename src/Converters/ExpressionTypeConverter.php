@@ -4,8 +4,10 @@ declare(strict_types=1);
 
 namespace ResourceParserGenerator\Converters;
 
+use Illuminate\Http\Resources\MissingValue;
 use Illuminate\Support\Facades\File;
 use PhpParser\Node\Expr;
+use PhpParser\Node\Expr\ArrowFunction;
 use PhpParser\Node\Expr\ConstFetch;
 use PhpParser\Node\Expr\MethodCall;
 use PhpParser\Node\Expr\NullsafeMethodCall;
@@ -106,6 +108,10 @@ class ExpressionTypeConverter
             return new Types\StringType();
         }
 
+        if ($expr instanceof ArrowFunction) {
+            return $this->convert($expr->expr, $resolver);
+        }
+
         throw new RuntimeException(sprintf('Unhandled expression type "%s"', $expr->getType()));
     }
 
@@ -125,7 +131,33 @@ class ExpressionTypeConverter
             );
         }
 
-        return $methodScope->returnType();
+        $returnType = $methodScope->returnType();
+
+        if ($rightSide === 'whenLoaded') {
+            if (!($returnType instanceof Types\UnionType)) {
+                throw new RuntimeException('Unexpected non-union whenLoaded method return');
+            }
+
+            $args = $value->getArgs();
+            if (count($args) < 2) {
+                throw new RuntimeException('Unhandled missing second argument for whenLoaded');
+            }
+
+            $returnWhenLoaded = $this->convert($args[1]->value, $resolver);
+
+            $returnWhenUnloaded = count($args) > 2
+                ? $this->convert($args[2]->value, $resolver)
+                : new Types\UndefinedType();
+
+            $returnType = $returnType
+                ->addToUnion($returnWhenLoaded)
+                ->addToUnion($returnWhenUnloaded)
+                ->removeFromUnion(fn(TypeContract $type) => $type instanceof Types\MixedType)
+                ->removeFromUnion(fn(TypeContract $type) => $type instanceof Types\ClassType
+                    && $type->fullyQualifiedName() === MissingValue::class);
+        }
+
+        return $returnType;
     }
 
     private function extractTypeFromNullsafeMethodCall(

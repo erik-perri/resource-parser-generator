@@ -33,6 +33,17 @@ class UnionType implements TypeContract
         );
     }
 
+    /**
+     * @param callable(TypeContract): bool $callback
+     * @return self
+     */
+    public function removeFromUnion(callable $callback): self
+    {
+        return new self(
+            ...$this->types->reject($callback)->values(),
+        );
+    }
+
     public function describe(): string
     {
         return $this->types

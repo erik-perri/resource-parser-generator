@@ -100,11 +100,8 @@ class DocBlockParser
         }
     }
 
-    private function parseReturn(
-        PhpDocNode $docNode,
-        ResolverContract $resolver,
-        DocBlock $docBlock
-    ): void {
+    private function parseReturn(PhpDocNode $docNode, ResolverContract $resolver, DocBlock $docBlock): void
+    {
         $returnNodes = $docNode->getTagsByName('@return');
         $returnNodeCount = count($returnNodes);
         if ($returnNodeCount) {

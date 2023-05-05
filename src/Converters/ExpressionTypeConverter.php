@@ -9,6 +9,7 @@ use PhpParser\Node\Expr;
 use PhpParser\Node\Expr\ConstFetch;
 use PhpParser\Node\Expr\MethodCall;
 use PhpParser\Node\Expr\NullsafeMethodCall;
+use PhpParser\Node\Expr\NullsafePropertyFetch;
 use PhpParser\Node\Expr\PropertyFetch;
 use PhpParser\Node\Expr\Ternary;
 use PhpParser\Node\Expr\UnaryMinus;
@@ -73,6 +74,10 @@ class ExpressionTypeConverter
 
         if ($expr instanceof PropertyFetch) {
             return $this->extractTypeFromPropertyFetch($expr, $resolver);
+        }
+
+        if ($expr instanceof NullsafePropertyFetch) {
+            return $this->extractTypeFromNullsafePropertyFetch($expr, $resolver);
         }
 
         if ($expr instanceof ConstFetch) {
@@ -152,6 +157,33 @@ class ExpressionTypeConverter
         return $return;
     }
 
+    private function extractTypeFromNullsafePropertyFetch(
+        NullsafePropertyFetch $value,
+        ResolverContract $resolver
+    ): TypeContract {
+        $leftSide = $this->getLeftSideScope($value, $resolver);
+        $rightSide = $this->getRightSide($value, $resolver);
+
+        if (!is_string($rightSide)) {
+            throw new RuntimeException('Right side of property fetch is not a string');
+        }
+
+        $type = $leftSide->propertyType($rightSide);
+        if (!$type) {
+            throw new RuntimeException(
+                sprintf('Unknown property "%s" for right side for property fetch', $rightSide[0]),
+            );
+        }
+
+        if ($type instanceof Types\UnionType) {
+            $type = $type->addToUnion(new Types\NullType());
+        } else {
+            $type = new Types\UnionType($type, new Types\NullType());
+        }
+
+        return $type;
+    }
+
     private function extractTypeFromPropertyFetch(PropertyFetch $value, ResolverContract $resolver): TypeContract
     {
         $leftSide = $this->getLeftSideScope($value, $resolver);
@@ -188,12 +220,12 @@ class ExpressionTypeConverter
     }
 
     private function getLeftSideScope(
-        PropertyFetch|MethodCall|NullsafeMethodCall $value,
+        PropertyFetch|NullsafePropertyFetch|MethodCall|NullsafeMethodCall $value,
         ResolverContract $resolver,
     ): ClassScope {
         $leftSide = $this->convert($value->var, $resolver);
 
-        if ($value instanceof NullsafeMethodCall) {
+        if ($value instanceof NullsafePropertyFetch || $value instanceof NullsafeMethodCall) {
             if (!($leftSide instanceof Types\UnionType)) {
                 throw new RuntimeException(
                     sprintf('Unexpected left side %s, "%s"', $value->name, $leftSide->describe()),
@@ -221,7 +253,7 @@ class ExpressionTypeConverter
         $leftSideClassScope = $leftSideFileScope->classes()->first();
         if (!$leftSideClassScope) {
             throw new RuntimeException(
-                sprintf('Unknown class "%s" for left side %s of method call', $leftSide->describe(), $value->name),
+                sprintf('Unknown class "%s" for left side of "%s"', $leftSide->describe(), $value->name),
             );
         }
 
@@ -229,7 +261,7 @@ class ExpressionTypeConverter
     }
 
     private function getRightSide(
-        PropertyFetch|MethodCall|NullsafeMethodCall $value,
+        PropertyFetch|NullsafePropertyFetch|MethodCall|NullsafeMethodCall $value,
         ResolverContract $resolver,
     ): TypeContract|string {
         return $value->name instanceof Expr

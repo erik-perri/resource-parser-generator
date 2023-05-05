@@ -9,16 +9,16 @@ namespace ResourceParserGenerator\Tests\Unit\Parsers;
 use Mockery\MockInterface;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\DataProvider;
+use ResourceParserGenerator\Converters\DocBlockTypeConverter;
 use ResourceParserGenerator\Parsers\Data\DocBlock;
 use ResourceParserGenerator\Parsers\DocBlockParser;
-use ResourceParserGenerator\Parsers\DocBlockTypeParser;
 use ResourceParserGenerator\Resolvers\Resolver;
 use ResourceParserGenerator\Tests\TestCase;
 use ResourceParserGenerator\Types\Contracts\TypeContract;
 
 #[CoversClass(DocBlock::class)]
 #[CoversClass(DocBlockParser::class)]
-#[CoversClass(DocBlockTypeParser::class)]
+#[CoversClass(DocBlockTypeConverter::class)]
 class DocBlockParserTest extends TestCase
 {
     #[DataProvider('parseProvider')]

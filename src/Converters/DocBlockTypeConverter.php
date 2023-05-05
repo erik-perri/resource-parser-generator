@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace ResourceParserGenerator\Parsers;
+namespace ResourceParserGenerator\Converters;
 
 use PHPStan\PhpDocParser\Ast\Type\ArrayTypeNode;
 use PHPStan\PhpDocParser\Ast\Type\GenericTypeNode;
@@ -15,40 +15,40 @@ use ResourceParserGenerator\Types;
 use ResourceParserGenerator\Types\Contracts\TypeContract;
 use RuntimeException;
 
-class DocBlockTypeParser
+class DocBlockTypeConverter
 {
-    public function parse(TypeNode $type, ResolverContract $resolver): TypeContract
+    public function convert(TypeNode $type, ResolverContract $resolver): TypeContract
     {
         if ($type instanceof UnionTypeNode) {
             return new Types\UnionType(
-                ...array_map(fn(TypeNode $type) => $this->parse($type, $resolver), $type->types),
+                ...array_map(fn(TypeNode $type) => $this->convert($type, $resolver), $type->types),
             );
         }
 
         if ($type instanceof GenericTypeNode) {
-            $containerType = $this->parse($type->type, $resolver);
+            $containerType = $this->convert($type->type, $resolver);
             if ($containerType instanceof Types\ArrayType) {
                 if (count($type->genericTypes) === 1) {
                     return new Types\ArrayType(
                         null,
-                        $this->parse($type->genericTypes[0], $resolver),
+                        $this->convert($type->genericTypes[0], $resolver),
                     );
                 } elseif (count($type->genericTypes) === 2) {
                     return new Types\ArrayType(
-                        $this->parse($type->genericTypes[0], $resolver),
-                        $this->parse($type->genericTypes[1], $resolver),
+                        $this->convert($type->genericTypes[0], $resolver),
+                        $this->convert($type->genericTypes[1], $resolver),
                     );
                 }
             }
 
             // TODO Generic sub-types?
-            return $this->parse($type->type, $resolver);
+            return $this->convert($type->type, $resolver);
         }
 
         if ($type instanceof ArrayTypeNode) {
             return new Types\ArrayType(
                 null,
-                $this->parse($type->type, $resolver),
+                $this->convert($type->type, $resolver),
             );
         }
 

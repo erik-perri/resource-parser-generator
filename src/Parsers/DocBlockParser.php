@@ -15,6 +15,7 @@ use PHPStan\PhpDocParser\Ast\PhpDoc\VarTagValueNode;
 use PHPStan\PhpDocParser\Lexer\Lexer;
 use PHPStan\PhpDocParser\Parser\PhpDocParser;
 use PHPStan\PhpDocParser\Parser\TokenIterator;
+use ResourceParserGenerator\Converters\DocBlockTypeConverter;
 use ResourceParserGenerator\Parsers\Data\DocBlock;
 use ResourceParserGenerator\Resolvers\Contracts\ResolverContract;
 use ResourceParserGenerator\Types;
@@ -23,7 +24,7 @@ use RuntimeException;
 class DocBlockParser
 {
     public function __construct(
-        private readonly DocBlockTypeParser $typeParser,
+        private readonly DocBlockTypeConverter $typeParser,
         private readonly Lexer $phpDocLexer,
         private readonly PhpDocParser $phpDocParser,
     ) {
@@ -65,7 +66,7 @@ class DocBlockParser
                 $docBlock->setMethod(
                     $node->value->methodName,
                     $node->value->returnType
-                        ? $this->typeParser->parse($node->value->returnType, $resolver)
+                        ? $this->typeParser->convert($node->value->returnType, $resolver)
                         : new Types\UntypedType(),
                 );
             }
@@ -78,7 +79,7 @@ class DocBlockParser
         foreach ($paramNodes as $node) {
             if ($node->value instanceof ParamTagValueNode) {
                 $name = ltrim($node->value->parameterName, '$');
-                $docBlock->setParam($name, $this->typeParser->parse($node->value->type, $resolver));
+                $docBlock->setParam($name, $this->typeParser->convert($node->value->type, $resolver));
             }
         }
     }
@@ -95,7 +96,7 @@ class DocBlockParser
         foreach ($propertyNodes as $node) {
             if ($node->value instanceof PropertyTagValueNode) {
                 $name = ltrim($node->value->propertyName, '$');
-                $docBlock->setProperty($name, $this->typeParser->parse($node->value->type, $resolver));
+                $docBlock->setProperty($name, $this->typeParser->convert($node->value->type, $resolver));
             }
         }
     }
@@ -114,7 +115,7 @@ class DocBlockParser
              */
             $returnNode = reset($returnNodes);
             if ($returnNode->value instanceof ReturnTagValueNode) {
-                $docBlock->setReturn($this->typeParser->parse($returnNode->value->type, $resolver));
+                $docBlock->setReturn($this->typeParser->convert($returnNode->value->type, $resolver));
             }
         }
     }
@@ -129,7 +130,7 @@ class DocBlockParser
                     $name = ltrim($node->value->variableName, '$');
                 }
 
-                $docBlock->setVar($name, $this->typeParser->parse($node->value->type, $resolver));
+                $docBlock->setVar($name, $this->typeParser->convert($node->value->type, $resolver));
             }
         }
     }

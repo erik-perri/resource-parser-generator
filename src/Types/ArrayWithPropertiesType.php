@@ -20,7 +20,12 @@ class ArrayWithPropertiesType implements TypeContract
 
     public function describe(): string
     {
-        return 'array[...]';
+        return sprintf(
+            'array<{%s}>',
+            $this->properties->map(
+                fn(TypeContract $type, string $property) => sprintf('%s: %s', $property, $type->describe()),
+            )->join('; '),
+        );
     }
 
     /**

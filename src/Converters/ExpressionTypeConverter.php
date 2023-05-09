@@ -30,6 +30,7 @@ use ResourceParserGenerator\Types;
 use ResourceParserGenerator\Types\Contracts\TypeContract;
 use RuntimeException;
 use Sourcetoad\EnhancedResources\Formatting\Attributes\Format;
+use Sourcetoad\EnhancedResources\Formatting\Attributes\IsDefault;
 use Sourcetoad\EnhancedResources\Resource;
 
 class ExpressionTypeConverter
@@ -419,10 +420,15 @@ class ExpressionTypeConverter
         return $formatName;
     }
 
-    // @phpstan-ignore-next-line
     private function locateDefaultFormatMethodInResource(ClassScopeContract $resourceClass): string|null
     {
-        // TODO Find method with IsDefault attribute or fail
+        foreach ($resourceClass->methods() as $methodName => $methodScope) {
+            $attribute = $methodScope->attribute(IsDefault::class);
+            if ($attribute) {
+                return $methodName;
+            }
+        }
+
         return null;
     }
 }

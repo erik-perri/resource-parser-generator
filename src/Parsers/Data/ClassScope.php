@@ -34,6 +34,7 @@ class ClassScope implements ClassScopeContract
     private readonly Collection $constants;
 
     /**
+     * @param class-string $fullyQualifiedName
      * @param ClassLike $node
      * @param ResolverContract $resolver
      * @param ClassScopeContract|null $extends
@@ -41,6 +42,7 @@ class ClassScope implements ClassScopeContract
      * @param DocBlockParser $docBlockParser
      */
     public function __construct(
+        private readonly string $fullyQualifiedName,
         private readonly ClassLike $node,
         private readonly ResolverContract $resolver,
         private readonly ClassScopeContract|null $extends,
@@ -71,13 +73,23 @@ class ClassScope implements ClassScopeContract
         }
     }
 
+    /**
+     * @param class-string $fullyQualifiedName
+     * @param ClassLike $node
+     * @param ResolverContract $resolver
+     * @param ClassScopeContract|null $extends
+     * @param ClassScopeContract ...$traits
+     * @return self
+     */
     public static function create(
+        string $fullyQualifiedName,
         ClassLike $node,
         ResolverContract $resolver,
         ClassScopeContract|null $extends,
         ClassScopeContract ...$traits,
     ): self {
         return resolve(self::class, [
+            'fullyQualifiedName' => $fullyQualifiedName,
             'node' => $node,
             'resolver' => $resolver,
             'extends' => $extends,
@@ -131,6 +143,11 @@ class ClassScope implements ClassScopeContract
     public function extends(): ClassScopeContract|null
     {
         return $this->extends;
+    }
+
+    public function fullyQualifiedName(): string
+    {
+        return $this->fullyQualifiedName;
     }
 
     public function name(): string

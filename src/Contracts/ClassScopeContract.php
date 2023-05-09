@@ -10,9 +10,14 @@ interface ClassScopeContract
 {
     public function constant(string $name): ClassConstantContract|null;
 
-    public function name(): string;
+    /**
+     * @return class-string
+     */
+    public function fullyQualifiedName(): string;
 
     public function method(string $name): ClassMethodScopeContract|null;
+
+    public function name(): string;
 
     public function property(string $name): ClassPropertyContract|null;
 

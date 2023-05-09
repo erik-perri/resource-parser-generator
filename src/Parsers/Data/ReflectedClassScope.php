@@ -39,6 +39,11 @@ class ReflectedClassScope implements ClassScopeContract
         ]);
     }
 
+    public function fullyQualifiedName(): string
+    {
+        return $this->reflection->getName();
+    }
+
     /**
      * @throws ReflectionException
      */
@@ -52,7 +57,7 @@ class ReflectedClassScope implements ClassScopeContract
 
     public function name(): string
     {
-        return $this->reflection->getName();
+        return $this->reflection->getShortName();
     }
 
     /**

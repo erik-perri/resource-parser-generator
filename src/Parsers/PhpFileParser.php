@@ -183,6 +183,7 @@ class PhpFileParser
             $resolver = Resolver::create($classResolver, null, $fullyQualifiedClassName);
 
             $classScope = ClassScope::create(
+                $fullyQualifiedClassName,
                 $class,
                 $resolver,
                 $this->parseClassExtends($class, $resolver),
@@ -222,6 +223,7 @@ class PhpFileParser
             $resolver = Resolver::create($classResolver, null, $fullyQualifiedTraitName);
 
             $traitScope = ClassScope::create(
+                $fullyQualifiedTraitName,
                 $trait,
                 $resolver,
                 null,

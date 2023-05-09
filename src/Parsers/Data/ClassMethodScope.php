@@ -7,7 +7,6 @@ namespace ResourceParserGenerator\Parsers\Data;
 use Illuminate\Support\Collection;
 use PhpParser\Node\Expr;
 use PhpParser\Node\Expr\Variable;
-use PhpParser\Node\Stmt\Class_;
 use PhpParser\Node\Stmt\ClassMethod;
 use ResourceParserGenerator\Contracts\ClassMethodScopeContract;
 use ResourceParserGenerator\Converters\DeclaredTypeConverter;
@@ -103,17 +102,16 @@ class ClassMethodScope implements ClassMethodScopeContract
 
     public function isPrivate(): bool
     {
-        return (bool)($this->node->flags & Class_::MODIFIER_PRIVATE);
+        return $this->node->isPrivate();
     }
 
     public function isProtected(): bool
     {
-        return (bool)($this->node->flags & Class_::MODIFIER_PROTECTED);
+        return $this->node->isProtected();
     }
 
     public function isPublic(): bool
     {
-        return ($this->node->flags & Class_::MODIFIER_PUBLIC) !== 0
-            || ($this->node->flags & Class_::VISIBILITY_MODIFIER_MASK) === 0;
+        return $this->node->isPublic();
     }
 }

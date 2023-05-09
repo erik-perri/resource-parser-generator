@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace ResourceParserGenerator\Parsers\Data;
 
-use PhpParser\Node\Stmt\Class_;
 use PhpParser\Node\Stmt\Property;
 use PhpParser\Node\Stmt\PropertyProperty;
 use ResourceParserGenerator\Contracts\ClassPropertyContract;
@@ -71,27 +70,26 @@ class ClassProperty implements ClassPropertyContract
 
     public function isPrivate(): bool
     {
-        return (bool)($this->property->flags & Class_::MODIFIER_PRIVATE);
+        return $this->property->isPrivate();
     }
 
     public function isProtected(): bool
     {
-        return (bool)($this->property->flags & Class_::MODIFIER_PROTECTED);
+        return $this->property->isProtected();
     }
 
     public function isPublic(): bool
     {
-        return ($this->property->flags & Class_::MODIFIER_PUBLIC) !== 0
-            || ($this->property->flags & Class_::VISIBILITY_MODIFIER_MASK) === 0;
+        return $this->property->isPublic();
     }
 
     public function isReadonly(): bool
     {
-        return (bool)($this->property->flags & Class_::MODIFIER_READONLY);
+        return $this->property->isReadonly();
     }
 
     public function isStatic(): bool
     {
-        return (bool)($this->property->flags & Class_::MODIFIER_STATIC);
+        return $this->property->isStatic();
     }
 }

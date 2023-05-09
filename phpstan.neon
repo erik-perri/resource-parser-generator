@@ -4,3 +4,8 @@ parameters:
     paths:
         - src/
     level: 9
+    ignoreErrors:
+        -
+            message: "#^Match expression does not handle remaining value\\: string$#"
+            count: 1
+            path: src/Converters/VariableTypeConverter.php

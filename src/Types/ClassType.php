@@ -32,6 +32,9 @@ class ClassType implements TypeContract
         return $this->alias;
     }
 
+    /**
+     * @return class-string
+     */
     public function fullyQualifiedName(): string
     {
         return $this->fullyQualifiedName;

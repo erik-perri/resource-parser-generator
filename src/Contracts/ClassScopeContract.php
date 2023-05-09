@@ -8,6 +8,8 @@ use ResourceParserGenerator\Types\Contracts\TypeContract;
 
 interface ClassScopeContract
 {
+    public function constant(string $name): ClassConstantContract|null;
+
     public function name(): string;
 
     public function method(string $name): ClassMethodScopeContract|null;

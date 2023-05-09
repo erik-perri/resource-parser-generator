@@ -5,14 +5,15 @@ declare(strict_types=1);
 namespace ResourceParserGenerator\Converters;
 
 use Illuminate\Http\Resources\MissingValue;
-use Illuminate\Support\Facades\File;
 use PhpParser\Node\Expr;
 use PhpParser\Node\Expr\ArrowFunction;
+use PhpParser\Node\Expr\ClassConstFetch;
 use PhpParser\Node\Expr\ConstFetch;
 use PhpParser\Node\Expr\MethodCall;
 use PhpParser\Node\Expr\NullsafeMethodCall;
 use PhpParser\Node\Expr\NullsafePropertyFetch;
 use PhpParser\Node\Expr\PropertyFetch;
+use PhpParser\Node\Expr\StaticCall;
 use PhpParser\Node\Expr\Ternary;
 use PhpParser\Node\Expr\UnaryMinus;
 use PhpParser\Node\Expr\UnaryPlus;
@@ -20,9 +21,8 @@ use PhpParser\Node\Expr\Variable;
 use PhpParser\Node\Scalar\DNumber;
 use PhpParser\Node\Scalar\LNumber;
 use PhpParser\Node\Scalar\String_;
-use ResourceParserGenerator\Filesystem\Contracts\ClassFileLocatorContract;
-use ResourceParserGenerator\Parsers\Data\ClassScope;
-use ResourceParserGenerator\Parsers\PhpFileParser;
+use ResourceParserGenerator\Contracts\ClassScopeContract;
+use ResourceParserGenerator\Parsers\ClassParser;
 use ResourceParserGenerator\Resolvers\Contracts\ResolverContract;
 use ResourceParserGenerator\Types;
 use ResourceParserGenerator\Types\Contracts\TypeContract;
@@ -31,8 +31,8 @@ use RuntimeException;
 class ExpressionTypeConverter
 {
     public function __construct(
-        private readonly ClassFileLocatorContract $classLocator,
-        private readonly PhpFileParser $fileParser,
+        private readonly DeclaredTypeConverter $declaredTypeConverter,
+        private readonly ClassParser $classParser,
     ) {
         //
     }
@@ -110,6 +110,14 @@ class ExpressionTypeConverter
 
         if ($expr instanceof ArrowFunction) {
             return $this->convert($expr->expr, $resolver);
+        }
+
+        if ($expr instanceof StaticCall) {
+            return $this->extractTypeFromStaticCall($expr, $resolver);
+        }
+
+        if ($expr instanceof ClassConstFetch) {
+            return $this->extractTypeFromClassConstFetch($expr, $resolver);
         }
 
         throw new RuntimeException(sprintf('Unhandled expression type "%s"', $expr->getType()));
@@ -254,7 +262,7 @@ class ExpressionTypeConverter
     private function getLeftSideScope(
         PropertyFetch|NullsafePropertyFetch|MethodCall|NullsafeMethodCall $value,
         ResolverContract $resolver,
-    ): ClassScope {
+    ): ClassScopeContract {
         $leftSide = $this->convert($value->var, $resolver);
 
         if ($value instanceof NullsafePropertyFetch || $value instanceof NullsafeMethodCall) {
@@ -280,16 +288,7 @@ class ExpressionTypeConverter
             );
         }
 
-        $leftSideFile = $this->classLocator->get($leftSide->describe());
-        $leftSideFileScope = $this->fileParser->parse(File::get($leftSideFile));
-        $leftSideClassScope = $leftSideFileScope->classes()->first();
-        if (!$leftSideClassScope) {
-            throw new RuntimeException(
-                sprintf('Unknown class "%s" for left side of "%s"', $leftSide->describe(), $value->name),
-            );
-        }
-
-        return $leftSideClassScope;
+        return $this->classParser->parse($leftSide->fullyQualifiedName());
     }
 
     private function getRightSide(
@@ -299,5 +298,57 @@ class ExpressionTypeConverter
         return $value->name instanceof Expr
             ? $this->convert($value->name, $resolver)
             : $value->name->name;
+    }
+
+    private function extractTypeFromStaticCall(StaticCall $expr, ResolverContract $resolver): TypeContract
+    {
+        $class = $expr->class instanceof Expr
+            ? $this->convert($expr->class, $resolver)
+            : $this->declaredTypeConverter->convert($expr->class, $resolver);
+
+        if (!($class instanceof Types\ClassType)) {
+            throw new RuntimeException('Static call class is not a class type');
+        }
+
+        $classScope = $this->classParser->parse($class->fullyQualifiedName());
+        $methodName = $expr->name;
+        if ($methodName instanceof Expr) {
+            throw new RuntimeException('Static call name is not a string');
+        }
+
+        $methodScope = $classScope->method($methodName->name);
+        if (!$methodScope) {
+            throw new RuntimeException(
+                sprintf('Unknown method "%s" for class "%s"', $methodName->name, $class->fullyQualifiedName()),
+            );
+        }
+
+        return $methodScope->returnType();
+    }
+
+    private function extractTypeFromClassConstFetch(ClassConstFetch $expr, ResolverContract $resolver): TypeContract
+    {
+        $class = $expr->class instanceof Expr
+            ? $this->convert($expr->class, $resolver)
+            : $this->declaredTypeConverter->convert($expr->class, $resolver);
+
+        if (!($class instanceof Types\ClassType)) {
+            throw new RuntimeException('Class const fetch class is not a class type');
+        }
+
+        $classScope = $this->classParser->parse($class->fullyQualifiedName());
+        $constName = $expr->name;
+        if ($constName instanceof Expr) {
+            throw new RuntimeException('Class const fetch name is not a string');
+        }
+
+        $constScope = $classScope->constant($constName->name);
+        if (!$constScope) {
+            throw new RuntimeException(
+                sprintf('Unknown constant "%s" for class "%s"', $constName->name, $class->fullyQualifiedName()),
+            );
+        }
+
+        return $constScope->type();
     }
 }

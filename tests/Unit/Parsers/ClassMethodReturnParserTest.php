@@ -108,6 +108,18 @@ class ClassMethodReturnParserTest extends TestCase
                     'related' => 'string',
                 ],
             ],
+            'UserResource::staticCallOrConst' => [
+                'className' => UserResource::class,
+                'methodName' => 'staticCallOrConst',
+                'expected' => [
+                    'const_float' => 'float',
+                    'const_string' => 'string',
+                    'explicit_method' => 'int',
+                    'hinted_method' => 'string',
+                    'reflected_const' => 'int',
+                    'reflected_method' => 'array',
+                ],
+            ],
         ];
     }
 }

@@ -245,7 +245,7 @@ class PhpFileParser
         }
 
         if (class_exists($parentClassName) && !$this->classFileLocator->exists($parentClassName)) {
-            return new ReflectedClassScope(new ReflectionClass($parentClassName));
+            return ReflectedClassScope::create(new ReflectionClass($parentClassName));
         }
 
         if (!$this->classFileLocator->exists($parentClassName)) {

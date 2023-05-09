@@ -4,8 +4,10 @@ declare(strict_types=1);
 
 namespace ResourceParserGenerator\Tests\Examples;
 
+use DateTimeZone;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
+use Phar;
 use ResourceParserGenerator\Tests\Examples\Models\User;
 
 /**
@@ -88,6 +90,18 @@ class UserResource extends JsonResource
     {
         return [
             'related' => $this->whenLoaded('related', fn() => $this->resource->related->name, 'none'),
+        ];
+    }
+
+    public function staticCallOrConst(): array
+    {
+        return [
+            'const_float' => User::CONST_FLOAT,
+            'const_string' => User::CONST_STRING,
+            'explicit_method' => User::getExplicitStaticValue(),
+            'hinted_method' => User::getHintedStaticValue(),
+            'reflected_const' => DateTimeZone::AMERICA,
+            'reflected_method' => Phar::getSupportedCompression(),
         ];
     }
 }

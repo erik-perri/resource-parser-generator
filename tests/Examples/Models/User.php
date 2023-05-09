@@ -18,9 +18,14 @@ use Illuminate\Database\Eloquent\Model as AliasedLaravelModel;
  * @property User $related
  *
  * @method string getRouteKey()
+ *
+ * @method static string getHintedStaticValue()
  */
 class User extends AliasedLaravelModel
 {
+    public const CONST_STRING = 'string';
+    public const CONST_FLOAT = 1.1;
+
     public function typedMethod(): int
     {
         return 1;
@@ -42,5 +47,10 @@ class User extends AliasedLaravelModel
     public function untypedWithoutDocMethod()
     {
         return 'string';
+    }
+
+    public static function getExplicitStaticValue(): int
+    {
+        return 1;
     }
 }

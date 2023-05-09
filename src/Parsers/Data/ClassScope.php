@@ -6,6 +6,7 @@ namespace ResourceParserGenerator\Parsers\Data;
 
 use Illuminate\Support\Collection;
 use PhpParser\Node\Stmt\ClassLike;
+use ResourceParserGenerator\Contracts\ClassConstantContract;
 use ResourceParserGenerator\Contracts\ClassMethodScopeContract;
 use ResourceParserGenerator\Contracts\ClassPropertyContract;
 use ResourceParserGenerator\Contracts\ClassScopeContract;
@@ -28,6 +29,11 @@ class ClassScope implements ClassScopeContract
     private readonly Collection $properties;
 
     /**
+     * @var Collection<string, ClassConstantContract>
+     */
+    private readonly Collection $constants;
+
+    /**
      * @param ClassLike $node
      * @param ResolverContract $resolver
      * @param ClassScopeContract|null $extends
@@ -43,6 +49,7 @@ class ClassScope implements ClassScopeContract
     ) {
         $this->methods = collect();
         $this->properties = collect();
+        $this->constants = collect();
 
         foreach ($this->node->getMethods() as $method) {
             $methodScope = ClassMethodScope::create($method, $this->resolver);
@@ -53,6 +60,13 @@ class ClassScope implements ClassScopeContract
             foreach ($property->props as $prop) {
                 $propertyScope = ClassProperty::create($property, $prop, $this->resolver);
                 $this->properties->put($propertyScope->name(), $propertyScope);
+            }
+        }
+
+        foreach ($this->node->getConstants() as $constantGroup) {
+            foreach ($constantGroup->consts as $constant) {
+                $constantScope = ClassConstant::create($constant, $this->resolver);
+                $this->constants->put($constantScope->name(), $constantScope);
             }
         }
     }
@@ -69,6 +83,37 @@ class ClassScope implements ClassScopeContract
             'extends' => $extends,
             'traits' => $traits,
         ]);
+    }
+
+    /**
+     * @return Collection<string, ClassConstantContract>
+     */
+    public function constants(): Collection
+    {
+        return $this->constants->collect();
+    }
+
+    public function constant(string $name): ClassConstantContract|null
+    {
+        // TODO Docblock?
+
+        $constant = $this->constants->get($name);
+
+        if ($constant === null && $this->extends()) {
+            $constant = $this->extends()->constant($name);
+        }
+
+        if ($constant === null) {
+            foreach ($this->traits as $trait) {
+                $constant = $trait->constant($name);
+
+                if ($constant !== null) {
+                    break;
+                }
+            }
+        }
+
+        return $constant;
     }
 
     public function docBlock(): DocBlock|null

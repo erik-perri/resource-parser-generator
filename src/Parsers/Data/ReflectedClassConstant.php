@@ -11,19 +11,26 @@ class ReflectedClassConstant implements ClassConstantContract
 {
     public function __construct(
         private readonly TypeContract $type,
+        private readonly mixed $value,
     ) {
         //
     }
 
-    public static function create(TypeContract $type): self
+    public static function create(TypeContract $type, mixed $value): self
     {
         return resolve(self::class, [
             'type' => $type,
+            'value' => $value,
         ]);
     }
 
     public function type(): TypeContract
     {
         return $this->type;
+    }
+
+    public function value(): mixed
+    {
+        return $this->value;
     }
 }

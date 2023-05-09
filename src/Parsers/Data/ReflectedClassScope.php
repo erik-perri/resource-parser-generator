@@ -85,8 +85,9 @@ class ReflectedClassScope implements ClassScopeContract
             return null;
         }
 
-        $type = $this->variableTypeConverter->convert($this->reflection->getConstant($name));
+        $constant = $this->reflection->getConstant($name);
+        $type = $this->variableTypeConverter->convert($constant);
 
-        return ReflectedClassConstant::create($type);
+        return ReflectedClassConstant::create($type, $constant);
     }
 }

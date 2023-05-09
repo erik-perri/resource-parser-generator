@@ -9,4 +9,6 @@ use ResourceParserGenerator\Types\Contracts\TypeContract;
 interface ClassConstantContract
 {
     public function type(): TypeContract;
+
+    public function value(): mixed;
 }

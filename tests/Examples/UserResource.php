@@ -104,4 +104,14 @@ class UserResource extends JsonResource
             'reflected_method' => Phar::getSupportedCompression(),
         ];
     }
+
+    public function relatedResource(): array
+    {
+        return [
+            'with_format_base' => RelatedResource::make($this->resource->related)
+                ->format(RelatedResource::FORMAT_BASE),
+            'with_format_verbose' => RelatedResource::make($this->resource->related)
+                ->format(RelatedResource::FORMAT_VERBOSE),
+        ];
+    }
 }

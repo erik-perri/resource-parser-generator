@@ -85,6 +85,12 @@ class DocBlockTypeConverter
                     return new Types\StringType();
                 case 'void':
                     return new Types\VoidType();
+                case 'static':
+                    $thisType = $resolver->resolveThis();
+                    if (!$thisType) {
+                        throw new RuntimeException('Cannot resolve static type');
+                    }
+                    return new Types\ClassType($thisType, null);
                 default:
                     break;
             }

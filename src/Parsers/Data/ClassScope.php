@@ -111,8 +111,8 @@ class ClassScope implements ClassScopeContract
 
         $constant = $this->constants->get($name);
 
-        if ($constant === null && $this->extends()) {
-            $constant = $this->extends()->constant($name);
+        if ($constant === null && $this->parent()) {
+            $constant = $this->parent()->constant($name);
         }
 
         if ($constant === null) {
@@ -140,14 +140,24 @@ class ClassScope implements ClassScopeContract
         return $this->docBlock;
     }
 
-    public function extends(): ClassScopeContract|null
-    {
-        return $this->extends;
-    }
-
     public function fullyQualifiedName(): string
     {
         return $this->fullyQualifiedName;
+    }
+
+    public function hasParent(string $className): bool
+    {
+        /**
+         * @var ClassScopeContract|null $parent
+         */
+        $parent = $this;
+        while ($parent = $parent?->parent()) {
+            if ($parent->fullyQualifiedName() === $className) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     public function name(): string
@@ -173,8 +183,8 @@ class ClassScope implements ClassScopeContract
 
         $method = $this->methods->get($name);
 
-        if ($method === null && $this->extends()) {
-            $method = $this->extends()->method($name);
+        if ($method === null && $this->parent()) {
+            $method = $this->parent()->method($name);
         }
 
         if ($method === null && count($this->traits)) {
@@ -188,6 +198,11 @@ class ClassScope implements ClassScopeContract
         }
 
         return $method;
+    }
+
+    public function parent(): ClassScopeContract|null
+    {
+        return $this->extends;
     }
 
     /**
@@ -206,8 +221,8 @@ class ClassScope implements ClassScopeContract
 
         $property = $this->properties->get($name);
 
-        if ($property === null && $this->extends()) {
-            $property = $this->extends()->property($name);
+        if ($property === null && $this->parent()) {
+            $property = $this->parent()->property($name);
         }
 
         return $property;

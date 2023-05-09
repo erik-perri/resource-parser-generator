@@ -11,6 +11,12 @@ interface ClassScopeContract
     public function constant(string $name): ClassConstantContract|null;
 
     /**
+     * @param class-string $className
+     * @return bool
+     */
+    public function hasParent(string $className): bool;
+
+    /**
      * @return class-string
      */
     public function fullyQualifiedName(): string;
@@ -18,6 +24,8 @@ interface ClassScopeContract
     public function method(string $name): ClassMethodScopeContract|null;
 
     public function name(): string;
+
+    public function parent(): ClassScopeContract|null;
 
     public function property(string $name): ClassPropertyContract|null;
 

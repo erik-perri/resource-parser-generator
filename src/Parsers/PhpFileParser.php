@@ -35,7 +35,12 @@ class PhpFileParser
         //
     }
 
-    public function parse(string $contents): FileScope
+    /**
+     * @param string $contents
+     * @param class-string|null $staticContext
+     * @return FileScope
+     */
+    public function parse(string $contents, string $staticContext = null): FileScope
     {
         $scope = FileScope::create();
 
@@ -48,7 +53,7 @@ class PhpFileParser
 
         $this->parseUseStatements($ast, $scope);
         $this->parseGroupUseStatements($ast, $scope);
-        $this->parseClassStatements($ast, $scope);
+        $this->parseClassStatements($ast, $scope, $staticContext);
         $this->parseTraitStatements($ast, $scope);
 
         return $scope;
@@ -157,9 +162,10 @@ class PhpFileParser
     /**
      * @param Stmt[] $ast
      * @param FileScope $scope
+     * @param class-string|null $staticContext
      * @return void
      */
-    private function parseClassStatements(array $ast, FileScope $scope): void
+    private function parseClassStatements(array $ast, FileScope $scope, string|null $staticContext): void
     {
         /**
          * @var Class_[] $classes
@@ -176,11 +182,15 @@ class PhpFileParser
             $className = $class->name
                 ? $class->name->toString()
                 : sprintf('AnonymousClass%d', $class->getLine());
+
+            /**
+             * @var class-string $fullyQualifiedClassName
+             */
             $fullyQualifiedClassName = $scope->namespace()
                 ? sprintf('%s\\%s', $scope->namespace(), $className)
                 : $className;
 
-            $resolver = Resolver::create($classResolver, null, $fullyQualifiedClassName);
+            $resolver = Resolver::create($classResolver, null, $staticContext ?? $fullyQualifiedClassName);
 
             $classScope = ClassScope::create(
                 $fullyQualifiedClassName,
@@ -216,6 +226,10 @@ class PhpFileParser
             $traitName = $trait->name
                 ? $trait->name->toString()
                 : sprintf('AnonymousTrait%d', $trait->getLine());
+
+            /**
+             * @var class-string $fullyQualifiedTraitName
+             */
             $fullyQualifiedTraitName = $scope->namespace()
                 ? sprintf('%s\\%s', $scope->namespace(), $traitName)
                 : $traitName;
@@ -255,7 +269,7 @@ class PhpFileParser
         }
 
         $parentClassFile = $this->classFileLocator->get($parentClassName);
-        $parentFileScope = $this->parse(File::get($parentClassFile));
+        $parentFileScope = $this->parse(File::get($parentClassFile), $resolver->resolveThis());
         $parentClassScope = $parentFileScope->classes()->first();
 
         if (!$parentClassScope) {

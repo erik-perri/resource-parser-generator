@@ -10,7 +10,6 @@ use ResourceParserGenerator\Parsers\ClassMethodReturnParser;
 use ResourceParserGenerator\Tests\Examples\UserResource;
 use ResourceParserGenerator\Tests\TestCase;
 use ResourceParserGenerator\Types\ArrayWithPropertiesType;
-use ResourceParserGenerator\Types\Contracts\TypeContract;
 
 #[CoversClass(ClassMethodReturnParser::class)]
 class ClassMethodReturnParserTest extends TestCase
@@ -25,7 +24,7 @@ class ClassMethodReturnParserTest extends TestCase
         $result = $parser->parse($className, $methodName);
 
         if ($result instanceof ArrayWithPropertiesType) {
-            $result = $result->properties()->map(fn(TypeContract $type) => $type->describe())->toArray();
+            $result = $result->describeArray();
         } else {
             $result = $result->describe();
         }
@@ -118,6 +117,19 @@ class ClassMethodReturnParserTest extends TestCase
                     'hinted_method' => 'string',
                     'reflected_const' => 'int',
                     'reflected_method' => 'array',
+                ],
+            ],
+            'UserResource::relatedResource' => [
+                'className' => UserResource::class,
+                'methodName' => 'relatedResource',
+                'expected' => [
+                    'with_format_base' => [
+                        'id' => 'int',
+                    ],
+                    'with_format_verbose' => [
+                        'id' => 'int',
+                        'email' => 'string',
+                    ],
                 ],
             ],
         ];

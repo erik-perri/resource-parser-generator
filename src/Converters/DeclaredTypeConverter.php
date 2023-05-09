@@ -70,7 +70,11 @@ class DeclaredTypeConverter
         }
 
         if ($type instanceof Name) {
-            $resolved = $resolver->resolveClass($type->toString());
+            if ($type->toString() === 'static') {
+                $resolved = $resolver->resolveThis();
+            } else {
+                $resolved = $resolver->resolveClass($type->toString());
+            }
             if (!$resolved) {
                 throw new RuntimeException(sprintf('Unable to resolve class "%s"', $type->toString()));
             }

@@ -25,7 +25,6 @@ class ClassMethodReturnParser
     public function __construct(
         private readonly ClassFileLocatorContract $classFileLocator,
         private readonly PhpFileParser $phpFileParser,
-        private readonly ExpressionTypeConverter $expressionTypeConverter,
     ) {
         //
     }
@@ -73,6 +72,8 @@ class ClassMethodReturnParser
          */
         $types = [];
 
+        $typeConverter = ExpressionTypeConverter::create($resolver, $this);
+
         foreach ($returnNodes as $returnNode) {
             if (!$returnNode->expr) {
                 $types[] = new Types\UntypedType();
@@ -94,13 +95,13 @@ class ClassMethodReturnParser
 
                     $arrayProperties->put(
                         $key->value,
-                        $this->expressionTypeConverter->convert($item->value, $resolver),
+                        $typeConverter->convert($item->value),
                     );
                 }
 
                 $types[] = new Types\ArrayWithPropertiesType($arrayProperties);
             } else {
-                $types[] = $this->expressionTypeConverter->convert($returnNode->expr, $resolver);
+                $types[] = $typeConverter->convert($returnNode->expr);
             }
         }
 

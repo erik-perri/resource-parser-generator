@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "7dfda1d6727609a650a2ae68833b358b",
+    "content-hash": "d2fa70aea7c352125011b8ba3ab0150f",
     "packages": [
         {
             "name": "brick/math",
@@ -7103,6 +7103,51 @@
                 }
             ],
             "time": "2023-02-07T11:34:05+00:00"
+        },
+        {
+            "name": "sourcetoad/enhanced-resources",
+            "version": "v6.0.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/sourcetoad/enhanced-resources.git",
+                "reference": "764c5d8d883106152291064c71f1f5e1c16c0180"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/sourcetoad/enhanced-resources/zipball/764c5d8d883106152291064c71f1f5e1c16c0180",
+                "reference": "764c5d8d883106152291064c71f1f5e1c16c0180",
+                "shasum": ""
+            },
+            "require": {
+                "laravel/framework": "^9.0|^10.0",
+                "php": "^8.0"
+            },
+            "require-dev": {
+                "orchestra/testbench": "^7.0|^8.0",
+                "phpunit/phpunit": "^9.5|^10.0"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Sourcetoad\\EnhancedResources\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Jason Jones",
+                    "email": "jason.erik.jones@gmail.com"
+                }
+            ],
+            "description": "Laravel's API Resources enhanced.",
+            "support": {
+                "issues": "https://github.com/sourcetoad/enhanced-resources/issues",
+                "source": "https://github.com/sourcetoad/enhanced-resources/tree/v6.0.0"
+            },
+            "time": "2023-02-20T17:03:39+00:00"
         },
         {
             "name": "spatie/backtrace",

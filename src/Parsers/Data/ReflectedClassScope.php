@@ -44,6 +44,18 @@ class ReflectedClassScope implements ClassScopeContract
         return $this->reflection->getName();
     }
 
+    public function hasParent(string $className): bool
+    {
+        $parent = $this->reflection;
+        while ($parent = $parent->getParentClass()) {
+            if ($parent->name === $className) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
     /**
      * @throws ReflectionException
      */
@@ -58,6 +70,13 @@ class ReflectedClassScope implements ClassScopeContract
     public function name(): string
     {
         return $this->reflection->getShortName();
+    }
+
+    public function parent(): ClassScopeContract|null
+    {
+        return $this->reflection->getParentClass()
+            ? ReflectedClassScope::create($this->reflection->getParentClass())
+            : null;
     }
 
     /**

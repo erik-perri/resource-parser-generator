@@ -70,7 +70,7 @@ class DeclaredTypeConverter
         }
 
         if ($type instanceof Name) {
-            if ($type->toString() === 'static') {
+            if (in_array($type->toString(), ['self', 'static'], true)) {
                 $resolved = $resolver->resolveThis();
             } else {
                 $resolved = $resolver->resolveClass($type->toString());

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace ResourceParserGenerator\Contracts;
 
+use Illuminate\Support\Collection;
 use ResourceParserGenerator\Types\Contracts\TypeContract;
 
 interface ClassScopeContract
@@ -20,6 +21,11 @@ interface ClassScopeContract
      * @return class-string
      */
     public function fullyQualifiedName(): string;
+
+    /**
+     * @return Collection<string, ClassMethodScopeContract>
+     */
+    public function methods(): Collection;
 
     public function method(string $name): ClassMethodScopeContract|null;
 

@@ -108,8 +108,8 @@ class UserResource extends JsonResource
     public function relatedResource(): array
     {
         return [
-            'with_format_base' => RelatedResource::make($this->resource->related)
-                ->format('base'),
+            'with_format_short' => RelatedResource::make($this->resource->related)
+                ->format('short'),
             'with_format_verbose' => RelatedResource::make($this->resource->related)
                 ->format(RelatedResource::FORMAT_VERBOSE),
         ];

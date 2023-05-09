@@ -22,12 +22,14 @@ use PhpParser\Node\Scalar\DNumber;
 use PhpParser\Node\Scalar\LNumber;
 use PhpParser\Node\Scalar\String_;
 use ResourceParserGenerator\Contracts\ClassScopeContract;
+use ResourceParserGenerator\Parsers\ClassConstFetchValueParser;
 use ResourceParserGenerator\Parsers\ClassMethodReturnParser;
 use ResourceParserGenerator\Parsers\ClassParser;
 use ResourceParserGenerator\Resolvers\Contracts\ResolverContract;
 use ResourceParserGenerator\Types;
 use ResourceParserGenerator\Types\Contracts\TypeContract;
 use RuntimeException;
+use Sourcetoad\EnhancedResources\Formatting\Attributes\Format;
 use Sourcetoad\EnhancedResources\Resource;
 
 class ExpressionTypeConverter
@@ -36,6 +38,7 @@ class ExpressionTypeConverter
         private readonly DeclaredTypeConverter $declaredTypeConverter,
         private readonly ClassParser $classParser,
         private readonly ResolverContract $resolver,
+        private readonly ClassConstFetchValueParser $classConstFetchValueParser,
         private readonly ClassMethodReturnParser|null $methodReturnParser,
     ) {
         //
@@ -163,7 +166,7 @@ class ExpressionTypeConverter
 
             if (!$formatMethod) {
                 throw new RuntimeException(
-                    sprintf('Unable to determine format format of resource "%s"', $leftSide->fullyQualifiedName()),
+                    sprintf('Unable to determine format of resource "%s"', $leftSide->fullyQualifiedName()),
                 );
             }
 
@@ -386,48 +389,34 @@ class ExpressionTypeConverter
             throw new RuntimeException('Method call name is not a string');
         }
 
+        $formatName = null;
+
         if ($call->name->toString() === 'format') {
             $formatArg = $call->getArgs()[0]->value;
 
             if ($formatArg instanceof String_) {
-                return $formatArg->value;
+                $formatName = $formatArg->value;
             } elseif ($formatArg instanceof ClassConstFetch) {
-                if ($formatArg->class instanceof Expr) {
-                    throw new RuntimeException('Class const fetch class is not a string');
+                $formatName = $this->classConstFetchValueParser->parse($formatArg, $this->resolver);
+
+                if (!is_string($formatName)) {
+                    throw new RuntimeException('Format name is not a string');
                 }
-
-                $fetchClassName = $this->resolver->resolveClass($formatArg->class->toString());
-                if (!$fetchClassName) {
-                    throw new RuntimeException(
-                        sprintf('Unknown class "%s" for class const fetch', $formatArg->class->toString()),
-                    );
-                }
-
-                $fetchClass = $fetchClassName === $resourceClass->fullyQualifiedName()
-                    ? $resourceClass
-                    : $this->classParser->parse($fetchClassName);
-
-                if ($formatArg->name instanceof Expr\Error) {
-                    throw new RuntimeException('Class const fetch name is not a string');
-                }
-
-                $constName = $formatArg->name->toString();
-                $constScope = $fetchClass->constant($constName);
-
-                if (!$constScope) {
-                    throw new RuntimeException(
-                        sprintf('Unknown constant "%s" for class "%s"', $constName, $fetchClass->fullyQualifiedName()),
-                    );
-                }
-
-                // TODO Return method with Format attribute rather than method name
-                return strval($constScope->value());
             }
         }
 
         // TODO Parse format call nested in chain
 
-        return null;
+        if ($formatName) {
+            foreach ($resourceClass->methods() as $methodName => $methodScope) {
+                $attribute = $methodScope->attribute(Format::class);
+                if ($attribute && $attribute->argument(0) === $formatName) {
+                    return $methodName;
+                }
+            }
+        }
+
+        return $formatName;
     }
 
     // @phpstan-ignore-next-line

@@ -5,9 +5,11 @@ declare(strict_types=1);
 namespace ResourceParserGenerator\Parsers\Data;
 
 use ReflectionMethod;
+use ResourceParserGenerator\Contracts\AttributeContract;
 use ResourceParserGenerator\Contracts\ClassMethodScopeContract;
 use ResourceParserGenerator\Converters\ReflectionTypeConverter;
 use ResourceParserGenerator\Types\Contracts\TypeContract;
+use RuntimeException;
 
 class ReflectedClassMethodScope implements ClassMethodScopeContract
 {
@@ -23,6 +25,11 @@ class ReflectedClassMethodScope implements ClassMethodScopeContract
         return resolve(self::class, [
             'reflection' => $reflection,
         ]);
+    }
+
+    public function attribute(string $className): AttributeContract|null
+    {
+        throw new RuntimeException('Cannot read attributes on reflected class method');
     }
 
     public function returnType(): TypeContract

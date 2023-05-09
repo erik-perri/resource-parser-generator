@@ -8,6 +8,7 @@ use Illuminate\Support\Collection;
 use PhpParser\Node\Expr;
 use PhpParser\Node\Expr\Variable;
 use PhpParser\Node\Stmt\ClassMethod;
+use ResourceParserGenerator\Contracts\AttributeContract;
 use ResourceParserGenerator\Contracts\ClassMethodScopeContract;
 use ResourceParserGenerator\Converters\DeclaredTypeConverter;
 use ResourceParserGenerator\Parsers\DocBlockParser;
@@ -40,6 +41,20 @@ class ClassMethodScope implements ClassMethodScopeContract
             'node' => $node,
             'resolver' => $resolver,
         ]);
+    }
+
+    public function attribute(string $className): AttributeContract|null
+    {
+        foreach ($this->node->attrGroups as $attrGroup) {
+            foreach ($attrGroup->attrs as $attr) {
+                $resolvedAttribute = $this->resolver->resolveClass($attr->name->toString());
+                if ($resolvedAttribute === $className) {
+                    return ClassMethodAttribute::create($attr, $this->resolver);
+                }
+            }
+        }
+
+        return null;
     }
 
     public function docBlock(): DocBlock|null

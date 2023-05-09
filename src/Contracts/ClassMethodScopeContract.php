@@ -8,5 +8,7 @@ use ResourceParserGenerator\Types\Contracts\TypeContract;
 
 interface ClassMethodScopeContract
 {
+    public function attribute(string $className): AttributeContract|null;
+
     public function returnType(): TypeContract;
 }

@@ -123,7 +123,7 @@ class ClassMethodReturnParserTest extends TestCase
                 'className' => UserResource::class,
                 'methodName' => 'relatedResource',
                 'expected' => [
-                    'with_format_base' => [
+                    'with_format_short' => [
                         'id' => 'int',
                     ],
                     'with_format_verbose' => [

@@ -4,8 +4,10 @@ declare(strict_types=1);
 
 namespace ResourceParserGenerator\Parsers\Data;
 
+use ResourceParserGenerator\Contracts\AttributeContract;
 use ResourceParserGenerator\Contracts\ClassMethodScopeContract;
 use ResourceParserGenerator\Types\Contracts\TypeContract;
+use RuntimeException;
 
 class VirtualClassMethodScope implements ClassMethodScopeContract
 {
@@ -20,6 +22,11 @@ class VirtualClassMethodScope implements ClassMethodScopeContract
         return resolve(self::class, [
             'returnType' => $returnType,
         ]);
+    }
+
+    public function attribute(string $className): AttributeContract|null
+    {
+        throw new RuntimeException('Cannot read attributes on virtual class method');
     }
 
     public function returnType(): TypeContract

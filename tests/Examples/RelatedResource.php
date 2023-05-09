@@ -13,11 +13,10 @@ use Sourcetoad\EnhancedResources\Resource;
  */
 class RelatedResource extends Resource
 {
-    public const FORMAT_BASE = 'base';
     public const FORMAT_VERBOSE = 'verbose';
 
-    #[Format(self::FORMAT_BASE)]
-    public function base(): array
+    #[Format('short')]
+    public function shortFormatNotNamedLikeFormatName(): array
     {
         return [
             'id' => $this->resource->id,

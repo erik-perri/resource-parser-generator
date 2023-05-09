@@ -167,11 +167,11 @@ class ClassScope implements ClassScopeContract
             : sprintf('AnonymousClass%d', $this->node->getLine());
     }
 
-    /**
-     * @return Collection<string, ClassMethodScope>
-     */
     public function methods(): Collection
     {
+        /**
+         * @var Collection<string, ClassMethodScopeContract>
+         */
         return $this->methods->collect();
     }
 

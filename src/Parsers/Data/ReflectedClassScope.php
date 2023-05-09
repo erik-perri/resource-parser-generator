@@ -4,8 +4,10 @@ declare(strict_types=1);
 
 namespace ResourceParserGenerator\Parsers\Data;
 
+use Illuminate\Support\Collection;
 use ReflectionClass;
 use ReflectionException;
+use ReflectionMethod;
 use ResourceParserGenerator\Contracts\ClassConstantContract;
 use ResourceParserGenerator\Contracts\ClassMethodScopeContract;
 use ResourceParserGenerator\Contracts\ClassPropertyContract;
@@ -54,6 +56,15 @@ class ReflectedClassScope implements ClassScopeContract
         }
 
         return false;
+    }
+
+    public function methods(): Collection
+    {
+        /**
+         * @var Collection<string, ClassMethodScopeContract>
+         */
+        return collect($this->reflection->getMethods())
+            ->map(fn(ReflectionMethod $method) => ReflectedClassMethodScope::create($method));
     }
 
     /**

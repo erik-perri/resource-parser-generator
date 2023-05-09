@@ -24,7 +24,7 @@ class ClassMethodReturnParserTest extends TestCase
         $result = $parser->parse($className, $methodName);
 
         if ($result instanceof ArrayWithPropertiesType) {
-            $result = $result->describeArray();
+            $result = $result->describeRecursive();
         } else {
             $result = $result->describe();
         }

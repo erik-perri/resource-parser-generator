@@ -57,8 +57,39 @@ class ExpressionTypeConverter
 
     public function convert(Expr $expr): TypeContract
     {
+        return $this->extractTypeFromExpr($expr, true);
+    }
+
+    private function extractTypeFromClassConstFetch(ClassConstFetch $expr): TypeContract
+    {
+        $class = $expr->class instanceof Expr
+            ? $this->extractTypeFromExpr($expr->class)
+            : $this->declaredTypeConverter->convert($expr->class, $this->resolver);
+
+        if (!($class instanceof Types\ClassType)) {
+            throw new RuntimeException('Class const fetch class is not a class type');
+        }
+
+        $classScope = $this->classParser->parse($class->fullyQualifiedName());
+        $constName = $expr->name;
+        if ($constName instanceof Expr) {
+            throw new RuntimeException('Class const fetch name is not a string');
+        }
+
+        $constScope = $classScope->constant($constName->name);
+        if (!$constScope) {
+            throw new RuntimeException(
+                sprintf('Unknown constant "%s" for class "%s"', $constName->name, $class->fullyQualifiedName()),
+            );
+        }
+
+        return $constScope->type();
+    }
+
+    private function extractTypeFromExpr(Expr $expr, bool $isExprRoot = false): TypeContract
+    {
         if ($expr instanceof MethodCall) {
-            return $this->extractTypeFromMethodCall($expr);
+            return $this->extractTypeFromMethodCall($expr, $isExprRoot);
         }
 
         if ($expr instanceof NullsafeMethodCall) {
@@ -127,11 +158,11 @@ class ExpressionTypeConverter
         }
 
         if ($expr instanceof ArrowFunction) {
-            return $this->convert($expr->expr);
+            return $this->extractTypeFromExpr($expr->expr);
         }
 
         if ($expr instanceof StaticCall) {
-            return $this->extractTypeFromStaticCall($expr);
+            return $this->extractTypeFromStaticCall($expr, $isExprRoot);
         }
 
         if ($expr instanceof ClassConstFetch) {
@@ -141,7 +172,7 @@ class ExpressionTypeConverter
         throw new RuntimeException(sprintf('Unhandled expression type "%s"', $expr->getType()));
     }
 
-    private function extractTypeFromMethodCall(MethodCall $value): TypeContract
+    private function extractTypeFromMethodCall(MethodCall $value, bool $isExprRoot = false): TypeContract
     {
         $leftSide = $this->getLeftSideScope($value);
         $rightSide = $this->getRightSide($value);
@@ -159,23 +190,8 @@ class ExpressionTypeConverter
 
         $returnType = $methodScope->returnType();
 
-        if ($returnType instanceof Types\ClassType &&
-            $returnType->fullyQualifiedName() === $leftSide->fullyQualifiedName() &&
-            $leftSide->hasParent(Resource::class)) {
-            $formatMethod = $this->locateFormatMethodInResourceCall($leftSide, $value)
-                ?? $this->locateDefaultFormatMethodInResource($leftSide);
-
-            if (!$formatMethod) {
-                throw new RuntimeException(
-                    sprintf('Unable to determine format of resource "%s"', $leftSide->fullyQualifiedName()),
-                );
-            }
-
-            if (!$this->methodReturnParser) {
-                throw new RuntimeException('Unable to parse method return');
-            }
-
-            return $this->methodReturnParser->parse($leftSide->fullyQualifiedName(), $formatMethod);
+        if ($isExprRoot && $returnType instanceof Types\ClassType && $leftSide->hasParent(Resource::class)) {
+            return $this->extractTypeFromResource($leftSide, $value);
         }
 
         if ($rightSide === 'whenLoaded') {
@@ -188,10 +204,10 @@ class ExpressionTypeConverter
                 throw new RuntimeException('Unhandled missing second argument for whenLoaded');
             }
 
-            $returnWhenLoaded = $this->convert($args[1]->value);
+            $returnWhenLoaded = $this->extractTypeFromExpr($args[1]->value);
 
             $returnWhenUnloaded = count($args) > 2
-                ? $this->convert($args[2]->value)
+                ? $this->extractTypeFromExpr($args[2]->value)
                 : new Types\UndefinedType();
 
             $returnType = $returnType
@@ -205,9 +221,8 @@ class ExpressionTypeConverter
         return $returnType;
     }
 
-    private function extractTypeFromNullsafeMethodCall(
-        NullsafeMethodCall $value
-    ): TypeContract {
+    private function extractTypeFromNullsafeMethodCall(NullsafeMethodCall $value): TypeContract
+    {
         $leftSide = $this->getLeftSideScope($value);
         $rightSide = $this->getRightSide($value);
 
@@ -277,14 +292,62 @@ class ExpressionTypeConverter
         return $type;
     }
 
+    private function extractTypeFromResource(ClassScopeContract $leftSide, MethodCall|StaticCall $value): TypeContract
+    {
+        $formatMethod = $this->locateFormatMethodInResourceCall($leftSide, $value)
+            ?? $this->locateDefaultFormatMethodInResource($leftSide);
+
+        if (!$formatMethod) {
+            throw new RuntimeException(
+                sprintf('Unable to determine format of resource "%s"', $leftSide->fullyQualifiedName()),
+            );
+        }
+
+        if (!$this->methodReturnParser) {
+            throw new RuntimeException('Unable to parse method return');
+        }
+
+        return $this->methodReturnParser->parse($leftSide->fullyQualifiedName(), $formatMethod);
+    }
+
+    private function extractTypeFromStaticCall(StaticCall $expr, bool $isExprRoot = false): TypeContract
+    {
+        $class = $expr->class instanceof Expr
+            ? $this->extractTypeFromExpr($expr->class)
+            : $this->declaredTypeConverter->convert($expr->class, $this->resolver);
+
+        if (!($class instanceof Types\ClassType)) {
+            throw new RuntimeException('Static call class is not a class type');
+        }
+
+        $classScope = $this->classParser->parse($class->fullyQualifiedName());
+        $methodName = $expr->name;
+        if ($methodName instanceof Expr) {
+            throw new RuntimeException('Static call name is not a string');
+        }
+
+        if ($isExprRoot && $classScope->hasParent(Resource::class)) {
+            return $this->extractTypeFromResource($classScope, $expr);
+        }
+
+        $methodScope = $classScope->method($methodName->name);
+        if (!$methodScope) {
+            throw new RuntimeException(
+                sprintf('Unknown method "%s" for class "%s"', $methodName->name, $class->fullyQualifiedName()),
+            );
+        }
+
+        return $methodScope->returnType();
+    }
+
     private function extractTypeFromTernary(Ternary $value): TypeContract
     {
         if (!$value->if) {
             throw new RuntimeException('Ternary expression missing if');
         }
 
-        $ifType = $this->convert($value->if);
-        $elseType = $this->convert($value->else);
+        $ifType = $this->extractTypeFromExpr($value->if);
+        $elseType = $this->extractTypeFromExpr($value->else);
 
         if ($ifType->describe() === $elseType->describe()) {
             return $ifType;
@@ -296,7 +359,7 @@ class ExpressionTypeConverter
     private function getLeftSideScope(
         PropertyFetch|NullsafePropertyFetch|MethodCall|NullsafeMethodCall $value,
     ): ClassScopeContract {
-        $leftSide = $this->convert($value->var);
+        $leftSide = $this->extractTypeFromExpr($value->var);
 
         if ($value instanceof NullsafePropertyFetch || $value instanceof NullsafeMethodCall) {
             if (!($leftSide instanceof Types\UnionType)) {
@@ -328,69 +391,19 @@ class ExpressionTypeConverter
         PropertyFetch|NullsafePropertyFetch|MethodCall|NullsafeMethodCall $value,
     ): TypeContract|string {
         return $value->name instanceof Expr
-            ? $this->convert($value->name)
+            ? $this->extractTypeFromExpr($value->name)
             : $value->name->name;
     }
 
-    private function extractTypeFromStaticCall(StaticCall $expr): TypeContract
-    {
-        $class = $expr->class instanceof Expr
-            ? $this->convert($expr->class)
-            : $this->declaredTypeConverter->convert($expr->class, $this->resolver);
-
-        if (!($class instanceof Types\ClassType)) {
-            throw new RuntimeException('Static call class is not a class type');
-        }
-
-        $classScope = $this->classParser->parse($class->fullyQualifiedName());
-        $methodName = $expr->name;
-        if ($methodName instanceof Expr) {
-            throw new RuntimeException('Static call name is not a string');
-        }
-
-        $methodScope = $classScope->method($methodName->name);
-        if (!$methodScope) {
-            throw new RuntimeException(
-                sprintf('Unknown method "%s" for class "%s"', $methodName->name, $class->fullyQualifiedName()),
-            );
-        }
-
-        return $methodScope->returnType();
-    }
-
-    private function extractTypeFromClassConstFetch(ClassConstFetch $expr): TypeContract
-    {
-        $class = $expr->class instanceof Expr
-            ? $this->convert($expr->class)
-            : $this->declaredTypeConverter->convert($expr->class, $this->resolver);
-
-        if (!($class instanceof Types\ClassType)) {
-            throw new RuntimeException('Class const fetch class is not a class type');
-        }
-
-        $classScope = $this->classParser->parse($class->fullyQualifiedName());
-        $constName = $expr->name;
-        if ($constName instanceof Expr) {
-            throw new RuntimeException('Class const fetch name is not a string');
-        }
-
-        $constScope = $classScope->constant($constName->name);
-        if (!$constScope) {
-            throw new RuntimeException(
-                sprintf('Unknown constant "%s" for class "%s"', $constName->name, $class->fullyQualifiedName()),
-            );
-        }
-
-        return $constScope->type();
-    }
-
-    private function locateFormatMethodInResourceCall(ClassScopeContract $resourceClass, MethodCall $call): string|null
-    {
-        if ($call->name instanceof Expr) {
-            throw new RuntimeException('Method call name is not a string');
-        }
-
+    private function locateFormatMethodInResourceCall(
+        ClassScopeContract $resourceClass,
+        MethodCall|StaticCall $call
+    ): string|null {
         $formatName = null;
+
+        if ($call->name instanceof Expr) {
+            throw new RuntimeException('Resource call name is not a string');
+        }
 
         if ($call->name->toString() === 'format') {
             $formatArg = $call->getArgs()[0]->value;

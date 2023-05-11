@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace ResourceParserGenerator\Converters\Expressions;
 
+use Illuminate\Http\Resources\MissingValue;
 use PhpParser\Node\Expr\MethodCall;
 use PhpParser\Node\Expr\NullsafeMethodCall;
 use ResourceParserGenerator\Contracts\Converters\Expressions\TypeConverterContract;
@@ -11,8 +12,11 @@ use ResourceParserGenerator\Converters\ExprTypeConverter;
 use ResourceParserGenerator\Converters\Traits\ParsesFetchSides;
 use ResourceParserGenerator\Parsers\ClassParser;
 use ResourceParserGenerator\Resolvers\Contracts\ResolverContract;
+use ResourceParserGenerator\Types\ClassType;
 use ResourceParserGenerator\Types\Contracts\TypeContract;
+use ResourceParserGenerator\Types\MixedType;
 use ResourceParserGenerator\Types\NullType;
+use ResourceParserGenerator\Types\UndefinedType;
 use ResourceParserGenerator\Types\UnionType;
 use RuntimeException;
 
@@ -41,18 +45,51 @@ class MethodCallTypeConverter implements TypeConverterContract
             throw new RuntimeException(sprintf('Unknown method "%s" in "%s"', $rightSide, $leftSide->name()));
         }
 
+        $type = $methodScope->returnType();
 
-        $return = $methodScope->returnType();
+        if ($rightSide === 'whenLoaded') {
+            $type = $this->handleWhenLoaded($expr, $context, $type);
+        }
 
         if ($expr instanceof NullsafeMethodCall) {
-            if ($return instanceof UnionType) {
-                $return = $return->addToUnion(new NullType());
+            if ($type instanceof UnionType) {
+                $type = $type->addToUnion(new NullType());
             } else {
-                $return = new UnionType($return, new NullType());
+                $type = new UnionType($type, new NullType());
             }
         }
 
-        return $return;
+        return $type;
+    }
+
+    private function handleWhenLoaded(
+        MethodCall|NullsafeMethodCall $expr,
+        ConverterContext $context,
+        TypeContract $type,
+    ): TypeContract {
+        if (!($type instanceof UnionType)) {
+            throw new RuntimeException(
+                sprintf('Unexpected non-union whenLoaded method return, found "%s"', $type->describe()),
+            );
+        }
+
+        $args = $expr->getArgs();
+        if (count($args) < 2) {
+            throw new RuntimeException('Unhandled missing second argument for whenLoaded');
+        }
+
+        $returnWhenLoaded = $this->exprTypeConverter->convert($args[1]->value, $context);
+
+        $returnWhenUnloaded = count($args) > 2
+            ? $this->exprTypeConverter->convert($args[2]->value, $context)
+            : new UndefinedType();
+
+        return $type
+            ->addToUnion($returnWhenLoaded)
+            ->addToUnion($returnWhenUnloaded)
+            ->removeFromUnion(fn(TypeContract $type) => $type instanceof MixedType)
+            ->removeFromUnion(fn(TypeContract $type) => $type instanceof ClassType
+                && $type->fullyQualifiedName() === MissingValue::class);
     }
 
     protected function exprTypeConverter(): ExprTypeConverter

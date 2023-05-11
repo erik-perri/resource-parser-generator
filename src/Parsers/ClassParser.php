@@ -22,9 +22,10 @@ class ClassParser
 
     /**
      * @param class-string $className
+     * @param class-string|null $staticContext
      * @return ClassScopeContract
      */
-    public function parse(string $className): ClassScopeContract
+    public function parse(string $className, string|null $staticContext = null): ClassScopeContract
     {
         if (class_exists($className) && !$this->classLocator->exists($className)) {
             return ReflectedClassScope::create(new ReflectionClass($className));
@@ -33,7 +34,7 @@ class ClassParser
         $classFile = $this->classLocator->get($className);
 
         $contents = File::get($classFile);
-        $fileScope = $this->fileParser->parse($contents);
+        $fileScope = $this->fileParser->parse($contents, $staticContext);
 
         $firstClass = $fileScope->classes()->first();
         if (!$firstClass) {

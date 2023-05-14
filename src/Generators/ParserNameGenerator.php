@@ -2,11 +2,12 @@
 
 declare(strict_types=1);
 
-namespace ResourceParserGenerator\Builders;
+namespace ResourceParserGenerator\Generators;
 
 use Illuminate\Support\Str;
+use ResourceParserGenerator\Generators\Contracts\ParserNameGeneratorContract;
 
-class ParserNameGenerator
+class ParserNameGenerator implements ParserNameGeneratorContract
 {
     public function generateVariableName(string $fullyQualifiedName, string $methodName): string
     {

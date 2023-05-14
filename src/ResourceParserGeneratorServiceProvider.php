@@ -15,6 +15,8 @@ use PHPStan\PhpDocParser\Parser\PhpDocParser;
 use PHPStan\PhpDocParser\Parser\TypeParser;
 use ResourceParserGenerator\Contracts\Filesystem\ClassFileLocatorContract;
 use ResourceParserGenerator\Filesystem\ClassFileLocator;
+use ResourceParserGenerator\Generators\Contracts\ParserNameGeneratorContract;
+use ResourceParserGenerator\Generators\ParserNameGenerator;
 
 class ResourceParserGeneratorServiceProvider extends ServiceProvider
 {
@@ -51,6 +53,8 @@ class ResourceParserGeneratorServiceProvider extends ServiceProvider
                     $constExprParser,
                 );
             });
+
+            $this->app->singleton(ParserNameGeneratorContract::class, ParserNameGenerator::class);
         }
     }
 }

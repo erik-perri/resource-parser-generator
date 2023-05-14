@@ -4,15 +4,15 @@ declare(strict_types=1);
 
 namespace ResourceParserGenerator\Types\Zod;
 
-use ResourceParserGenerator\Builders\ParserNameGenerator;
 use ResourceParserGenerator\Contracts\Types\ParserTypeContract;
+use ResourceParserGenerator\Generators\Contracts\ParserNameGeneratorContract;
 
 class ZodShapeReferenceType implements ParserTypeContract
 {
     public function __construct(
         private readonly string $fullyQualifiedResourceName,
         private readonly string $methodName,
-        private readonly ParserNameGenerator $parserNameGenerator,
+        private readonly ParserNameGeneratorContract $parserNameGenerator,
     ) {
         //
     }

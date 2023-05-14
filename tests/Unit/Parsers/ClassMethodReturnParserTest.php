@@ -70,6 +70,7 @@ class ClassMethodReturnParserTest extends TestCase
                 'expected' => [
                     'ternary_to_int' => 'int',
                     'ternary_to_compound' => 'bool|int|string',
+                    'short_ternary' => 'string',
                 ],
             ],
             'UserResource::scalars' => [

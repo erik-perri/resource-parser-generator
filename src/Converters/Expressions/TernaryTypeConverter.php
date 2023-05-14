@@ -23,6 +23,10 @@ class TernaryTypeConverter implements TypeConverterContract
         $ifType = $this->exprTypeConverter->convert($expr->if ?? $expr->cond, $context);
         $elseType = $this->exprTypeConverter->convert($expr->else, $context);
 
+        if (!$expr->if && $ifType instanceof Types\UnionType) {
+            $ifType = $ifType->removeNullable();
+        }
+
         if ($ifType->describe() === $elseType->describe()) {
             return $ifType;
         }

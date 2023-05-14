@@ -6,6 +6,7 @@ namespace ResourceParserGenerator\Types;
 
 use Illuminate\Support\Collection;
 use ResourceParserGenerator\Contracts\Types\TypeContract;
+use RuntimeException;
 
 class UnionType implements TypeContract
 {
@@ -59,5 +60,25 @@ class UnionType implements TypeContract
     public function types(): Collection
     {
         return $this->types->collect();
+    }
+
+    public function removeNullable(): TypeContract
+    {
+        $newTypes = $this->types->reject(fn(TypeContract $type) => $type instanceof NullType);
+        $newLength = $newTypes->count();
+
+        if ($newLength === $this->types->count()) {
+            throw new RuntimeException('Cannot remove nullable from non-nullable union');
+        }
+
+        if (!$newLength) {
+            throw new RuntimeException('Removing nullable would produce empty union');
+        }
+
+        if ($newLength === 1) {
+            return $newTypes->first();
+        }
+
+        return new self(...$newTypes->values());
     }
 }

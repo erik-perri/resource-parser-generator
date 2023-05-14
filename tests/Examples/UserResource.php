@@ -69,6 +69,7 @@ class UserResource extends JsonResource
         return [
             'ternary_to_int' => $request->has('something') ? +1 : -1,
             'ternary_to_compound' => $this->resource->created_at ? ($this->resource->updated_at ? true : -1) : 'false',
+            'short_ternary' => $this->resource->created_at?->toString() ?: 'false',
         ];
     }
 

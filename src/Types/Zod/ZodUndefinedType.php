@@ -8,13 +8,13 @@ use ResourceParserGenerator\Contracts\Types\ParserTypeContract;
 
 class ZodUndefinedType implements ParserTypeContract
 {
-    public function imports(): array
-    {
-        return ['undefined'];
-    }
-
     public function constraint(): string
     {
         return 'undefined()';
+    }
+
+    public function imports(): array
+    {
+        return ['zod' => ['undefined']];
     }
 }

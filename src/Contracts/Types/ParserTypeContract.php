@@ -7,7 +7,7 @@ namespace ResourceParserGenerator\Contracts\Types;
 interface ParserTypeContract
 {
     /**
-     * @return string[]
+     * @return array<string, string[]>
      */
     public function imports(): array;
 

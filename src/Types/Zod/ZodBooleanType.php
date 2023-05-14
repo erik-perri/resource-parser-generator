@@ -8,13 +8,13 @@ use ResourceParserGenerator\Contracts\Types\ParserTypeContract;
 
 class ZodBooleanType implements ParserTypeContract
 {
-    public function imports(): array
-    {
-        return ['boolean'];
-    }
-
     public function constraint(): string
     {
         return 'boolean()';
+    }
+
+    public function imports(): array
+    {
+        return ['zod' => ['boolean']];
     }
 }

@@ -27,13 +27,35 @@ class ZodShapeReferenceType implements ParserTypeContract
         ]);
     }
 
+    public function constraint(): string
+    {
+        return $this->parserNameGenerator->generateVariableName($this->fullyQualifiedResourceName, $this->methodName);
+    }
+
     public function imports(): array
     {
         return [];
     }
 
-    public function constraint(): string
+    /**
+     * @param string[] $availableParsersInThisFile
+     * @return array<string, string[]>
+     */
+    public function shapeImport(array $availableParsersInThisFile): array
     {
-        return $this->parserNameGenerator->generateVariableName($this->fullyQualifiedResourceName, $this->methodName);
+        if (!in_array($this->constraint(), $availableParsersInThisFile, true)) {
+            $fileName = $this->parserNameGenerator->generateFileName($this->fullyQualifiedResourceName);
+            $parserName = $this->parserNameGenerator->generateVariableName(
+                $this->fullyQualifiedResourceName,
+                $this->methodName,
+            );
+            return [
+                // TODO Generate this path somehow. Currently it works since we don't support any other structure than
+                //      all parsers in the same location.
+                './' . $fileName => [$parserName],
+            ];
+        }
+
+        return [];
     }
 }

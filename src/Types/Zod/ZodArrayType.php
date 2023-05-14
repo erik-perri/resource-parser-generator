@@ -15,27 +15,6 @@ class ZodArrayType implements ParserTypeContract
         //
     }
 
-    public function imports(): array
-    {
-        $constraintType = $this->keys && $this->values
-            ? 'record'
-            : 'array';
-        $imports = collect([$constraintType]);
-
-        if ($this->keys) {
-            $imports = $imports->merge($this->keys->imports());
-        }
-
-        if ($this->values) {
-            $imports = $imports->merge($this->values->imports());
-        }
-
-        return $imports
-            ->unique()
-            ->sort()
-            ->all();
-    }
-
     public function constraint(): string
     {
         if ($this->keys && $this->values) {
@@ -47,5 +26,26 @@ class ZodArrayType implements ParserTypeContract
         }
 
         return 'array()';
+    }
+
+    public function imports(): array
+    {
+        $constraintType = $this->keys && $this->values
+            ? 'record'
+            : 'array';
+
+        $imports = collect(['zod' => [$constraintType]]);
+
+        if ($this->keys) {
+            $imports = $imports->mergeRecursive($this->keys->imports());
+        }
+
+        if ($this->values) {
+            $imports = $imports->mergeRecursive($this->values->imports());
+        }
+
+        return $imports
+            ->map(fn(array $importItems) => collect($importItems)->unique()->sort()->values()->all())
+            ->all();
     }
 }

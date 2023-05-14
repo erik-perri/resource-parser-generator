@@ -19,27 +19,6 @@ class ZodIntersectionType implements ParserTypeContract
         $this->types = collect($types);
     }
 
-    public function imports(): array
-    {
-        /**
-         * @var Collection<int, string> $imports
-         */
-        $imports = $this->types->map(fn(ParserTypeContract $type) => $type->imports())
-            ->flatten()
-            ->unique()
-            ->sort();
-
-        if ($imports->count() === 1) {
-            return $imports->all();
-        }
-
-        return $imports
-            ->add('intersection')
-            ->unique()
-            ->sort()
-            ->all();
-    }
-
     public function constraint(): string
     {
         $types = $this->types->map(fn(ParserTypeContract $type) => $type->constraint())
@@ -51,5 +30,18 @@ class ZodIntersectionType implements ParserTypeContract
         }
 
         return sprintf('intersection(%s)', $types->join(', '));
+    }
+
+    public function imports(): array
+    {
+        $imports = collect(['zod' => ['intersection']]);
+
+        foreach ($this->types as $type) {
+            $imports = $imports->mergeRecursive($type->imports());
+        }
+
+        return $imports
+            ->map(fn(array $importItems) => collect($importItems)->unique()->sort()->values()->all())
+            ->all();
     }
 }

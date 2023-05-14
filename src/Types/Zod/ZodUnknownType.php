@@ -8,13 +8,13 @@ use ResourceParserGenerator\Contracts\Types\ParserTypeContract;
 
 class ZodUnknownType implements ParserTypeContract
 {
-    public function imports(): array
-    {
-        return ['unknown'];
-    }
-
     public function constraint(): string
     {
         return 'unknown()';
+    }
+
+    public function imports(): array
+    {
+        return ['zod' => ['unknown']];
     }
 }

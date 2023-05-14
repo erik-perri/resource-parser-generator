@@ -19,27 +19,6 @@ class ZodUnionType implements ParserTypeContract
         $this->types = collect($types);
     }
 
-    public function imports(): array
-    {
-        /**
-         * @var Collection<int, string> $imports
-         */
-        $imports = $this->types->map(fn(ParserTypeContract $type) => $type->imports())
-            ->flatten()
-            ->unique()
-            ->sort();
-
-        if ($imports->count() === 1) {
-            return $imports->all();
-        }
-
-        return $imports
-            ->add('union')
-            ->unique()
-            ->sort()
-            ->all();
-    }
-
     public function constraint(): string
     {
         $types = $this->types->map(fn(ParserTypeContract $type) => $type->constraint())
@@ -51,5 +30,22 @@ class ZodUnionType implements ParserTypeContract
         }
 
         return sprintf('union(%s)', $types->join(', '));
+    }
+
+    public function imports(): array
+    {
+        $imports = collect(['zod' => ['union']]);
+
+        foreach ($this->types as $type) {
+            $imports = $imports->mergeRecursive($type->imports());
+        }
+
+        if ($imports->count() === 1) {
+            return $imports->all();
+        }
+
+        return $imports
+            ->map(fn(array $importItems) => collect($importItems)->unique()->sort()->values()->all())
+            ->all();
     }
 }

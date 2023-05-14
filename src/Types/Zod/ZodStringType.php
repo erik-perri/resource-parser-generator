@@ -8,13 +8,13 @@ use ResourceParserGenerator\Contracts\Types\ParserTypeContract;
 
 class ZodStringType implements ParserTypeContract
 {
-    public function imports(): array
-    {
-        return ['string'];
-    }
-
     public function constraint(): string
     {
         return 'string()';
+    }
+
+    public function imports(): array
+    {
+        return ['zod' => ['string']];
     }
 }

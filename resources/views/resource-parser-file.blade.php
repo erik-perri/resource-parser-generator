@@ -1,11 +1,13 @@
 @php
     use Illuminate\Support\Collection;use ResourceParserGenerator\Parsers\Data\ResourceParserData;
 
-    /** @var string[] $imports */
+    /** @var Collection<string, string[]> $imports */
     /** @var Collection<string, ResourceParserData> $parsers */
 @endphp
 
-import {{ '{' }}{{ implode(', ', $imports) }}{{ '}' }} from 'zod';
+@foreach($imports as $from => $imported)
+import {{ '{' }}{{ implode(', ', $imported) }}{{ '}' }} from '{{$from}}';
+@endforeach
 
 @foreach($parsers as $parserName => $parser)
 @include('resource-parser-generator::resource-parser', [

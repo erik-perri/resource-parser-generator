@@ -8,13 +8,13 @@ use ResourceParserGenerator\Contracts\Types\ParserTypeContract;
 
 class ZodNullType implements ParserTypeContract
 {
-    public function imports(): array
-    {
-        return ['null'];
-    }
-
     public function constraint(): string
     {
         return 'null()';
+    }
+
+    public function imports(): array
+    {
+        return ['zod' => ['null']];
     }
 }

@@ -8,13 +8,13 @@ use ResourceParserGenerator\Contracts\Types\ParserTypeContract;
 
 class ZodNumberType implements ParserTypeContract
 {
-    public function imports(): array
-    {
-        return ['number'];
-    }
-
     public function constraint(): string
     {
         return 'number()';
+    }
+
+    public function imports(): array
+    {
+        return ['zod' => ['number']];
     }
 }

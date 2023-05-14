@@ -21,6 +21,8 @@ use PhpParser\Node\Scalar\DNumber;
 use PhpParser\Node\Scalar\LNumber;
 use PhpParser\Node\Scalar\String_;
 use ResourceParserGenerator\Contracts\Converters\Expressions\TypeConverterContract;
+use ResourceParserGenerator\Contracts\Resolvers\ResolverContract;
+use ResourceParserGenerator\Contracts\Types\TypeContract;
 use ResourceParserGenerator\Converters\Expressions\ArrowFunctionTypeConverter;
 use ResourceParserGenerator\Converters\Expressions\ClassConstFetchTypeConverter;
 use ResourceParserGenerator\Converters\Expressions\ConstFetchTypeConverter;
@@ -31,8 +33,6 @@ use ResourceParserGenerator\Converters\Expressions\PropertyFetchTypeConverter;
 use ResourceParserGenerator\Converters\Expressions\StaticCallTypeConverter;
 use ResourceParserGenerator\Converters\Expressions\StringTypeConverter;
 use ResourceParserGenerator\Converters\Expressions\TernaryTypeConverter;
-use ResourceParserGenerator\Resolvers\Contracts\ResolverContract;
-use ResourceParserGenerator\Types\Contracts\TypeContract;
 use RuntimeException;
 
 class ExprTypeConverter

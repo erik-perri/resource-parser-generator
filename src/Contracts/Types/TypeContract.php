@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace ResourceParserGenerator\Types\Contracts;
+namespace ResourceParserGenerator\Contracts\Types;
 
 interface TypeContract
 {

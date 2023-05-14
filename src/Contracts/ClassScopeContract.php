@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace ResourceParserGenerator\Contracts;
 
 use Illuminate\Support\Collection;
-use ResourceParserGenerator\Types\Contracts\TypeContract;
+use ResourceParserGenerator\Contracts\Types\TypeContract;
 
 interface ClassScopeContract
 {

@@ -8,8 +8,8 @@ use PhpParser\Node\Attribute;
 use PhpParser\Node\Expr\ClassConstFetch;
 use PhpParser\Node\Scalar\String_;
 use ResourceParserGenerator\Contracts\AttributeContract;
+use ResourceParserGenerator\Contracts\Resolvers\ResolverContract;
 use ResourceParserGenerator\Parsers\ClassConstFetchValueParser;
-use ResourceParserGenerator\Resolvers\Contracts\ResolverContract;
 use RuntimeException;
 
 class ClassMethodAttribute implements AttributeContract

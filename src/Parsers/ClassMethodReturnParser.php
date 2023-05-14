@@ -10,14 +10,14 @@ use PhpParser\Node\Expr\Array_;
 use PhpParser\Node\Scalar\String_;
 use PhpParser\Node\Stmt\Return_;
 use PhpParser\NodeFinder;
+use ResourceParserGenerator\Contracts\Filesystem\ClassFileLocatorContract;
+use ResourceParserGenerator\Contracts\Types\TypeContract;
 use ResourceParserGenerator\Converters\ExpressionTypeConverter;
-use ResourceParserGenerator\Filesystem\Contracts\ClassFileLocatorContract;
 use ResourceParserGenerator\Parsers\Data\ClassMethodScope;
 use ResourceParserGenerator\Resolvers\ClassNameResolver;
 use ResourceParserGenerator\Resolvers\Resolver;
 use ResourceParserGenerator\Resolvers\VariableResolver;
 use ResourceParserGenerator\Types;
-use ResourceParserGenerator\Types\Contracts\TypeContract;
 use RuntimeException;
 
 class ClassMethodReturnParser

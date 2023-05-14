@@ -12,8 +12,8 @@ use ResourceParserGenerator\Contracts\ClassConstantContract;
 use ResourceParserGenerator\Contracts\ClassMethodScopeContract;
 use ResourceParserGenerator\Contracts\ClassPropertyContract;
 use ResourceParserGenerator\Contracts\ClassScopeContract;
+use ResourceParserGenerator\Contracts\Types\TypeContract;
 use ResourceParserGenerator\Converters\VariableTypeConverter;
-use ResourceParserGenerator\Types\Contracts\TypeContract;
 
 class ReflectedClassScope implements ClassScopeContract
 {

@@ -12,9 +12,9 @@ use PhpParser\Node\Name;
 use PhpParser\Node\Scalar\DNumber;
 use PhpParser\Node\Scalar\LNumber;
 use PHPUnit\Framework\Attributes\CoversClass;
+use ResourceParserGenerator\Contracts\Resolvers\ResolverContract;
 use ResourceParserGenerator\Converters\Expressions\TernaryTypeConverter;
 use ResourceParserGenerator\Converters\ExprTypeConverter;
-use ResourceParserGenerator\Resolvers\Contracts\ResolverContract;
 use ResourceParserGenerator\Tests\TestCase;
 use ResourceParserGenerator\Types;
 

@@ -6,8 +6,8 @@ namespace ResourceParserGenerator\Converters;
 
 use ReflectionNamedType;
 use ReflectionType;
+use ResourceParserGenerator\Contracts\Types\TypeContract;
 use ResourceParserGenerator\Types;
-use ResourceParserGenerator\Types\Contracts\TypeContract;
 use RuntimeException;
 
 class ReflectionTypeConverter

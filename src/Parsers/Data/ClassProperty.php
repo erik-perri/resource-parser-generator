@@ -7,10 +7,10 @@ namespace ResourceParserGenerator\Parsers\Data;
 use PhpParser\Node\Stmt\Property;
 use PhpParser\Node\Stmt\PropertyProperty;
 use ResourceParserGenerator\Contracts\ClassPropertyContract;
+use ResourceParserGenerator\Contracts\Resolvers\ResolverContract;
+use ResourceParserGenerator\Contracts\Types\TypeContract;
 use ResourceParserGenerator\Converters\DeclaredTypeConverter;
 use ResourceParserGenerator\Parsers\DocBlockParser;
-use ResourceParserGenerator\Resolvers\Contracts\ResolverContract;
-use ResourceParserGenerator\Types\Contracts\TypeContract;
 
 class ClassProperty implements ClassPropertyContract
 {

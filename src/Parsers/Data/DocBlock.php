@@ -6,7 +6,7 @@ namespace ResourceParserGenerator\Parsers\Data;
 
 use Illuminate\Support\Collection;
 use InvalidArgumentException;
-use ResourceParserGenerator\Types\Contracts\TypeContract;
+use ResourceParserGenerator\Contracts\Types\TypeContract;
 
 class DocBlock
 {

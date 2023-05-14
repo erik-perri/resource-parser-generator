@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace ResourceParserGenerator\Converters;
 
+use ResourceParserGenerator\Contracts\Types\TypeContract;
 use ResourceParserGenerator\Types;
-use ResourceParserGenerator\Types\Contracts\TypeContract;
 
 class VariableTypeConverter
 {

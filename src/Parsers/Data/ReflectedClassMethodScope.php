@@ -7,8 +7,8 @@ namespace ResourceParserGenerator\Parsers\Data;
 use ReflectionMethod;
 use ResourceParserGenerator\Contracts\AttributeContract;
 use ResourceParserGenerator\Contracts\ClassMethodScopeContract;
+use ResourceParserGenerator\Contracts\Types\TypeContract;
 use ResourceParserGenerator\Converters\ReflectionTypeConverter;
-use ResourceParserGenerator\Types\Contracts\TypeContract;
 use RuntimeException;
 
 class ReflectedClassMethodScope implements ClassMethodScopeContract

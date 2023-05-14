@@ -7,7 +7,7 @@ namespace ResourceParserGenerator\Parsers;
 use PhpParser\Node\Expr;
 use PhpParser\Node\Expr\ClassConstFetch;
 use ResourceParserGenerator\Contracts\ClassScopeContract;
-use ResourceParserGenerator\Resolvers\Contracts\ResolverContract;
+use ResourceParserGenerator\Contracts\Resolvers\ResolverContract;
 use RuntimeException;
 
 class ClassConstFetchValueParser

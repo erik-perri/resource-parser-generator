@@ -11,9 +11,9 @@ use PhpParser\Node\Name;
 use PhpParser\Node\Name\FullyQualified;
 use PhpParser\Node\NullableType;
 use PhpParser\Node\UnionType;
-use ResourceParserGenerator\Resolvers\Contracts\ResolverContract;
+use ResourceParserGenerator\Contracts\Resolvers\ResolverContract;
+use ResourceParserGenerator\Contracts\Types\TypeContract;
 use ResourceParserGenerator\Types;
-use ResourceParserGenerator\Types\Contracts\TypeContract;
 use RuntimeException;
 
 class DeclaredTypeConverter

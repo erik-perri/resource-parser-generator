@@ -16,12 +16,12 @@ use PhpParser\NodeFinder;
 use PhpParser\Parser;
 use ReflectionClass;
 use ResourceParserGenerator\Contracts\ClassScopeContract;
-use ResourceParserGenerator\Filesystem\Contracts\ClassFileLocatorContract;
+use ResourceParserGenerator\Contracts\Filesystem\ClassFileLocatorContract;
+use ResourceParserGenerator\Contracts\Resolvers\ResolverContract;
 use ResourceParserGenerator\Parsers\Data\ClassScope;
 use ResourceParserGenerator\Parsers\Data\FileScope;
 use ResourceParserGenerator\Parsers\Data\ReflectedClassScope;
 use ResourceParserGenerator\Resolvers\ClassNameResolver;
-use ResourceParserGenerator\Resolvers\Contracts\ResolverContract;
 use ResourceParserGenerator\Resolvers\Resolver;
 use RuntimeException;
 

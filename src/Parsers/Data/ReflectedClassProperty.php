@@ -6,8 +6,8 @@ namespace ResourceParserGenerator\Parsers\Data;
 
 use ReflectionProperty;
 use ResourceParserGenerator\Contracts\ClassPropertyContract;
+use ResourceParserGenerator\Contracts\Types\TypeContract;
 use ResourceParserGenerator\Converters\ReflectionTypeConverter;
-use ResourceParserGenerator\Types\Contracts\TypeContract;
 
 class ReflectedClassProperty implements ClassPropertyContract
 {

@@ -6,9 +6,9 @@ namespace ResourceParserGenerator\Converters\Expressions;
 
 use PhpParser\Node\Scalar\DNumber;
 use ResourceParserGenerator\Contracts\Converters\Expressions\TypeConverterContract;
-use ResourceParserGenerator\Resolvers\Contracts\ResolverContract;
+use ResourceParserGenerator\Contracts\Resolvers\ResolverContract;
+use ResourceParserGenerator\Contracts\Types\TypeContract;
 use ResourceParserGenerator\Types;
-use ResourceParserGenerator\Types\Contracts\TypeContract;
 
 class DoubleTypeConverter implements TypeConverterContract
 {

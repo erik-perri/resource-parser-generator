@@ -7,7 +7,7 @@ namespace ResourceParserGenerator\Parsers;
 use Illuminate\Support\Facades\File;
 use ReflectionClass;
 use ResourceParserGenerator\Contracts\ClassScopeContract;
-use ResourceParserGenerator\Filesystem\Contracts\ClassFileLocatorContract;
+use ResourceParserGenerator\Contracts\Filesystem\ClassFileLocatorContract;
 use ResourceParserGenerator\Parsers\Data\ReflectedClassScope;
 use RuntimeException;
 

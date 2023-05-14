@@ -7,9 +7,9 @@ namespace ResourceParserGenerator\Parsers\Data;
 use PhpParser\Node\Const_;
 use PhpParser\Node\Scalar\String_;
 use ResourceParserGenerator\Contracts\ClassConstantContract;
+use ResourceParserGenerator\Contracts\Resolvers\ResolverContract;
+use ResourceParserGenerator\Contracts\Types\TypeContract;
 use ResourceParserGenerator\Converters\ExpressionTypeConverter;
-use ResourceParserGenerator\Resolvers\Contracts\ResolverContract;
-use ResourceParserGenerator\Types\Contracts\TypeContract;
 use RuntimeException;
 
 class ClassConstant implements ClassConstantContract

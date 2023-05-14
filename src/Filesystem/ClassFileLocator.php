@@ -6,7 +6,7 @@ namespace ResourceParserGenerator\Filesystem;
 
 use Composer\Autoload\ClassLoader;
 use InvalidArgumentException;
-use ResourceParserGenerator\Filesystem\Contracts\ClassFileLocatorContract;
+use ResourceParserGenerator\Contracts\Filesystem\ClassFileLocatorContract;
 use RuntimeException;
 
 class ClassFileLocator implements ClassFileLocatorContract

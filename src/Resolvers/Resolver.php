@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace ResourceParserGenerator\Resolvers;
 
-use ResourceParserGenerator\Resolvers\Contracts\ClassNameResolverContract;
-use ResourceParserGenerator\Resolvers\Contracts\ResolverContract;
-use ResourceParserGenerator\Resolvers\Contracts\VariableResolverContract;
-use ResourceParserGenerator\Types\Contracts\TypeContract;
+use ResourceParserGenerator\Contracts\Resolvers\ClassNameResolverContract;
+use ResourceParserGenerator\Contracts\Resolvers\ResolverContract;
+use ResourceParserGenerator\Contracts\Resolvers\VariableResolverContract;
+use ResourceParserGenerator\Contracts\Types\TypeContract;
 
 class Resolver implements ResolverContract
 {

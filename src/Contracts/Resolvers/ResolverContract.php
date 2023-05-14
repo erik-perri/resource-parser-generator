@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace ResourceParserGenerator\Resolvers\Contracts;
+namespace ResourceParserGenerator\Contracts\Resolvers;
 
-use ResourceParserGenerator\Types\Contracts\TypeContract;
+use ResourceParserGenerator\Contracts\Types\TypeContract;
 
 interface ResolverContract
 {

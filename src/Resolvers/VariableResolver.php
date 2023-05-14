@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace ResourceParserGenerator\Resolvers;
 
 use Illuminate\Support\Collection;
-use ResourceParserGenerator\Resolvers\Contracts\VariableResolverContract;
-use ResourceParserGenerator\Types\Contracts\TypeContract;
+use ResourceParserGenerator\Contracts\Resolvers\VariableResolverContract;
+use ResourceParserGenerator\Contracts\Types\TypeContract;
 
 class VariableResolver implements VariableResolverContract
 {

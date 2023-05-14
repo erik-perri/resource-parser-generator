@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace ResourceParserGenerator\Types;
 
-use ResourceParserGenerator\Types\Contracts\TypeContract;
+use ResourceParserGenerator\Contracts\Types\TypeContract;
 
 class UndefinedType implements TypeContract
 {

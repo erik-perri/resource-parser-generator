@@ -5,26 +5,26 @@ declare(strict_types=1);
 namespace ResourceParserGenerator\Parsers;
 
 use Illuminate\Support\Collection;
-use Illuminate\Support\Facades\File;
 use PhpParser\Node\Expr\Array_;
 use PhpParser\Node\Scalar\String_;
 use PhpParser\Node\Stmt\Return_;
 use PhpParser\NodeFinder;
-use ResourceParserGenerator\Contracts\Filesystem\ClassFileLocatorContract;
+use ResourceParserGenerator\Contracts\ClassScopeContract as ClassScopeContract;
 use ResourceParserGenerator\Contracts\Types\TypeContract;
-use ResourceParserGenerator\Converters\ExpressionTypeConverter;
+use ResourceParserGenerator\Converters\Data\ConverterContext;
+use ResourceParserGenerator\Converters\ExprTypeConverter;
 use ResourceParserGenerator\Parsers\Data\ClassMethodScope;
-use ResourceParserGenerator\Resolvers\ClassNameResolver;
-use ResourceParserGenerator\Resolvers\Resolver;
 use ResourceParserGenerator\Resolvers\VariableResolver;
 use ResourceParserGenerator\Types;
 use RuntimeException;
+use Sourcetoad\EnhancedResources\Formatting\Attributes\IsDefault;
+use Sourcetoad\EnhancedResources\Resource;
 
 class ClassMethodReturnParser
 {
     public function __construct(
-        private readonly ClassFileLocatorContract $classFileLocator,
-        private readonly PhpFileParser $phpFileParser,
+        private readonly ExprTypeConverter $expressionTypeConverter,
+        private readonly ClassParser $classParser,
     ) {
         //
     }
@@ -36,13 +36,11 @@ class ClassMethodReturnParser
      */
     public function parse(string $className, string $methodName): TypeContract
     {
-        $classFile = $this->classFileLocator->get($className);
-        $fileScope = $this->phpFileParser->parse(File::get($classFile));
-        $classScope = $fileScope->class(class_basename($className));
+        $classScope = $this->classParser->parse($className);
         $methodScope = $classScope->method($methodName);
         if (!$methodScope) {
             throw new RuntimeException(
-                sprintf('Unknown method "%s"', $methodName),
+                sprintf('Unknown method "%s" in class "%s"', $methodName, $className),
             );
         }
 
@@ -52,15 +50,10 @@ class ClassMethodReturnParser
             );
         }
 
-        $classResolver = ClassNameResolver::create($fileScope);
-        $resolver = Resolver::create(
-            $classResolver,
-            VariableResolver::create($methodScope->parameters()),
-            $className,
-        );
+        $resolver = $classScope->resolver()
+            ->setVariableResolver(VariableResolver::create($methodScope->parameters()));
 
         $nodeFinder = new NodeFinder();
-
 
         /**
          * @var Return_[] $returnNodes
@@ -72,13 +65,13 @@ class ClassMethodReturnParser
          */
         $types = [];
 
-        $typeConverter = ExpressionTypeConverter::create($resolver, $this);
-
         foreach ($returnNodes as $returnNode) {
             if (!$returnNode->expr) {
                 $types[] = new Types\UntypedType();
                 continue;
             }
+
+            $context = new ConverterContext($resolver);
 
             if ($returnNode->expr instanceof Array_) {
                 $arrayProperties = collect();
@@ -93,15 +86,42 @@ class ClassMethodReturnParser
                         throw new RuntimeException('Unexpected non-string key in resource');
                     }
 
-                    $arrayProperties->put(
-                        $key->value,
-                        $typeConverter->convert($item->value),
-                    );
+                    $type = $this->expressionTypeConverter->convert($item->value, $context);
+
+                    if ($type instanceof Types\ClassType) {
+                        $returnClass = $this->classParser->parse($type->fullyQualifiedName());
+
+                        if (!$returnClass->hasParent(Resource::class)) {
+                            throw new RuntimeException(
+                                sprintf(
+                                    'Unexpected non-resource class return "%s" in resource for property "%s"',
+                                    $type->fullyQualifiedName(),
+                                    $key->value,
+                                ),
+                            );
+                        }
+
+                        $format = $context->formatMethod()
+                            ?? $this->findDefaultFormat($returnClass);
+                        if (!$format) {
+                            throw new RuntimeException(
+                                sprintf(
+                                    'Unable to determine format for resource class "%s" in resource for property "%s"',
+                                    $type->fullyQualifiedName(),
+                                    $key->value,
+                                ),
+                            );
+                        }
+
+                        $type = $this->parse($type->fullyQualifiedName(), $format);
+                    }
+
+                    $arrayProperties->put($key->value, $type);
                 }
 
                 $types[] = new Types\ArrayWithPropertiesType($arrayProperties);
             } else {
-                $types[] = $typeConverter->convert($returnNode->expr);
+                $types[] = $this->expressionTypeConverter->convert($returnNode->expr, $context);
             }
         }
 
@@ -180,5 +200,17 @@ class ClassMethodReturnParser
             ->merge([new Types\ArrayWithPropertiesType($mergedArrays)])
             ->values()
             ->all();
+    }
+
+    private function findDefaultFormat(ClassScopeContract $resourceClass): string|null
+    {
+        foreach ($resourceClass->methods() as $methodName => $methodScope) {
+            $attribute = $methodScope->attribute(IsDefault::class);
+            if ($attribute) {
+                return $methodName;
+            }
+        }
+
+        return null;
     }
 }

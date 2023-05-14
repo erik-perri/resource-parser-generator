@@ -21,8 +21,8 @@ use PhpParser\Node\Scalar\DNumber;
 use PhpParser\Node\Scalar\LNumber;
 use PhpParser\Node\Scalar\String_;
 use ResourceParserGenerator\Contracts\Converters\Expressions\TypeConverterContract;
-use ResourceParserGenerator\Contracts\Resolvers\ResolverContract;
 use ResourceParserGenerator\Contracts\Types\TypeContract;
+use ResourceParserGenerator\Converters\Data\ConverterContext;
 use ResourceParserGenerator\Converters\Expressions\ArrowFunctionTypeConverter;
 use ResourceParserGenerator\Converters\Expressions\ClassConstFetchTypeConverter;
 use ResourceParserGenerator\Converters\Expressions\ConstFetchTypeConverter;
@@ -63,7 +63,7 @@ class ExprTypeConverter
         ];
     }
 
-    public function convert(Expr $expr, ResolverContract $resolver): TypeContract
+    public function convert(Expr $expr, ConverterContext $context): TypeContract
     {
         $class = get_class($expr);
         $handlerClass = $this->typeHandlers[$class] ?? null;
@@ -76,6 +76,6 @@ class ExprTypeConverter
          */
         $handler = resolve($handlerClass);
 
-        return $handler->convert($expr, $resolver);
+        return $handler->convert($expr, $context);
     }
 }

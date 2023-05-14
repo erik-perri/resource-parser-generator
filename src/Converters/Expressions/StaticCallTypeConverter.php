@@ -7,8 +7,8 @@ namespace ResourceParserGenerator\Converters\Expressions;
 use PhpParser\Node\Expr;
 use PhpParser\Node\Expr\StaticCall;
 use ResourceParserGenerator\Contracts\Converters\Expressions\TypeConverterContract;
-use ResourceParserGenerator\Contracts\Resolvers\ResolverContract;
 use ResourceParserGenerator\Contracts\Types\TypeContract;
+use ResourceParserGenerator\Converters\Data\ConverterContext;
 use ResourceParserGenerator\Converters\DeclaredTypeConverter;
 use ResourceParserGenerator\Parsers\ClassParser;
 use ResourceParserGenerator\Types\ClassType;
@@ -23,7 +23,7 @@ class StaticCallTypeConverter implements TypeConverterContract
         //
     }
 
-    public function convert(StaticCall $expr, ResolverContract $resolver): TypeContract
+    public function convert(StaticCall $expr, ConverterContext $context): TypeContract
     {
         $methodName = $expr->name;
         if ($methodName instanceof Expr) {
@@ -34,7 +34,7 @@ class StaticCallTypeConverter implements TypeConverterContract
             throw new RuntimeException('Static call class is not a string');
         }
 
-        $classType = $this->declaredTypeConverter->convert($expr->class, $resolver);
+        $classType = $this->declaredTypeConverter->convert($expr->class, $context->resolver());
         if (!($classType instanceof ClassType)) {
             throw new RuntimeException('Static call class is not a class type');
         }

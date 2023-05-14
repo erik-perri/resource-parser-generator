@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace ResourceParserGenerator\Contracts;
 
 use Illuminate\Support\Collection;
+use ResourceParserGenerator\Contracts\Resolvers\ResolverContract;
 use ResourceParserGenerator\Contracts\Types\TypeContract;
 
 interface ClassScopeContract
@@ -36,4 +37,6 @@ interface ClassScopeContract
     public function property(string $name): ClassPropertyContract|null;
 
     public function propertyType(string $name): TypeContract|null;
+
+    public function resolver(): ResolverContract;
 }

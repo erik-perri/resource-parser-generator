@@ -6,8 +6,8 @@ namespace ResourceParserGenerator\Converters\Expressions;
 
 use PhpParser\Node\Expr\ArrowFunction;
 use ResourceParserGenerator\Contracts\Converters\Expressions\TypeConverterContract;
-use ResourceParserGenerator\Contracts\Resolvers\ResolverContract;
 use ResourceParserGenerator\Contracts\Types\TypeContract;
+use ResourceParserGenerator\Converters\Data\ConverterContext;
 use ResourceParserGenerator\Converters\ExprTypeConverter;
 
 class ArrowFunctionTypeConverter implements TypeConverterContract
@@ -17,8 +17,8 @@ class ArrowFunctionTypeConverter implements TypeConverterContract
         //
     }
 
-    public function convert(ArrowFunction $expr, ResolverContract $resolver): TypeContract
+    public function convert(ArrowFunction $expr, ConverterContext $context): TypeContract
     {
-        return $this->exprTypeConverter->convert($expr->expr, $resolver);
+        return $this->exprTypeConverter->convert($expr->expr, $context);
     }
 }

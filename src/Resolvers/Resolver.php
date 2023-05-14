@@ -50,4 +50,13 @@ class Resolver implements ResolverContract
     {
         return $this->variableResolver?->resolve($name);
     }
+
+    public function setVariableResolver(VariableResolverContract $variableResolver): self
+    {
+        return self::create(
+            $this->classResolver,
+            $variableResolver,
+            $this->thisType,
+        );
+    }
 }

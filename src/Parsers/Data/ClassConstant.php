@@ -9,7 +9,8 @@ use PhpParser\Node\Scalar\String_;
 use ResourceParserGenerator\Contracts\ClassConstantContract;
 use ResourceParserGenerator\Contracts\Resolvers\ResolverContract;
 use ResourceParserGenerator\Contracts\Types\TypeContract;
-use ResourceParserGenerator\Converters\ExpressionTypeConverter;
+use ResourceParserGenerator\Converters\Data\ConverterContext;
+use ResourceParserGenerator\Converters\ExprTypeConverter;
 use RuntimeException;
 
 class ClassConstant implements ClassConstantContract
@@ -17,6 +18,7 @@ class ClassConstant implements ClassConstantContract
     public function __construct(
         private readonly Const_ $constant,
         private readonly ResolverContract $resolver,
+        private readonly ExprTypeConverter $exprTypeConverter,
     ) {
         //
     }
@@ -36,7 +38,7 @@ class ClassConstant implements ClassConstantContract
 
     public function type(): TypeContract
     {
-        return ExpressionTypeConverter::create($this->resolver, null)->convert($this->constant->value);
+        return $this->exprTypeConverter->convert($this->constant->value, new ConverterContext($this->resolver));
     }
 
     public function value(): mixed

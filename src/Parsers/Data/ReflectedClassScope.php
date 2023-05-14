@@ -12,8 +12,10 @@ use ResourceParserGenerator\Contracts\ClassConstantContract;
 use ResourceParserGenerator\Contracts\ClassMethodScopeContract;
 use ResourceParserGenerator\Contracts\ClassPropertyContract;
 use ResourceParserGenerator\Contracts\ClassScopeContract;
+use ResourceParserGenerator\Contracts\Resolvers\ResolverContract;
 use ResourceParserGenerator\Contracts\Types\TypeContract;
 use ResourceParserGenerator\Converters\VariableTypeConverter;
+use RuntimeException;
 
 class ReflectedClassScope implements ClassScopeContract
 {
@@ -39,6 +41,18 @@ class ReflectedClassScope implements ClassScopeContract
         return resolve(self::class, [
             'reflection' => $reflection,
         ]);
+    }
+
+    public function constant(string $name): ClassConstantContract|null
+    {
+        if (!$this->reflection->hasConstant($name)) {
+            return null;
+        }
+
+        $constant = $this->reflection->getConstant($name);
+        $type = $this->variableTypeConverter->convert($constant);
+
+        return ReflectedClassConstant::create($type, $constant);
     }
 
     public function fullyQualifiedName(): string
@@ -109,15 +123,8 @@ class ReflectedClassScope implements ClassScopeContract
         return $this->property($name)?->type();
     }
 
-    public function constant(string $name): ClassConstantContract|null
+    public function resolver(): ResolverContract
     {
-        if (!$this->reflection->hasConstant($name)) {
-            return null;
-        }
-
-        $constant = $this->reflection->getConstant($name);
-        $type = $this->variableTypeConverter->convert($constant);
-
-        return ReflectedClassConstant::create($type, $constant);
+        throw new RuntimeException('Reflected class does not have resolver');
     }
 }

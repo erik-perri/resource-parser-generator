@@ -6,8 +6,8 @@ namespace ResourceParserGenerator\Converters\Expressions;
 
 use PhpParser\Node\Expr\Ternary;
 use ResourceParserGenerator\Contracts\Converters\Expressions\TypeConverterContract;
-use ResourceParserGenerator\Contracts\Resolvers\ResolverContract;
 use ResourceParserGenerator\Contracts\Types\TypeContract;
+use ResourceParserGenerator\Converters\Data\ConverterContext;
 use ResourceParserGenerator\Converters\ExprTypeConverter;
 use ResourceParserGenerator\Types;
 
@@ -18,10 +18,10 @@ class TernaryTypeConverter implements TypeConverterContract
         //
     }
 
-    public function convert(Ternary $expr, ResolverContract $resolver): TypeContract
+    public function convert(Ternary $expr, ConverterContext $context): TypeContract
     {
-        $ifType = $this->exprTypeConverter->convert($expr->if ?? $expr->cond, $resolver);
-        $elseType = $this->exprTypeConverter->convert($expr->else, $resolver);
+        $ifType = $this->exprTypeConverter->convert($expr->if ?? $expr->cond, $context);
+        $elseType = $this->exprTypeConverter->convert($expr->else, $context);
 
         if ($ifType->describe() === $elseType->describe()) {
             return $ifType;

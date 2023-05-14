@@ -6,7 +6,6 @@ namespace ResourceParserGenerator\Parsers;
 
 use PhpParser\Node\Expr;
 use PhpParser\Node\Expr\ClassConstFetch;
-use ResourceParserGenerator\Contracts\ClassScopeContract;
 use ResourceParserGenerator\Contracts\Resolvers\ResolverContract;
 use RuntimeException;
 
@@ -21,13 +20,11 @@ class ClassConstFetchValueParser
     /**
      * @param ClassConstFetch $value
      * @param ResolverContract $resolver
-     * @param ClassScopeContract|null $fetchClass
      * @return mixed
      */
     public function parse(
         ClassConstFetch $value,
         ResolverContract $resolver,
-        ClassScopeContract|null $fetchClass = null
     ): mixed {
         if ($value->class instanceof Expr) {
             throw new RuntimeException('Class const fetch class is not a string');
@@ -35,21 +32,19 @@ class ClassConstFetchValueParser
 
         $referencedClassName = $value->class->toString();
 
-        if ($fetchClass === null) {
-            if ($referencedClassName === 'self') {
-                $resolvedClassName = $resolver->resolveThis();
-            } else {
-                $resolvedClassName = $resolver->resolveClass($referencedClassName);
-            }
-
-            if (!$resolvedClassName) {
-                throw new RuntimeException(
-                    sprintf('Unknown class "%s" for class const fetch', $value->class->toString()),
-                );
-            }
-
-            $fetchClass = $this->classParser->parse($resolvedClassName);
+        if ($referencedClassName === 'self') {
+            $resolvedClassName = $resolver->resolveThis();
+        } else {
+            $resolvedClassName = $resolver->resolveClass($referencedClassName);
         }
+
+        if (!$resolvedClassName) {
+            throw new RuntimeException(
+                sprintf('Unknown class "%s" for class const fetch', $value->class->toString()),
+            );
+        }
+
+        $fetchClass = $this->classParser->parse($resolvedClassName);
 
         if ($value->name instanceof Expr\Error) {
             throw new RuntimeException('Class const fetch name is not a string');

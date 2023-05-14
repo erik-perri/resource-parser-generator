@@ -7,8 +7,8 @@ namespace ResourceParserGenerator\Converters\Expressions;
 use PhpParser\Node\Expr;
 use PhpParser\Node\Expr\ClassConstFetch;
 use ResourceParserGenerator\Contracts\Converters\Expressions\TypeConverterContract;
-use ResourceParserGenerator\Contracts\Resolvers\ResolverContract;
 use ResourceParserGenerator\Contracts\Types\TypeContract;
+use ResourceParserGenerator\Converters\Data\ConverterContext;
 use ResourceParserGenerator\Converters\DeclaredTypeConverter;
 use ResourceParserGenerator\Parsers\ClassParser;
 use ResourceParserGenerator\Types\ClassType;
@@ -23,7 +23,7 @@ class ClassConstFetchTypeConverter implements TypeConverterContract
         //
     }
 
-    public function convert(ClassConstFetch $expr, ResolverContract $resolver): TypeContract
+    public function convert(ClassConstFetch $expr, ConverterContext $context): TypeContract
     {
         $constName = $expr->name;
         if ($constName instanceof Expr) {
@@ -34,12 +34,12 @@ class ClassConstFetchTypeConverter implements TypeConverterContract
             throw new RuntimeException('Class const fetch class is not a string');
         }
 
-        $classType = $this->declaredTypeConverter->convert($expr->class, $resolver);
+        $classType = $this->declaredTypeConverter->convert($expr->class, $context->resolver());
         if (!($classType instanceof ClassType)) {
             throw new RuntimeException('Class const fetch class is not a class type');
         }
 
-        $classScope = $this->classParser->parse($classType->fullyQualifiedName(), $resolver->resolveThis());
+        $classScope = $this->classParser->parse($classType->fullyQualifiedName(), $context->resolver()->resolveThis());
         $constScope = $classScope->constant($constName->name);
         if (!$constScope) {
             throw new RuntimeException(

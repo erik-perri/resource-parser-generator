@@ -7,8 +7,8 @@ namespace ResourceParserGenerator\Converters\Expressions;
 use PhpParser\Node\Expr\NullsafePropertyFetch;
 use PhpParser\Node\Expr\PropertyFetch;
 use ResourceParserGenerator\Contracts\Converters\Expressions\TypeConverterContract;
-use ResourceParserGenerator\Contracts\Resolvers\ResolverContract;
 use ResourceParserGenerator\Contracts\Types\TypeContract;
+use ResourceParserGenerator\Converters\Data\ConverterContext;
 use ResourceParserGenerator\Converters\ExprTypeConverter;
 use ResourceParserGenerator\Converters\Traits\ParsesFetchSides;
 use ResourceParserGenerator\Parsers\ClassParser;
@@ -27,10 +27,10 @@ class PropertyFetchTypeConverter implements TypeConverterContract
         //
     }
 
-    public function convert(PropertyFetch|NullsafePropertyFetch $expr, ResolverContract $resolver): TypeContract
+    public function convert(PropertyFetch|NullsafePropertyFetch $expr, ConverterContext $context): TypeContract
     {
-        $leftSide = $this->convertLeftSideToClassScope($expr, $resolver);
-        $rightSide = $this->convertRightSide($expr, $resolver);
+        $leftSide = $this->convertLeftSideToClassScope($expr, $context);
+        $rightSide = $this->convertRightSide($expr, $context);
 
         if (!is_string($rightSide)) {
             throw new RuntimeException('Right side of property fetch is not a string');

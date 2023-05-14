@@ -232,4 +232,9 @@ class ClassScope implements ClassScopeContract
     {
         return $this->property($name)?->type();
     }
+
+    public function resolver(): ResolverContract
+    {
+        return $this->resolver;
+    }
 }

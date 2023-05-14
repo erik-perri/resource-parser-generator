@@ -7,14 +7,14 @@ namespace ResourceParserGenerator\Converters\Expressions;
 use PhpParser\Node\Expr;
 use PhpParser\Node\Expr\Variable;
 use ResourceParserGenerator\Contracts\Converters\Expressions\TypeConverterContract;
-use ResourceParserGenerator\Contracts\Resolvers\ResolverContract;
 use ResourceParserGenerator\Contracts\Types\TypeContract;
+use ResourceParserGenerator\Converters\Data\ConverterContext;
 use ResourceParserGenerator\Types;
 use RuntimeException;
 
 class VariableTypeConverter implements TypeConverterContract
 {
-    public function convert(Variable $expr, ResolverContract $resolver): TypeContract
+    public function convert(Variable $expr, ConverterContext $context): TypeContract
     {
         $name = $expr->name;
         if ($name instanceof Expr) {
@@ -22,14 +22,14 @@ class VariableTypeConverter implements TypeConverterContract
         }
 
         if ($name === 'this') {
-            $thisType = $resolver->resolveThis();
+            $thisType = $context->resolver()->resolveThis();
             if (!$thisType) {
                 throw new RuntimeException('Unable to resolve $this');
             }
             return new Types\ClassType($thisType, null);
         }
 
-        $variableType = $resolver->resolveVariable($name);
+        $variableType = $context->resolver()->resolveVariable($name);
 
         if (!$variableType) {
             throw new RuntimeException(sprintf('Cannot resolve variable "%s"', $name));

@@ -10,8 +10,8 @@ use PhpParser\Node\Expr\NullsafeMethodCall;
 use PhpParser\Node\Expr\NullsafePropertyFetch;
 use PhpParser\Node\Expr\PropertyFetch;
 use ResourceParserGenerator\Contracts\ClassScopeContract;
-use ResourceParserGenerator\Contracts\Resolvers\ResolverContract;
 use ResourceParserGenerator\Contracts\Types\TypeContract;
+use ResourceParserGenerator\Converters\Data\ConverterContext;
 use ResourceParserGenerator\Converters\ExprTypeConverter;
 use ResourceParserGenerator\Parsers\ClassParser;
 use ResourceParserGenerator\Types\ClassType;
@@ -27,9 +27,9 @@ trait ParsesFetchSides
 
     private function convertLeftSideToClassScope(
         PropertyFetch|NullsafePropertyFetch|MethodCall|NullsafeMethodCall $expr,
-        ResolverContract $resolver,
+        ConverterContext $context,
     ): ClassScopeContract {
-        $leftSide = $this->exprTypeConverter()->convert($expr->var, $resolver);
+        $leftSide = $this->exprTypeConverter()->convert($expr->var, $context);
 
         if ($expr instanceof NullsafePropertyFetch || $expr instanceof NullsafeMethodCall) {
             if (!($leftSide instanceof UnionType)) {
@@ -58,15 +58,15 @@ trait ParsesFetchSides
             );
         }
 
-        return $this->classParser()->parse($leftSide->fullyQualifiedName(), $resolver->resolveThis());
+        return $this->classParser()->parse($leftSide->fullyQualifiedName());
     }
 
     private function convertRightSide(
         PropertyFetch|NullsafePropertyFetch|MethodCall|NullsafeMethodCall $expr,
-        ResolverContract $resolver,
+        ConverterContext $context,
     ): TypeContract|string {
         return $expr->name instanceof Expr
-            ? $this->exprTypeConverter()->convert($expr->name, $resolver)
+            ? $this->exprTypeConverter()->convert($expr->name, $context)
             : $expr->name->name;
     }
 }

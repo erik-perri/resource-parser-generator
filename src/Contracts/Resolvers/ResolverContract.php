@@ -24,4 +24,6 @@ interface ResolverContract
      * @return TypeContract|null
      */
     public function resolveVariable(string $name): TypeContract|null;
+
+    public function setVariableResolver(VariableResolverContract $variableResolver): self;
 }

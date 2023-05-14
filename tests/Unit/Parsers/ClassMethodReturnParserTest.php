@@ -7,6 +7,7 @@ namespace ResourceParserGenerator\Tests\Unit\Parsers;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\DataProvider;
 use ResourceParserGenerator\Parsers\ClassMethodReturnParser;
+use ResourceParserGenerator\Tests\Examples\RelatedResource;
 use ResourceParserGenerator\Tests\Examples\UserResource;
 use ResourceParserGenerator\Tests\TestCase;
 use ResourceParserGenerator\Types\ArrayWithPropertiesType;
@@ -124,16 +125,9 @@ class ClassMethodReturnParserTest extends TestCase
                 'className' => UserResource::class,
                 'methodName' => 'relatedResource',
                 'expected' => [
-                    'with_format_default' => [
-                        'name' => 'string',
-                    ],
-                    'with_format_short' => [
-                        'id' => 'int',
-                    ],
-                    'with_format_verbose' => [
-                        'id' => 'int',
-                        'email' => 'string',
-                    ],
+                    'with_format_default' => RelatedResource::class,
+                    'with_format_short' => RelatedResource::class . '::shortFormatNotNamedLikeFormatName',
+                    'with_format_verbose' => RelatedResource::class . '::verbose',
                 ],
             ],
         ];

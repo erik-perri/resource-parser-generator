@@ -5,7 +5,9 @@ declare(strict_types=1);
 namespace ResourceParserGenerator\Types;
 
 use Illuminate\Support\Collection;
+use ResourceParserGenerator\Contracts\Types\ParserTypeContract;
 use ResourceParserGenerator\Contracts\Types\TypeContract;
+use ResourceParserGenerator\Types\Zod\ZodUnionType;
 use RuntimeException;
 
 class UnionType implements TypeContract
@@ -30,7 +32,7 @@ class UnionType implements TypeContract
     {
         return new self(
             $type,
-            ...$this->types->values(),
+            ...$this->types->all(),
         );
     }
 
@@ -41,7 +43,7 @@ class UnionType implements TypeContract
     public function removeFromUnion(callable $callback): self
     {
         return new self(
-            ...$this->types->reject($callback)->values(),
+            ...$this->types->reject($callback)->all(),
         );
     }
 
@@ -79,6 +81,13 @@ class UnionType implements TypeContract
             return $newTypes->firstOrFail();
         }
 
-        return new self(...$newTypes->values());
+        return new self(...$newTypes->all());
+    }
+
+    public function parserType(): ParserTypeContract
+    {
+        return new ZodUnionType(
+            ...$this->types->map(fn(TypeContract $type) => $type->parserType())->all(),
+        );
     }
 }

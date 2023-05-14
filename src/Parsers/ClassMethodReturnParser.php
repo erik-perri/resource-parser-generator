@@ -9,7 +9,6 @@ use PhpParser\Node\Expr\Array_;
 use PhpParser\Node\Scalar\String_;
 use PhpParser\Node\Stmt\Return_;
 use PhpParser\NodeFinder;
-use ResourceParserGenerator\Contracts\ClassScopeContract as ClassScopeContract;
 use ResourceParserGenerator\Contracts\Types\TypeContract;
 use ResourceParserGenerator\Converters\Data\ConverterContext;
 use ResourceParserGenerator\Converters\ExprTypeConverter;
@@ -17,8 +16,6 @@ use ResourceParserGenerator\Parsers\Data\ClassMethodScope;
 use ResourceParserGenerator\Resolvers\VariableResolver;
 use ResourceParserGenerator\Types;
 use RuntimeException;
-use Sourcetoad\EnhancedResources\Formatting\Attributes\IsDefault;
-use Sourcetoad\EnhancedResources\Resource;
 
 class ClassMethodReturnParser
 {
@@ -88,32 +85,12 @@ class ClassMethodReturnParser
 
                     $type = $this->expressionTypeConverter->convert($item->value, $context);
 
-                    if ($type instanceof Types\ClassType) {
-                        $returnClass = $this->classParser->parse($type->fullyQualifiedName());
-
-                        if (!$returnClass->hasParent(Resource::class)) {
-                            throw new RuntimeException(
-                                sprintf(
-                                    'Unexpected non-resource class return "%s" in resource for property "%s"',
-                                    $type->fullyQualifiedName(),
-                                    $key->value,
-                                ),
-                            );
-                        }
-
-                        $format = $context->formatMethod()
-                            ?? $this->findDefaultFormat($returnClass);
-                        if (!$format) {
-                            throw new RuntimeException(
-                                sprintf(
-                                    'Unable to determine format for resource class "%s" in resource for property "%s"',
-                                    $type->fullyQualifiedName(),
-                                    $key->value,
-                                ),
-                            );
-                        }
-
-                        $type = $this->parse($type->fullyQualifiedName(), $format);
+                    if ($type instanceof Types\ClassType && $context->formatMethod()) {
+                        $type = new Types\ClassWithMethodType(
+                            $type->fullyQualifiedName(),
+                            $type->alias(),
+                            $context->formatMethod(),
+                        );
                     }
 
                     $arrayProperties->put($key->value, $type);
@@ -184,8 +161,7 @@ class ClassMethodReturnParser
                     }
                 })
                 ->flatten()
-                ->values()
-                ->toArray();
+                ->all();
 
             if (count($splitTypes) > 1) {
                 $type = new Types\UnionType(...$splitTypes);
@@ -198,19 +174,6 @@ class ClassMethodReturnParser
 
         return $otherTypes
             ->merge([new Types\ArrayWithPropertiesType($mergedArrays)])
-            ->values()
             ->all();
-    }
-
-    private function findDefaultFormat(ClassScopeContract $resourceClass): string|null
-    {
-        foreach ($resourceClass->methods() as $methodName => $methodScope) {
-            $attribute = $methodScope->attribute(IsDefault::class);
-            if ($attribute) {
-                return $methodName;
-            }
-        }
-
-        return null;
     }
 }

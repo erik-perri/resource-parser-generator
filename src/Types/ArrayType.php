@@ -4,7 +4,9 @@ declare(strict_types=1);
 
 namespace ResourceParserGenerator\Types;
 
+use ResourceParserGenerator\Contracts\Types\ParserTypeContract;
 use ResourceParserGenerator\Contracts\Types\TypeContract;
+use ResourceParserGenerator\Types\Zod\ZodArrayType;
 
 class ArrayType implements TypeContract
 {
@@ -30,5 +32,13 @@ class ArrayType implements TypeContract
         }
 
         return 'array';
+    }
+
+    public function parserType(): ParserTypeContract
+    {
+        return new ZodArrayType(
+            $this->keys?->parserType(),
+            $this->values?->parserType(),
+        );
     }
 }

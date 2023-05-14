@@ -1,0 +1,28 @@
+import {number, object, output, string} from 'zod';
+
+export const relatedResourceBaseParser = object({
+  name: string(),
+});
+
+export type RelatedResourceBase = output<typeof relatedResourceBaseParser>;
+
+export const relatedResourceShortFormatNotNamedLikeFormatNameParser = object({
+  id: number(),
+});
+
+export type RelatedResourceShortFormatNotNamedLikeFormatName = output<typeof relatedResourceShortFormatNotNamedLikeFormatNameParser>;
+
+export const relatedResourceVerboseParser = object({
+  id: number(),
+  email: string(),
+});
+
+export type RelatedResourceVerbose = output<typeof relatedResourceVerboseParser>;
+
+export const userResourceRelatedResourceParser = object({
+  with_format_short: relatedResourceShortFormatNotNamedLikeFormatNameParser,
+  with_format_verbose: relatedResourceVerboseParser,
+  with_format_default: relatedResourceBaseParser,
+});
+
+export type UserResourceRelatedResource = output<typeof userResourceRelatedResourceParser>;

@@ -1,9 +1,8 @@
 @php
-    use Illuminate\Support\Collection;
-    use ResourceParserGenerator\Builders\Data\ParserData;
+    use Illuminate\Support\Collection;use ResourceParserGenerator\Parsers\Data\ResourceParserData;
 
     /** @var string[] $imports */
-    /** @var Collection<string, ParserData> $parsers */
+    /** @var Collection<string, ResourceParserData> $parsers */
 @endphp
 
 import {{ '{' }}{{ implode(', ', $imports) }}{{ '}' }} from 'zod';

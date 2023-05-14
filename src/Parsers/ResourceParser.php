@@ -4,15 +4,16 @@ declare(strict_types=1);
 
 namespace ResourceParserGenerator\Parsers;
 
-use Illuminate\Support\Collection;
 use ResourceParserGenerator\Contracts\ClassScopeContract as ClassScopeContract;
-use ResourceParserGenerator\Parsers\Data\ParsedResource;
+use ResourceParserGenerator\Contracts\Types\TypeContract;
+use ResourceParserGenerator\Parsers\Data\ResourceParserCollection;
+use ResourceParserGenerator\Parsers\Data\ResourceParserData;
 use ResourceParserGenerator\Types;
 use RuntimeException;
 use Sourcetoad\EnhancedResources\Formatting\Attributes\IsDefault;
 use Sourcetoad\EnhancedResources\Resource;
 
-class ResourceReturnParser
+class ResourceParser
 {
     public function __construct(
         private readonly ClassParser $classParser,
@@ -24,15 +25,17 @@ class ResourceReturnParser
     /**
      * @param class-string $className
      * @param string $methodName
-     * @param Collection<string, ParsedResource>|null $parsedResources
-     * @return Collection<string, ParsedResource>
+     * @param ResourceParserCollection|null $result
+     * @return ResourceParserCollection
      */
-    public function parse(string $className, string $methodName, Collection $parsedResources = null): Collection
-    {
-        $parsedResources ??= collect();
-        $parserKey = $this->getParserKey($className, $methodName);
-        if ($parsedResources->has($parserKey)) {
-            return $parsedResources;
+    public function parse(
+        string $className,
+        string $methodName,
+        ResourceParserCollection $result = null
+    ): ResourceParserCollection {
+        $result ??= new ResourceParserCollection();
+        if ($result->has($className, $methodName)) {
+            return $result;
         }
 
         $returnType = $this->parseReturnType($className, $methodName);
@@ -66,12 +69,11 @@ class ResourceReturnParser
                     );
                 }
 
-                $childParserKey = $this->getParserKey($type->fullyQualifiedName(), $format);
-                if ($parsedResources->has($childParserKey)) {
+                if ($result->has($type->fullyQualifiedName(), $format)) {
                     continue;
                 }
 
-                $this->parse($type->fullyQualifiedName(), $format, $parsedResources);
+                $this->parse($type->fullyQualifiedName(), $format, $result);
 
                 // Replace the property type with a method type reference if we didn't have a reference, then we don't
                 // need to parse the default format again later.
@@ -89,14 +91,13 @@ class ResourceReturnParser
             }
         }
 
-        $parsedResources->put($parserKey, ParsedResource::create($className, $methodName, $returnType));
+        $result->add(ResourceParserData::create(
+            $className,
+            $methodName,
+            $returnType->properties()->map(fn(TypeContract $property) => $property->parserType())
+        ));
 
-        return $parsedResources;
-    }
-
-    private function getParserKey(string $className, string $methodName): string
-    {
-        return $className . '::' . $methodName;
+        return $result;
     }
 
     /**

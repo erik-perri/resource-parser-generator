@@ -2,26 +2,26 @@
 
 declare(strict_types=1);
 
-namespace ResourceParserGenerator\Tests\Unit\Builders;
+namespace ResourceParserGenerator\Tests\Unit\Generators;
 
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\DataProvider;
-use ResourceParserGenerator\Builders\ResourceParserBuilder;
-use ResourceParserGenerator\Parsers\ResourceReturnParser;
+use ResourceParserGenerator\Generators\ResourceParserGenerator;
+use ResourceParserGenerator\Parsers\ResourceParser;
 use ResourceParserGenerator\Tests\Examples\UserResource;
 use ResourceParserGenerator\Tests\TestCase;
 
-#[CoversClass(ResourceParserBuilder::class)]
-class ResourceParserBuilderTest extends TestCase
+#[CoversClass(ResourceParserGenerator::class)]
+class ResourceParserGeneratorTest extends TestCase
 {
     #[DataProvider('expectedContentProvider')]
     public function testOutputsExpectedContent(string $className, string $methodName, string $expectedContent): void
     {
         // Arrange
-        $parsers = $this->make(ResourceReturnParser::class)->parse($className, $methodName);
+        $parsers = $this->make(ResourceParser::class)->parse($className, $methodName);
 
         // Act
-        $contents = $this->make(ResourceParserBuilder::class)->build($parsers);
+        $contents = $this->make(ResourceParserGenerator::class)->build($parsers);
 
         // Assert
         $this->assertEquals($expectedContent, $contents);

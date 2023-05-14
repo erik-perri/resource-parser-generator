@@ -76,7 +76,7 @@ class UnionType implements TypeContract
         }
 
         if ($newLength === 1) {
-            return $newTypes->first();
+            return $newTypes->firstOrFail();
         }
 
         return new self(...$newTypes->values());

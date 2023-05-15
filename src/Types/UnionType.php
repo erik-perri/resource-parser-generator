@@ -86,12 +86,16 @@ class UnionType implements TypeContract
 
     public function parserType(): ParserTypeContract
     {
-        // TODO Flatten the union before this point
-        return new ZodUnionType(...$this->types->map(function (TypeContract $type) {
+        /**
+         * TODO Flatten the union before this point
+         * @var ParserTypeContract[] $flatTypes
+         */
+        $flatTypes = $this->types->map(function (TypeContract $type) {
             if ($type instanceof UnionType) {
                 return $type->types()->map(fn(TypeContract $type) => $type->parserType())->all();
             }
             return $type->parserType();
-        })->flatten()->all());
+        })->flatten()->all();
+        return new ZodUnionType(...$flatTypes);
     }
 }

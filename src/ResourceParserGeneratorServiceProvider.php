@@ -30,6 +30,10 @@ class ResourceParserGeneratorServiceProvider extends ServiceProvider
     public function register(): void
     {
         if ($this->app->environment('local', 'testing')) {
+            $this->commands([
+                Console\Commands\GenerateResourceParsersCommand::class,
+            ]);
+
             $this->app->singleton(
                 ClassFileLocatorContract::class,
                 fn() => new ClassFileLocator(

@@ -3,7 +3,7 @@
 COMMANDS=(
   "composer check-style"
   "composer check-code"
-  "composer test -- --coverage-html=coverage --coverage-text --path-coverage"
+  "composer test -- --coverage-html=coverage --coverage-text"
   "composer validate --strict"
 )
 

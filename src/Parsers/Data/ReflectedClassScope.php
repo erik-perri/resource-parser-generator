@@ -12,9 +12,9 @@ use ResourceParserGenerator\Contracts\ClassConstantContract;
 use ResourceParserGenerator\Contracts\ClassMethodScopeContract;
 use ResourceParserGenerator\Contracts\ClassPropertyContract;
 use ResourceParserGenerator\Contracts\ClassScopeContract;
+use ResourceParserGenerator\Contracts\Converters\VariableTypeConverterContract;
 use ResourceParserGenerator\Contracts\Resolvers\ResolverContract;
 use ResourceParserGenerator\Contracts\Types\TypeContract;
-use ResourceParserGenerator\Converters\VariableTypeConverter;
 use RuntimeException;
 
 class ReflectedClassScope implements ClassScopeContract
@@ -22,11 +22,11 @@ class ReflectedClassScope implements ClassScopeContract
     /**
      * @template T of object
      * @param ReflectionClass<T> $reflection
-     * @param VariableTypeConverter $variableTypeConverter
+     * @param VariableTypeConverterContract $variableTypeConverter
      */
     public function __construct(
         private readonly ReflectionClass $reflection,
-        private readonly VariableTypeConverter $variableTypeConverter,
+        private readonly VariableTypeConverterContract $variableTypeConverter,
     ) {
         //
     }

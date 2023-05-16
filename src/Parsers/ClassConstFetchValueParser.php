@@ -6,26 +6,21 @@ namespace ResourceParserGenerator\Parsers;
 
 use PhpParser\Node\Expr;
 use PhpParser\Node\Expr\ClassConstFetch;
+use ResourceParserGenerator\Contracts\Parsers\ClassConstFetchValueParserContract;
+use ResourceParserGenerator\Contracts\Parsers\ClassParserContract;
 use ResourceParserGenerator\Contracts\Resolvers\ResolverContract;
 use RuntimeException;
 
-class ClassConstFetchValueParser
+class ClassConstFetchValueParser implements ClassConstFetchValueParserContract
 {
     public function __construct(
-        private readonly ClassParser $classParser,
+        private readonly ClassParserContract $classParser,
     ) {
         //
     }
 
-    /**
-     * @param ClassConstFetch $value
-     * @param ResolverContract $resolver
-     * @return mixed
-     */
-    public function parse(
-        ClassConstFetch $value,
-        ResolverContract $resolver,
-    ): mixed {
+    public function parse(ClassConstFetch $value, ResolverContract $resolver): mixed
+    {
         if ($value->class instanceof Expr) {
             throw new RuntimeException('Class const fetch class is not a string');
         }

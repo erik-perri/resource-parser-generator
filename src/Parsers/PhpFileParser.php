@@ -17,6 +17,7 @@ use PhpParser\Parser;
 use ReflectionClass;
 use ResourceParserGenerator\Contracts\ClassScopeContract;
 use ResourceParserGenerator\Contracts\Filesystem\ClassFileLocatorContract;
+use ResourceParserGenerator\Contracts\Parsers\PhpFileParserContract;
 use ResourceParserGenerator\Contracts\Resolvers\ResolverContract;
 use ResourceParserGenerator\Parsers\Data\ClassScope;
 use ResourceParserGenerator\Parsers\Data\FileScope;
@@ -25,7 +26,7 @@ use ResourceParserGenerator\Resolvers\ClassNameResolver;
 use ResourceParserGenerator\Resolvers\Resolver;
 use RuntimeException;
 
-class PhpFileParser
+class PhpFileParser implements PhpFileParserContract
 {
     public function __construct(
         private readonly Parser $parser,
@@ -35,11 +36,6 @@ class PhpFileParser
         //
     }
 
-    /**
-     * @param string $contents
-     * @param class-string|null $staticContext
-     * @return FileScope
-     */
     public function parse(string $contents, string $staticContext = null): FileScope
     {
         $scope = FileScope::create();

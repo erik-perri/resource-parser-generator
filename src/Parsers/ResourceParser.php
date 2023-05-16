@@ -5,6 +5,9 @@ declare(strict_types=1);
 namespace ResourceParserGenerator\Parsers;
 
 use ResourceParserGenerator\Contracts\ClassScopeContract as ClassScopeContract;
+use ResourceParserGenerator\Contracts\Parsers\ClassMethodReturnParserContract;
+use ResourceParserGenerator\Contracts\Parsers\ClassParserContract;
+use ResourceParserGenerator\Contracts\Parsers\ResourceParserContract;
 use ResourceParserGenerator\Contracts\Types\TypeContract;
 use ResourceParserGenerator\Parsers\Data\ResourceParserCollection;
 use ResourceParserGenerator\Parsers\Data\ResourceParserData;
@@ -13,21 +16,15 @@ use RuntimeException;
 use Sourcetoad\EnhancedResources\Formatting\Attributes\IsDefault;
 use Sourcetoad\EnhancedResources\Resource;
 
-class ResourceParser
+class ResourceParser implements ResourceParserContract
 {
     public function __construct(
-        private readonly ClassParser $classParser,
-        private readonly ClassMethodReturnParser $classMethodReturnParser,
+        private readonly ClassParserContract $classParser,
+        private readonly ClassMethodReturnParserContract $classMethodReturnParser,
     ) {
         //
     }
 
-    /**
-     * @param class-string $className
-     * @param string $methodName
-     * @param ResourceParserCollection|null $result
-     * @return ResourceParserCollection
-     */
     public function parse(
         string $className,
         string $methodName,

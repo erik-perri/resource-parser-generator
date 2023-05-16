@@ -11,12 +11,12 @@ use PhpParser\Node\Expr\NullsafeMethodCall;
 use PhpParser\Node\Scalar\String_;
 use ResourceParserGenerator\Contracts\ClassScopeContract;
 use ResourceParserGenerator\Contracts\Converters\Expressions\TypeConverterContract;
+use ResourceParserGenerator\Contracts\Converters\ExprTypeConverterContract;
+use ResourceParserGenerator\Contracts\Parsers\ClassConstFetchValueParserContract;
+use ResourceParserGenerator\Contracts\Parsers\ClassParserContract;
 use ResourceParserGenerator\Contracts\Types\TypeContract;
 use ResourceParserGenerator\Converters\Data\ConverterContext;
-use ResourceParserGenerator\Converters\ExprTypeConverter;
 use ResourceParserGenerator\Converters\Traits\ParsesFetchSides;
-use ResourceParserGenerator\Parsers\ClassConstFetchValueParser;
-use ResourceParserGenerator\Parsers\ClassParser;
 use ResourceParserGenerator\Types\ClassType;
 use ResourceParserGenerator\Types\MixedType;
 use ResourceParserGenerator\Types\NullType;
@@ -31,9 +31,9 @@ class MethodCallTypeConverter implements TypeConverterContract
     use ParsesFetchSides;
 
     public function __construct(
-        private readonly ClassConstFetchValueParser $classConstFetchValueParser,
-        private readonly ClassParser $classParser,
-        private readonly ExprTypeConverter $exprTypeConverter,
+        private readonly ClassConstFetchValueParserContract $classConstFetchValueParser,
+        private readonly ClassParserContract $classParser,
+        private readonly ExprTypeConverterContract $exprTypeConverter,
     ) {
         //
     }
@@ -131,12 +131,12 @@ class MethodCallTypeConverter implements TypeConverterContract
         }
     }
 
-    protected function exprTypeConverter(): ExprTypeConverter
+    protected function exprTypeConverter(): ExprTypeConverterContract
     {
         return $this->exprTypeConverter;
     }
 
-    protected function classParser(): ClassParser
+    protected function classParser(): ClassParserContract
     {
         return $this->classParser;
     }

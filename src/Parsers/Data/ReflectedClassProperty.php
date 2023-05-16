@@ -6,14 +6,14 @@ namespace ResourceParserGenerator\Parsers\Data;
 
 use ReflectionProperty;
 use ResourceParserGenerator\Contracts\ClassPropertyContract;
+use ResourceParserGenerator\Contracts\Converters\ReflectionTypeConverterContract;
 use ResourceParserGenerator\Contracts\Types\TypeContract;
-use ResourceParserGenerator\Converters\ReflectionTypeConverter;
 
 class ReflectedClassProperty implements ClassPropertyContract
 {
     public function __construct(
         private readonly ReflectionProperty $reflection,
-        private readonly ReflectionTypeConverter $typeConverter,
+        private readonly ReflectionTypeConverterContract $typeConverter,
     ) {
         //
     }

@@ -4,10 +4,11 @@ declare(strict_types=1);
 
 namespace ResourceParserGenerator\Converters;
 
+use ResourceParserGenerator\Contracts\Converters\VariableTypeConverterContract;
 use ResourceParserGenerator\Contracts\Types\TypeContract;
 use ResourceParserGenerator\Types;
 
-class VariableTypeConverter
+class VariableTypeConverter implements VariableTypeConverterContract
 {
     public function convert(mixed $variable): TypeContract
     {

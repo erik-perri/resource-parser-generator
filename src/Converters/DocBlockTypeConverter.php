@@ -10,12 +10,13 @@ use PHPStan\PhpDocParser\Ast\Type\IdentifierTypeNode;
 use PHPStan\PhpDocParser\Ast\Type\ThisTypeNode;
 use PHPStan\PhpDocParser\Ast\Type\TypeNode;
 use PHPStan\PhpDocParser\Ast\Type\UnionTypeNode;
+use ResourceParserGenerator\Contracts\Converters\DocBlockTypeConverterContract;
 use ResourceParserGenerator\Contracts\Resolvers\ResolverContract;
 use ResourceParserGenerator\Contracts\Types\TypeContract;
 use ResourceParserGenerator\Types;
 use RuntimeException;
 
-class DocBlockTypeConverter
+class DocBlockTypeConverter implements DocBlockTypeConverterContract
 {
     public function convert(TypeNode $type, ResolverContract $resolver): TypeContract
     {

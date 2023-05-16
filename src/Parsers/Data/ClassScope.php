@@ -10,9 +10,9 @@ use ResourceParserGenerator\Contracts\ClassConstantContract;
 use ResourceParserGenerator\Contracts\ClassMethodScopeContract;
 use ResourceParserGenerator\Contracts\ClassPropertyContract;
 use ResourceParserGenerator\Contracts\ClassScopeContract;
+use ResourceParserGenerator\Contracts\Parsers\DocBlockParserContract;
 use ResourceParserGenerator\Contracts\Resolvers\ResolverContract;
 use ResourceParserGenerator\Contracts\Types\TypeContract;
-use ResourceParserGenerator\Parsers\DocBlockParser;
 
 class ClassScope implements ClassScopeContract
 {
@@ -39,7 +39,7 @@ class ClassScope implements ClassScopeContract
      * @param ResolverContract $resolver
      * @param ClassScopeContract|null $extends
      * @param array<int, ClassScopeContract> $traits
-     * @param DocBlockParser $docBlockParser
+     * @param DocBlockParserContract $docBlockParser
      */
     public function __construct(
         private readonly string $fullyQualifiedName,
@@ -47,7 +47,7 @@ class ClassScope implements ClassScopeContract
         private readonly ResolverContract $resolver,
         private readonly ClassScopeContract|null $extends,
         private readonly array $traits,
-        private readonly DocBlockParser $docBlockParser,
+        private readonly DocBlockParserContract $docBlockParser,
     ) {
         $this->methods = collect();
         $this->properties = collect();

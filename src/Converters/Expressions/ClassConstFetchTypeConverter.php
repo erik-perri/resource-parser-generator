@@ -6,19 +6,19 @@ namespace ResourceParserGenerator\Converters\Expressions;
 
 use PhpParser\Node\Expr;
 use PhpParser\Node\Expr\ClassConstFetch;
+use ResourceParserGenerator\Contracts\Converters\DeclaredTypeConverterContract;
 use ResourceParserGenerator\Contracts\Converters\Expressions\TypeConverterContract;
+use ResourceParserGenerator\Contracts\Parsers\ClassParserContract;
 use ResourceParserGenerator\Contracts\Types\TypeContract;
 use ResourceParserGenerator\Converters\Data\ConverterContext;
-use ResourceParserGenerator\Converters\DeclaredTypeConverter;
-use ResourceParserGenerator\Parsers\ClassParser;
 use ResourceParserGenerator\Types\ClassType;
 use RuntimeException;
 
 class ClassConstFetchTypeConverter implements TypeConverterContract
 {
     public function __construct(
-        private readonly ClassParser $classParser,
-        private readonly DeclaredTypeConverter $declaredTypeConverter,
+        private readonly ClassParserContract $classParser,
+        private readonly DeclaredTypeConverterContract $declaredTypeConverter,
     ) {
         //
     }

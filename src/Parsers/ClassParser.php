@@ -8,23 +8,20 @@ use Illuminate\Support\Facades\File;
 use ReflectionClass;
 use ResourceParserGenerator\Contracts\ClassScopeContract;
 use ResourceParserGenerator\Contracts\Filesystem\ClassFileLocatorContract;
+use ResourceParserGenerator\Contracts\Parsers\ClassParserContract;
+use ResourceParserGenerator\Contracts\Parsers\PhpFileParserContract;
 use ResourceParserGenerator\Parsers\Data\ReflectedClassScope;
 use RuntimeException;
 
-class ClassParser
+class ClassParser implements ClassParserContract
 {
     public function __construct(
         private readonly ClassFileLocatorContract $classLocator,
-        private readonly PhpFileParser $fileParser,
+        private readonly PhpFileParserContract $fileParser,
     ) {
         //
     }
 
-    /**
-     * @param class-string $className
-     * @param class-string|null $staticContext
-     * @return ClassScopeContract
-     */
     public function parse(string $className, string|null $staticContext = null): ClassScopeContract
     {
         if (class_exists($className) && !$this->classLocator->exists($className)) {

@@ -11,12 +11,13 @@ use PhpParser\Node\Name;
 use PhpParser\Node\Name\FullyQualified;
 use PhpParser\Node\NullableType;
 use PhpParser\Node\UnionType;
+use ResourceParserGenerator\Contracts\Converters\DeclaredTypeConverterContract;
 use ResourceParserGenerator\Contracts\Resolvers\ResolverContract;
 use ResourceParserGenerator\Contracts\Types\TypeContract;
 use ResourceParserGenerator\Types;
 use RuntimeException;
 
-class DeclaredTypeConverter
+class DeclaredTypeConverter implements DeclaredTypeConverterContract
 {
     public function convert(ComplexType|Identifier|Name|null $type, ResolverContract $resolver): TypeContract
     {

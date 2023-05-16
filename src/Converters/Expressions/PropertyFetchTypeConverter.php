@@ -7,11 +7,11 @@ namespace ResourceParserGenerator\Converters\Expressions;
 use PhpParser\Node\Expr\NullsafePropertyFetch;
 use PhpParser\Node\Expr\PropertyFetch;
 use ResourceParserGenerator\Contracts\Converters\Expressions\TypeConverterContract;
+use ResourceParserGenerator\Contracts\Converters\ExprTypeConverterContract;
+use ResourceParserGenerator\Contracts\Parsers\ClassParserContract;
 use ResourceParserGenerator\Contracts\Types\TypeContract;
 use ResourceParserGenerator\Converters\Data\ConverterContext;
-use ResourceParserGenerator\Converters\ExprTypeConverter;
 use ResourceParserGenerator\Converters\Traits\ParsesFetchSides;
-use ResourceParserGenerator\Parsers\ClassParser;
 use ResourceParserGenerator\Types\NullType;
 use ResourceParserGenerator\Types\UnionType;
 use RuntimeException;
@@ -21,8 +21,8 @@ class PropertyFetchTypeConverter implements TypeConverterContract
     use ParsesFetchSides;
 
     public function __construct(
-        private readonly ClassParser $classParser,
-        private readonly ExprTypeConverter $exprTypeConverter,
+        private readonly ClassParserContract $classParser,
+        private readonly ExprTypeConverterContract $exprTypeConverter,
     ) {
         //
     }
@@ -52,12 +52,12 @@ class PropertyFetchTypeConverter implements TypeConverterContract
         return $type;
     }
 
-    protected function exprTypeConverter(): ExprTypeConverter
+    protected function exprTypeConverter(): ExprTypeConverterContract
     {
         return $this->exprTypeConverter;
     }
 
-    protected function classParser(): ClassParser
+    protected function classParser(): ClassParserContract
     {
         return $this->classParser;
     }

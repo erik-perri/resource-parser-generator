@@ -15,16 +15,17 @@ use PHPStan\PhpDocParser\Ast\PhpDoc\VarTagValueNode;
 use PHPStan\PhpDocParser\Lexer\Lexer;
 use PHPStan\PhpDocParser\Parser\PhpDocParser;
 use PHPStan\PhpDocParser\Parser\TokenIterator;
+use ResourceParserGenerator\Contracts\Converters\DocBlockTypeConverterContract;
+use ResourceParserGenerator\Contracts\Parsers\DocBlockParserContract;
 use ResourceParserGenerator\Contracts\Resolvers\ResolverContract;
-use ResourceParserGenerator\Converters\DocBlockTypeConverter;
 use ResourceParserGenerator\Parsers\Data\DocBlock;
 use ResourceParserGenerator\Types;
 use RuntimeException;
 
-class DocBlockParser
+class DocBlockParser implements DocBlockParserContract
 {
     public function __construct(
-        private readonly DocBlockTypeConverter $typeParser,
+        private readonly DocBlockTypeConverterContract $typeParser,
         private readonly Lexer $phpDocLexer,
         private readonly PhpDocParser $phpDocParser,
     ) {

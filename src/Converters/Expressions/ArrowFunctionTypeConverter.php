@@ -6,13 +6,13 @@ namespace ResourceParserGenerator\Converters\Expressions;
 
 use PhpParser\Node\Expr\ArrowFunction;
 use ResourceParserGenerator\Contracts\Converters\Expressions\TypeConverterContract;
+use ResourceParserGenerator\Contracts\Converters\ExprTypeConverterContract;
 use ResourceParserGenerator\Contracts\Types\TypeContract;
 use ResourceParserGenerator\Converters\Data\ConverterContext;
-use ResourceParserGenerator\Converters\ExprTypeConverter;
 
 class ArrowFunctionTypeConverter implements TypeConverterContract
 {
-    public function __construct(private readonly ExprTypeConverter $exprTypeConverter)
+    public function __construct(private readonly ExprTypeConverterContract $exprTypeConverter)
     {
         //
     }

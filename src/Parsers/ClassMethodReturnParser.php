@@ -9,28 +9,25 @@ use PhpParser\Node\Expr\Array_;
 use PhpParser\Node\Scalar\String_;
 use PhpParser\Node\Stmt\Return_;
 use PhpParser\NodeFinder;
+use ResourceParserGenerator\Contracts\Converters\ExprTypeConverterContract;
+use ResourceParserGenerator\Contracts\Parsers\ClassMethodReturnParserContract;
+use ResourceParserGenerator\Contracts\Parsers\ClassParserContract;
 use ResourceParserGenerator\Contracts\Types\TypeContract;
 use ResourceParserGenerator\Converters\Data\ConverterContext;
-use ResourceParserGenerator\Converters\ExprTypeConverter;
 use ResourceParserGenerator\Parsers\Data\ClassMethodScope;
 use ResourceParserGenerator\Resolvers\VariableResolver;
 use ResourceParserGenerator\Types;
 use RuntimeException;
 
-class ClassMethodReturnParser
+class ClassMethodReturnParser implements ClassMethodReturnParserContract
 {
     public function __construct(
-        private readonly ExprTypeConverter $expressionTypeConverter,
-        private readonly ClassParser $classParser,
+        private readonly ExprTypeConverterContract $expressionTypeConverter,
+        private readonly ClassParserContract $classParser,
     ) {
         //
     }
 
-    /**
-     * @param class-string $className
-     * @param string $methodName
-     * @return TypeContract
-     */
     public function parse(string $className, string $methodName): TypeContract
     {
         $classScope = $this->classParser->parse($className);

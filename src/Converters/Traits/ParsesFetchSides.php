@@ -10,19 +10,19 @@ use PhpParser\Node\Expr\NullsafeMethodCall;
 use PhpParser\Node\Expr\NullsafePropertyFetch;
 use PhpParser\Node\Expr\PropertyFetch;
 use ResourceParserGenerator\Contracts\ClassScopeContract;
+use ResourceParserGenerator\Contracts\Converters\ExprTypeConverterContract;
+use ResourceParserGenerator\Contracts\Parsers\ClassParserContract;
 use ResourceParserGenerator\Contracts\Types\TypeContract;
 use ResourceParserGenerator\Converters\Data\ConverterContext;
-use ResourceParserGenerator\Converters\ExprTypeConverter;
-use ResourceParserGenerator\Parsers\ClassParser;
 use ResourceParserGenerator\Types\ClassType;
 use ResourceParserGenerator\Types\UnionType;
 use RuntimeException;
 
 trait ParsesFetchSides
 {
-    abstract protected function exprTypeConverter(): ExprTypeConverter;
+    abstract protected function exprTypeConverter(): ExprTypeConverterContract;
 
-    abstract protected function classParser(): ClassParser;
+    abstract protected function classParser(): ClassParserContract;
 
     private function convertLeftSideToClassScope(
         PropertyFetch|NullsafePropertyFetch|MethodCall|NullsafeMethodCall $expr,

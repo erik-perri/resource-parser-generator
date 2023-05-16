@@ -21,6 +21,7 @@ use PhpParser\Node\Scalar\DNumber;
 use PhpParser\Node\Scalar\LNumber;
 use PhpParser\Node\Scalar\String_;
 use ResourceParserGenerator\Contracts\Converters\Expressions\TypeConverterContract;
+use ResourceParserGenerator\Contracts\Converters\ExprTypeConverterContract;
 use ResourceParserGenerator\Contracts\Types\TypeContract;
 use ResourceParserGenerator\Converters\Data\ConverterContext;
 use ResourceParserGenerator\Converters\Expressions\ArrowFunctionTypeConverter;
@@ -35,7 +36,7 @@ use ResourceParserGenerator\Converters\Expressions\StringTypeConverter;
 use ResourceParserGenerator\Converters\Expressions\TernaryTypeConverter;
 use RuntimeException;
 
-class ExprTypeConverter
+class ExprTypeConverter implements ExprTypeConverterContract
 {
     /**
      * @var array<class-string, class-string>

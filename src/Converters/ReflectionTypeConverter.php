@@ -6,11 +6,12 @@ namespace ResourceParserGenerator\Converters;
 
 use ReflectionNamedType;
 use ReflectionType;
+use ResourceParserGenerator\Contracts\Converters\ReflectionTypeConverterContract;
 use ResourceParserGenerator\Contracts\Types\TypeContract;
 use ResourceParserGenerator\Types;
 use RuntimeException;
 
-class ReflectionTypeConverter
+class ReflectionTypeConverter implements ReflectionTypeConverterContract
 {
     public function convert(ReflectionType|null $type): TypeContract
     {

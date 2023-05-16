@@ -7,12 +7,12 @@ namespace ResourceParserGenerator\Console\Commands;
 use Illuminate\Console\Command;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\File;
+use ResourceParserGenerator\Contracts\Parsers\ResourceParserContract;
 use ResourceParserGenerator\Filesystem\Contracts\ParserFileSplitterContract;
 use ResourceParserGenerator\Filesystem\NoOpFileSplitter;
 use ResourceParserGenerator\Filesystem\SplitByResourceFileSplitter;
 use ResourceParserGenerator\Generators\ResourceParserFileGenerator;
 use ResourceParserGenerator\Parsers\Data\ResourceParserCollection;
-use ResourceParserGenerator\Parsers\ResourceParser;
 use Throwable;
 
 class GenerateResourceParsersCommand extends Command
@@ -52,7 +52,7 @@ class GenerateResourceParsersCommand extends Command
         }
 
         $parserCollection = $this->make(ResourceParserCollection::class);
-        $resourceParser = $this->make(ResourceParser::class);
+        $resourceParser = $this->make(ResourceParserContract::class);
         $parserFileGenerator = $this->make(ResourceParserFileGenerator::class);
 
         foreach ($methods as [$className, $methodName]) {

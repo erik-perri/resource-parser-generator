@@ -7,6 +7,8 @@ declare(strict_types=1);
 namespace ResourceParserGenerator\Tests\Unit\Converters;
 
 use Closure;
+use Mockery\ExpectationInterface;
+use Mockery\MockInterface;
 use PhpParser\Node;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\DataProvider;
@@ -29,18 +31,21 @@ class DeclaredTypeConverterTest extends TestCase
         $parser = $this->make(DeclaredTypeConverter::class);
 
         /**
-         * @var ResolverContract $resolveMock
+         * @var MockInterface|ExpectationInterface $resolveMock
          */
         $resolveMock = $resolveMockFactory
             ? $resolveMockFactory->call($this)
             : $this->mock(ResolverContract::class)
                 ->shouldReceive('resolveClass')
                 ->never()
-                ->andReturnNull()
-                ->getMock();
+                ->andReturnNull();
+
+        $resolveMock->shouldReceive('resolveThis')
+            ->zeroOrMoreTimes()
+            ->andReturn('App\This');
 
         // Act
-        $result = $parser->convert($input, $resolveMock);
+        $result = $parser->convert($input, $resolveMock->getMock());
 
         // Assert
         $this->assertInstanceOf(get_class($expected), $result);
@@ -78,6 +83,14 @@ class DeclaredTypeConverterTest extends TestCase
                 'input' => new Node\Identifier('object'),
                 'expected' => new Types\ObjectType(),
             ],
+            'self' => [
+                'input' => new Node\Name('self'),
+                'expected' => new Types\ClassType('App\This', null),
+            ],
+            'static' => [
+                'input' => new Node\Name('static'),
+                'expected' => new Types\ClassType('App\This', null),
+            ],
             'string' => [
                 'input' => new Node\Identifier('string'),
                 'expected' => new Types\StringType(),
@@ -101,8 +114,7 @@ class DeclaredTypeConverterTest extends TestCase
                     ->shouldReceive('resolveClass')
                     ->once()
                     ->with('Foo\Baz')
-                    ->andReturn('App\Foo\Baz')
-                    ->getMock(),
+                    ->andReturn('App\Foo\Baz'),
             ],
             'class not qualified' => [
                 'input' => new Node\Name('Baz'),
@@ -111,8 +123,7 @@ class DeclaredTypeConverterTest extends TestCase
                     ->shouldReceive('resolveClass')
                     ->once()
                     ->with('Baz')
-                    ->andReturn('App\Foo\Baz')
-                    ->getMock(),
+                    ->andReturn('App\Foo\Baz'),
             ],
         ];
     }

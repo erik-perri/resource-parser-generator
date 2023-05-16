@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace ResourceParserGenerator\Tests\Unit\Console\Commands;
+namespace ResourceParserGenerator\Tests\Feature\Console\Commands;
 
 use Illuminate\Support\Facades\File;
 use PHPUnit\Framework\Attributes\CoversClass;

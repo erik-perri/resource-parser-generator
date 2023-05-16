@@ -11,7 +11,7 @@ use RuntimeException;
 
 class ResourceParserFileGenerator
 {
-    public function __construct(private readonly ResourceParserGenerator $resourceParserBuilder)
+    public function __construct(private readonly ResourceParserGenerator $resourceParserGenerator)
     {
         //
     }
@@ -31,7 +31,7 @@ class ResourceParserFileGenerator
         $fileSplitter
             ->split($parsers)
             ->each(function (ResourceParserCollection $parsers, string $fileName) use ($files) {
-                $contents = $this->resourceParserBuilder->build($parsers);
+                $contents = $this->resourceParserGenerator->generate($parsers);
 
                 if ($files->has($fileName)) {
                     throw new RuntimeException(sprintf('File "%s" already exists in generation.', $fileName));

@@ -21,7 +21,7 @@ class ResourceParserGeneratorTest extends TestCase
         $parsers = $this->make(ResourceParser::class)->parse($className, $methodName);
 
         // Act
-        $contents = $this->make(ResourceParserGenerator::class)->build($parsers);
+        $contents = $this->make(ResourceParserGenerator::class)->generate($parsers);
 
         // Assert
         $this->assertEquals($expectedContent, $contents);

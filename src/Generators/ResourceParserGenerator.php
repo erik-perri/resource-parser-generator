@@ -15,7 +15,7 @@ class ResourceParserGenerator
      * @param ResourceParserCollection $parsers
      * @return string
      */
-    public function build(ResourceParserCollection $parsers): string
+    public function generate(ResourceParserCollection $parsers): string
     {
         /**
          * @var Collection<string, ResourceParserData> $parsers

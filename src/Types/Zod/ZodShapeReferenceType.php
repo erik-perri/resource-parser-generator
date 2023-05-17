@@ -40,16 +40,16 @@ class ZodShapeReferenceType implements ParserTypeContract
     }
 
     /**
-     * @param Collection<int, ResourceParserData> $parsers
+     * @param Collection<int, ResourceParserData> $parsersInThisFile
      * @return array<string, string[]>
      */
-    public function shapeImport(Collection $parsers): array
+    public function shapeImport(Collection $parsersInThisFile): array
     {
-        $alreadyParsedResource = $parsers->first(function (ResourceParserData $parser) {
+        $parserInThisFile = $parsersInThisFile->first(function (ResourceParserData $parser) {
             return $parser->fullyQualifiedResourceName() === $this->fullyQualifiedResourceName;
         });
 
-        if (!$alreadyParsedResource) {
+        if (!$parserInThisFile) {
             $fileName = $this->parserNameGenerator->generateFileName($this->fullyQualifiedResourceName);
             $parserName = $this->parserNameGenerator->generateVariableName(
                 $this->fullyQualifiedResourceName,

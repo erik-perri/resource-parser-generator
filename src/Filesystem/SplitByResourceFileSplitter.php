@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace ResourceParserGenerator\Filesystem;
 
 use Illuminate\Support\Collection;
-use ResourceParserGenerator\Filesystem\Contracts\ParserFileSplitterContract;
+use ResourceParserGenerator\Contracts\Filesystem\ParserFileSplitterContract;
 use ResourceParserGenerator\Generators\ParserNameGenerator;
 use ResourceParserGenerator\Parsers\Data\ResourceParserCollection;
 

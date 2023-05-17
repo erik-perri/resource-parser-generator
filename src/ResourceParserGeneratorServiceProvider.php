@@ -19,6 +19,7 @@ use ResourceParserGenerator\Contracts\Converters\ExpressionTypeConverterContract
 use ResourceParserGenerator\Contracts\Converters\ReflectionTypeConverterContract;
 use ResourceParserGenerator\Contracts\Converters\VariableTypeConverterContract;
 use ResourceParserGenerator\Contracts\Filesystem\ClassFileLocatorContract;
+use ResourceParserGenerator\Contracts\Generators\ParserNameGeneratorContract;
 use ResourceParserGenerator\Contracts\Parsers\ClassConstFetchValueParserContract;
 use ResourceParserGenerator\Contracts\Parsers\ClassMethodReturnParserContract;
 use ResourceParserGenerator\Contracts\Parsers\ClassParserContract;
@@ -31,7 +32,6 @@ use ResourceParserGenerator\Converters\ExpressionTypeConverter;
 use ResourceParserGenerator\Converters\ReflectionTypeConverter;
 use ResourceParserGenerator\Converters\VariableTypeConverter;
 use ResourceParserGenerator\Filesystem\ClassFileLocator;
-use ResourceParserGenerator\Generators\Contracts\ParserNameGeneratorContract;
 use ResourceParserGenerator\Generators\ParserNameGenerator;
 use ResourceParserGenerator\Parsers\ClassConstFetchValueParser;
 use ResourceParserGenerator\Parsers\ClassMethodReturnParser;

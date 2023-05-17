@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace ResourceParserGenerator\Generators\Contracts;
+namespace ResourceParserGenerator\Contracts\Generators;
 
 interface ParserNameGeneratorContract
 {

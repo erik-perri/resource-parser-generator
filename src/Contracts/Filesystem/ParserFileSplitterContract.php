@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace ResourceParserGenerator\Filesystem\Contracts;
+namespace ResourceParserGenerator\Contracts\Filesystem;
 
 use Illuminate\Support\Collection;
 use ResourceParserGenerator\Parsers\Data\ResourceParserCollection;

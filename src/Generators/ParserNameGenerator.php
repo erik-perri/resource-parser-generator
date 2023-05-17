@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace ResourceParserGenerator\Generators;
 
 use Illuminate\Support\Str;
-use ResourceParserGenerator\Generators\Contracts\ParserNameGeneratorContract;
+use ResourceParserGenerator\Contracts\Generators\ParserNameGeneratorContract;
 
 class ParserNameGenerator implements ParserNameGeneratorContract
 {

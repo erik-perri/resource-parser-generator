@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace ResourceParserGenerator\Parsers\Data;
 
 use Illuminate\Support\Collection;
+use ResourceParserGenerator\Contracts\Generators\ParserNameGeneratorContract;
 use ResourceParserGenerator\Contracts\Types\ParserTypeContract;
-use ResourceParserGenerator\Generators\Contracts\ParserNameGeneratorContract;
 
 class ResourceParserData
 {

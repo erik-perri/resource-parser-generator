@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace ResourceParserGenerator\Types\Zod;
 
+use ResourceParserGenerator\Contracts\Generators\ParserNameGeneratorContract;
 use ResourceParserGenerator\Contracts\Types\ParserTypeContract;
-use ResourceParserGenerator\Generators\Contracts\ParserNameGeneratorContract;
 
 class ZodShapeReferenceType implements ParserTypeContract
 {

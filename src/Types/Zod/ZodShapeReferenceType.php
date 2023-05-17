@@ -4,8 +4,10 @@ declare(strict_types=1);
 
 namespace ResourceParserGenerator\Types\Zod;
 
+use Illuminate\Support\Collection;
 use ResourceParserGenerator\Contracts\Generators\ParserNameGeneratorContract;
 use ResourceParserGenerator\Contracts\Types\ParserTypeContract;
+use ResourceParserGenerator\Parsers\Data\ResourceParserData;
 
 class ZodShapeReferenceType implements ParserTypeContract
 {
@@ -38,12 +40,16 @@ class ZodShapeReferenceType implements ParserTypeContract
     }
 
     /**
-     * @param string[] $availableParsersInThisFile
+     * @param Collection<int, ResourceParserData> $parsers
      * @return array<string, string[]>
      */
-    public function shapeImport(array $availableParsersInThisFile): array
+    public function shapeImport(Collection $parsers): array
     {
-        if (!in_array($this->constraint(), $availableParsersInThisFile, true)) {
+        $alreadyParsedResource = $parsers->first(function (ResourceParserData $parser) {
+            return $parser->fullyQualifiedResourceName() === $this->fullyQualifiedResourceName;
+        });
+
+        if (!$alreadyParsedResource) {
             $fileName = $this->parserNameGenerator->generateFileName($this->fullyQualifiedResourceName);
             $parserName = $this->parserNameGenerator->generateVariableName(
                 $this->fullyQualifiedResourceName,

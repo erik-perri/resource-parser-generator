@@ -9,7 +9,7 @@ use Illuminate\Support\Collection;
 class ResourceParserCollection
 {
     /**
-     * @var Collection<string, Collection<string, ResourceParserData>>
+     * @var Collection<int, ResourceParserData>
      */
     private readonly Collection $parsers;
 
@@ -22,37 +22,24 @@ class ResourceParserCollection
 
     public function add(ResourceParserData $parser): self
     {
-        $resourceParsers = $this->parsers->get($parser->fullyQualifiedResourceName()) ?? collect();
-
-        $resourceParsers->put($parser->methodName(), $parser);
-
-        $this->parsers->put($parser->fullyQualifiedResourceName(), $resourceParsers);
+        $this->parsers->add($parser);
 
         return $this;
     }
 
     /**
-     * @return Collection<string, Collection<string, ResourceParserData>>
+     * @return Collection<int, ResourceParserData>
      */
     public function collect(): Collection
     {
         return $this->parsers->collect();
     }
 
-    /**
-     * @return Collection<string, ResourceParserData>
-     */
-    public function flatten(): Collection
-    {
-        /**
-         * @var Collection<string, ResourceParserData>
-         */
-        return $this->parsers->flatten();
-    }
-
     public function has(string $fullyQualifiedResourceName, string $methodName): bool
     {
-        return $this->parsers->has($fullyQualifiedResourceName)
-            && $this->parsers->get($fullyQualifiedResourceName)?->has($methodName);
+        return $this->parsers->some(
+            fn(ResourceParserData $parser) => $parser->fullyQualifiedResourceName() === $fullyQualifiedResourceName
+                && $parser->methodName() === $methodName,
+        );
     }
 }

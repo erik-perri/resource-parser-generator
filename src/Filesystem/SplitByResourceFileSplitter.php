@@ -6,28 +6,24 @@ namespace ResourceParserGenerator\Filesystem;
 
 use Illuminate\Support\Collection;
 use ResourceParserGenerator\Contracts\Filesystem\ParserFileSplitterContract;
-use ResourceParserGenerator\Generators\ParserNameGenerator;
 use ResourceParserGenerator\Parsers\Data\ResourceParserCollection;
+use ResourceParserGenerator\Parsers\Data\ResourceParserData;
 
 class SplitByResourceFileSplitter implements ParserFileSplitterContract
 {
-    public function __construct(private readonly ParserNameGenerator $parserNameGenerator)
-    {
-        //
-    }
-
     public function split(ResourceParserCollection $parsers): Collection
     {
         /**
-         * @var Collection<string, ResourceParserCollection>
+         * @var Collection<string, array<int, ResourceParserData>>
          */
-        return $parsers->collect()->mapWithKeys(function (Collection $resourceParsers, string $resourceClass) {
-            $fileName = $this->parserNameGenerator->generateFileName($resourceClass);
-            $collection = new ResourceParserCollection(...$resourceParsers->all());
+        $files = collect();
 
-            return [
-                $fileName => $collection,
-            ];
-        });
+        foreach ($parsers->collect() as $parser) {
+            $files = $files->mergeRecursive([
+                $parser->fileName() => [$parser],
+            ]);
+        }
+
+        return $files;
     }
 }

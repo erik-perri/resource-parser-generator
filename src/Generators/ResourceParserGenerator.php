@@ -5,37 +5,22 @@ declare(strict_types=1);
 namespace ResourceParserGenerator\Generators;
 
 use Illuminate\Support\Collection;
-use ResourceParserGenerator\Parsers\Data\ResourceParserCollection;
 use ResourceParserGenerator\Parsers\Data\ResourceParserData;
 use ResourceParserGenerator\Types\Zod\ZodShapeReferenceType;
 
 class ResourceParserGenerator
 {
     /**
-     * @param ResourceParserCollection $parsers
+     * @param Collection<int, ResourceParserData> $parsers
      * @return string
      */
-    public function generate(ResourceParserCollection $parsers): string
+    public function generate(Collection $parsers): string
     {
-        /**
-         * @var Collection<string, ResourceParserData> $parsers
-         */
-        $parsers = $parsers->flatten();
-
-        // TODO Figure out a way to restructure this so we're passing in the already generated file and variable names
-        //      rather than regenerating them in shapeImport.
-        $availableParsersInThisFile = $parsers
-            ->map(fn(ResourceParserData $parser) => $parser->variableName())
-            ->unique()
-            ->sort()
-            ->values()
-            ->all();
-
         $imports = collect();
         foreach ($parsers as $parser) {
             foreach ($parser->properties() as $property) {
                 if ($property instanceof ZodShapeReferenceType) {
-                    $imports = $imports->mergeRecursive($property->shapeImport($availableParsersInThisFile));
+                    $imports = $imports->mergeRecursive($property->shapeImport($parsers));
                 } else {
                     $imports = $imports->mergeRecursive($property->imports());
                 }

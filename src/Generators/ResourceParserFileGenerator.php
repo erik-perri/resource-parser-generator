@@ -30,8 +30,8 @@ class ResourceParserFileGenerator
 
         $fileSplitter
             ->split($parsers)
-            ->each(function (ResourceParserCollection $parsers, string $fileName) use ($files) {
-                $contents = $this->resourceParserGenerator->generate($parsers);
+            ->each(function (array $parsers, string $fileName) use ($files) {
+                $contents = $this->resourceParserGenerator->generate(collect($parsers));
 
                 if ($files->has($fileName)) {
                     throw new RuntimeException(sprintf('File "%s" already exists in generation.', $fileName));

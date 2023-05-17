@@ -26,14 +26,6 @@ export const userResourceTernariesParser = object({
 
 export type UserResourceTernaries = output<typeof userResourceTernariesParser>;
 
-export const userResourceRelatedResourceParser = object({
-  with_format_short: relatedResourceShortFormatNotNamedLikeFormatNameParser,
-  with_format_verbose: relatedResourceVerboseParser,
-  with_format_default: relatedResourceBaseParser,
-});
-
-export type UserResourceRelatedResource = output<typeof userResourceRelatedResourceParser>;
-
 export const relatedResourceBaseParser = object({
   name: string(),
 });
@@ -52,3 +44,11 @@ export const relatedResourceVerboseParser = object({
 });
 
 export type RelatedResourceVerbose = output<typeof relatedResourceVerboseParser>;
+
+export const userResourceRelatedResourceParser = object({
+  with_format_short: relatedResourceShortFormatNotNamedLikeFormatNameParser,
+  with_format_verbose: relatedResourceVerboseParser,
+  with_format_default: relatedResourceBaseParser,
+});
+
+export type UserResourceRelatedResource = output<typeof userResourceRelatedResourceParser>;

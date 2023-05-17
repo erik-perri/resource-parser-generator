@@ -18,7 +18,7 @@ class NoOpFileSplitter implements ParserFileSplitterContract
     public function split(ResourceParserCollection $parsers): Collection
     {
         return collect([
-            $this->fileName => $parsers,
+            $this->fileName => $parsers->collect()->all(),
         ]);
     }
 }

@@ -43,6 +43,11 @@ class ResourceParserData
         ]);
     }
 
+    public function fileName(): string
+    {
+        return $this->parserNameGenerator->generateFileName($this->fullyQualifiedResourceName());
+    }
+
     public function fullyQualifiedResourceName(): string
     {
         return $this->fullyQualifiedResourceName;

@@ -42,8 +42,7 @@ class DocBlockTypeConverter implements DocBlockTypeConverterContract
                 }
             }
 
-            // TODO Generic sub-types?
-            return $this->convert($type->type, $resolver);
+            throw new RuntimeException(sprintf('Unhandled generic type for "%s"', $containerType->describe()));
         }
 
         if ($type instanceof ArrayTypeNode) {

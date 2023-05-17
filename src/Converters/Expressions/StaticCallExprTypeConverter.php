@@ -7,14 +7,14 @@ namespace ResourceParserGenerator\Converters\Expressions;
 use PhpParser\Node\Expr;
 use PhpParser\Node\Expr\StaticCall;
 use ResourceParserGenerator\Contracts\Converters\DeclaredTypeConverterContract;
-use ResourceParserGenerator\Contracts\Converters\Expressions\TypeConverterContract;
+use ResourceParserGenerator\Contracts\Converters\Expressions\ExprTypeConverterContract;
 use ResourceParserGenerator\Contracts\Parsers\ClassParserContract;
 use ResourceParserGenerator\Contracts\Types\TypeContract;
 use ResourceParserGenerator\Converters\Data\ConverterContext;
 use ResourceParserGenerator\Types\ClassType;
 use RuntimeException;
 
-class StaticCallTypeConverter implements TypeConverterContract
+class StaticCallExprTypeConverter implements ExprTypeConverterContract
 {
     public function __construct(
         private readonly ClassParserContract $classParser,

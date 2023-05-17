@@ -11,7 +11,7 @@ use ResourceParserGenerator\Converters\Data\ConverterContext;
 /**
  * @method TypeContract convert(Expr $expr, ConverterContext $context)
  */
-interface TypeConverterContract
+interface ExprTypeConverterContract
 {
     //
 }

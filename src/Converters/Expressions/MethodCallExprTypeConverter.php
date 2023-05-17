@@ -10,8 +10,8 @@ use PhpParser\Node\Expr\MethodCall;
 use PhpParser\Node\Expr\NullsafeMethodCall;
 use PhpParser\Node\Scalar\String_;
 use ResourceParserGenerator\Contracts\ClassScopeContract;
-use ResourceParserGenerator\Contracts\Converters\Expressions\TypeConverterContract;
-use ResourceParserGenerator\Contracts\Converters\ExprTypeConverterContract;
+use ResourceParserGenerator\Contracts\Converters\Expressions\ExprTypeConverterContract;
+use ResourceParserGenerator\Contracts\Converters\ExpressionTypeConverterContract;
 use ResourceParserGenerator\Contracts\Parsers\ClassConstFetchValueParserContract;
 use ResourceParserGenerator\Contracts\Parsers\ClassParserContract;
 use ResourceParserGenerator\Contracts\Types\TypeContract;
@@ -26,14 +26,14 @@ use RuntimeException;
 use Sourcetoad\EnhancedResources\Formatting\Attributes\Format;
 use Sourcetoad\EnhancedResources\Resource;
 
-class MethodCallTypeConverter implements TypeConverterContract
+class MethodCallExprTypeConverter implements ExprTypeConverterContract
 {
     use ParsesFetchSides;
 
     public function __construct(
         private readonly ClassConstFetchValueParserContract $classConstFetchValueParser,
         private readonly ClassParserContract $classParser,
-        private readonly ExprTypeConverterContract $exprTypeConverter,
+        private readonly ExpressionTypeConverterContract $expressionTypeConverter,
     ) {
         //
     }
@@ -89,10 +89,10 @@ class MethodCallTypeConverter implements TypeConverterContract
             throw new RuntimeException('Unhandled missing second argument for whenLoaded');
         }
 
-        $returnWhenLoaded = $this->exprTypeConverter->convert($args[1]->value, $context);
+        $returnWhenLoaded = $this->expressionTypeConverter->convert($args[1]->value, $context);
 
         $returnWhenUnloaded = count($args) > 2
-            ? $this->exprTypeConverter->convert($args[2]->value, $context)
+            ? $this->expressionTypeConverter->convert($args[2]->value, $context)
             : new UndefinedType();
 
         return $type
@@ -131,9 +131,9 @@ class MethodCallTypeConverter implements TypeConverterContract
         }
     }
 
-    protected function exprTypeConverter(): ExprTypeConverterContract
+    protected function expressionTypeConverter(): ExpressionTypeConverterContract
     {
-        return $this->exprTypeConverter;
+        return $this->expressionTypeConverter;
     }
 
     protected function classParser(): ClassParserContract

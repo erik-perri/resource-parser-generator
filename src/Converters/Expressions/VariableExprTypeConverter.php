@@ -6,13 +6,13 @@ namespace ResourceParserGenerator\Converters\Expressions;
 
 use PhpParser\Node\Expr;
 use PhpParser\Node\Expr\Variable;
-use ResourceParserGenerator\Contracts\Converters\Expressions\TypeConverterContract;
+use ResourceParserGenerator\Contracts\Converters\Expressions\ExprTypeConverterContract;
 use ResourceParserGenerator\Contracts\Types\TypeContract;
 use ResourceParserGenerator\Converters\Data\ConverterContext;
 use ResourceParserGenerator\Types;
 use RuntimeException;
 
-class VariableTypeConverter implements TypeConverterContract
+class VariableExprTypeConverter implements ExprTypeConverterContract
 {
     public function convert(Variable $expr, ConverterContext $context): TypeContract
     {

@@ -5,23 +5,23 @@ declare(strict_types=1);
 namespace ResourceParserGenerator\Converters\Expressions;
 
 use PhpParser\Node\Expr\Ternary;
-use ResourceParserGenerator\Contracts\Converters\Expressions\TypeConverterContract;
-use ResourceParserGenerator\Contracts\Converters\ExprTypeConverterContract;
+use ResourceParserGenerator\Contracts\Converters\Expressions\ExprTypeConverterContract;
+use ResourceParserGenerator\Contracts\Converters\ExpressionTypeConverterContract;
 use ResourceParserGenerator\Contracts\Types\TypeContract;
 use ResourceParserGenerator\Converters\Data\ConverterContext;
 use ResourceParserGenerator\Types;
 
-class TernaryTypeConverter implements TypeConverterContract
+class TernaryExprTypeConverter implements ExprTypeConverterContract
 {
-    public function __construct(private readonly ExprTypeConverterContract $exprTypeConverter)
+    public function __construct(private readonly ExpressionTypeConverterContract $expressionTypeConverter)
     {
         //
     }
 
     public function convert(Ternary $expr, ConverterContext $context): TypeContract
     {
-        $ifType = $this->exprTypeConverter->convert($expr->if ?? $expr->cond, $context);
-        $elseType = $this->exprTypeConverter->convert($expr->else, $context);
+        $ifType = $this->expressionTypeConverter->convert($expr->if ?? $expr->cond, $context);
+        $elseType = $this->expressionTypeConverter->convert($expr->else, $context);
 
         if (!$expr->if && $ifType instanceof Types\UnionType) {
             $ifType = $ifType->removeNullable();

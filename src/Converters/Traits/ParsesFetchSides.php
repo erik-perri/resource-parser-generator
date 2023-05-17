@@ -10,7 +10,7 @@ use PhpParser\Node\Expr\NullsafeMethodCall;
 use PhpParser\Node\Expr\NullsafePropertyFetch;
 use PhpParser\Node\Expr\PropertyFetch;
 use ResourceParserGenerator\Contracts\ClassScopeContract;
-use ResourceParserGenerator\Contracts\Converters\ExprTypeConverterContract;
+use ResourceParserGenerator\Contracts\Converters\ExpressionTypeConverterContract;
 use ResourceParserGenerator\Contracts\Parsers\ClassParserContract;
 use ResourceParserGenerator\Contracts\Types\TypeContract;
 use ResourceParserGenerator\Converters\Data\ConverterContext;
@@ -20,7 +20,7 @@ use RuntimeException;
 
 trait ParsesFetchSides
 {
-    abstract protected function exprTypeConverter(): ExprTypeConverterContract;
+    abstract protected function expressionTypeConverter(): ExpressionTypeConverterContract;
 
     abstract protected function classParser(): ClassParserContract;
 
@@ -28,7 +28,7 @@ trait ParsesFetchSides
         PropertyFetch|NullsafePropertyFetch|MethodCall|NullsafeMethodCall $expr,
         ConverterContext $context,
     ): ClassScopeContract {
-        $leftSide = $this->exprTypeConverter()->convert($expr->var, $context);
+        $leftSide = $this->expressionTypeConverter()->convert($expr->var, $context);
 
         if ($expr instanceof NullsafePropertyFetch || $expr instanceof NullsafeMethodCall) {
             if (!($leftSide instanceof UnionType)) {
@@ -63,7 +63,7 @@ trait ParsesFetchSides
         ConverterContext $context,
     ): TypeContract|string {
         return $expr->name instanceof Expr
-            ? $this->exprTypeConverter()->convert($expr->name, $context)
+            ? $this->expressionTypeConverter()->convert($expr->name, $context)
             : $expr->name->name;
     }
 }

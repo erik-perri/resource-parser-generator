@@ -9,7 +9,7 @@ use PhpParser\Node\Expr\Array_;
 use PhpParser\Node\Scalar\String_;
 use PhpParser\Node\Stmt\Return_;
 use PhpParser\NodeFinder;
-use ResourceParserGenerator\Contracts\Converters\ExprTypeConverterContract;
+use ResourceParserGenerator\Contracts\Converters\ExpressionTypeConverterContract;
 use ResourceParserGenerator\Contracts\Parsers\ClassMethodReturnParserContract;
 use ResourceParserGenerator\Contracts\Parsers\ClassParserContract;
 use ResourceParserGenerator\Contracts\Types\TypeContract;
@@ -22,7 +22,7 @@ use RuntimeException;
 class ClassMethodReturnParser implements ClassMethodReturnParserContract
 {
     public function __construct(
-        private readonly ExprTypeConverterContract $expressionTypeConverter,
+        private readonly ExpressionTypeConverterContract $expressionTypeConverter,
         private readonly ClassParserContract $classParser,
     ) {
         //

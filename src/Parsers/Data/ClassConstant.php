@@ -7,7 +7,7 @@ namespace ResourceParserGenerator\Parsers\Data;
 use PhpParser\Node\Const_;
 use PhpParser\Node\Scalar\String_;
 use ResourceParserGenerator\Contracts\ClassConstantContract;
-use ResourceParserGenerator\Contracts\Converters\ExprTypeConverterContract;
+use ResourceParserGenerator\Contracts\Converters\ExpressionTypeConverterContract;
 use ResourceParserGenerator\Contracts\Resolvers\ResolverContract;
 use ResourceParserGenerator\Contracts\Types\TypeContract;
 use ResourceParserGenerator\Converters\Data\ConverterContext;
@@ -18,7 +18,7 @@ class ClassConstant implements ClassConstantContract
     public function __construct(
         private readonly Const_ $constant,
         private readonly ResolverContract $resolver,
-        private readonly ExprTypeConverterContract $exprTypeConverter,
+        private readonly ExpressionTypeConverterContract $exprTypeConverter,
     ) {
         //
     }

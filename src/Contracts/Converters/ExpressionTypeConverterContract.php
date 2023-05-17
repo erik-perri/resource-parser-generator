@@ -8,7 +8,7 @@ use PhpParser\Node\Expr;
 use ResourceParserGenerator\Contracts\Types\TypeContract;
 use ResourceParserGenerator\Converters\Data\ConverterContext;
 
-interface ExprTypeConverterContract
+interface ExpressionTypeConverterContract
 {
     public function convert(Expr $expr, ConverterContext $context): TypeContract;
 }

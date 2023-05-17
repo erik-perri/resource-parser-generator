@@ -20,6 +20,7 @@ class VariableTypeConverter implements VariableTypeConverterContract
             'array' => new Types\ArrayType(null, null),
             'object' => new Types\ObjectType(),
             'resource' => new Types\ResourceType(),
+            'resource (closed)' => new Types\ResourceType(true),
             'NULL' => new Types\NullType(),
             'unknown type' => new Types\MixedType(),
         };

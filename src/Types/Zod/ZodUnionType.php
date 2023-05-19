@@ -29,7 +29,7 @@ class ZodUnionType implements ParserTypeContract
             return $types->firstOrFail();
         }
 
-        return sprintf('union(%s)', $types->join(', '));
+        return sprintf('union([%s])', $types->join(', '));
     }
 
     public function imports(): array

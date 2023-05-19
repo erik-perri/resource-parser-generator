@@ -29,7 +29,7 @@ class ZodIntersectionType implements ParserTypeContract
             return $types->firstOrFail();
         }
 
-        return sprintf('intersection(%s)', $types->join(', '));
+        return sprintf('intersection([%s])', $types->join(', '));
     }
 
     public function imports(): array

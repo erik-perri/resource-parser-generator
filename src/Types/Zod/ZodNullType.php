@@ -10,11 +10,11 @@ class ZodNullType implements ParserTypeContract
 {
     public function constraint(): string
     {
-        return 'null()';
+        return 'z.null()';
     }
 
     public function imports(): array
     {
-        return ['zod' => ['null']];
+        return ['zod' => ['z']];
     }
 }

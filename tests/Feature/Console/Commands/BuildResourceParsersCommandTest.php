@@ -9,13 +9,13 @@ use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\File;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\DataProvider;
-use ResourceParserGenerator\Console\Commands\GenerateResourceParsersCommand;
+use ResourceParserGenerator\Console\Commands\BuildResourceParsersCommand;
 use ResourceParserGenerator\Tests\Examples\Resources\RelatedResource;
 use ResourceParserGenerator\Tests\Examples\Resources\UserResource;
 use ResourceParserGenerator\Tests\TestCase;
 
-#[CoversClass(GenerateResourceParsersCommand::class)]
-class GenerateResourceParsersCommandTest extends TestCase
+#[CoversClass(BuildResourceParsersCommand::class)]
+class BuildResourceParsersCommandTest extends TestCase
 {
     protected function setUp(): void
     {
@@ -31,9 +31,9 @@ class GenerateResourceParsersCommandTest extends TestCase
         $this->clearTestOutputFiles();
     }
 
-    public function testGeneratorShouldReturnFailureIfConfigurationIsNotSet(): void
+    public function testShouldReturnFailureIfConfigurationIsNotSet(): void
     {
-        $this->artisan(GenerateResourceParsersCommand::class)
+        $this->artisan(BuildResourceParsersCommand::class)
             ->expectsOutputToContain(
                 'No configuration found at "build.resource_parsers" for resource parser generation.',
             )
@@ -41,7 +41,7 @@ class GenerateResourceParsersCommandTest extends TestCase
             ->execute();
     }
 
-    public function testGeneratorShouldReturnFailureIfClassDoesNotExist(): void
+    public function testShouldReturnFailureIfClassDoesNotExist(): void
     {
         Config::set('build.resource_parsers', [
             'output_path' => dirname(__DIR__, 3) . '/Output',
@@ -51,13 +51,13 @@ class GenerateResourceParsersCommandTest extends TestCase
             ],
         ]);
 
-        $this->artisan(GenerateResourceParsersCommand::class)
+        $this->artisan(BuildResourceParsersCommand::class)
             ->expectsOutputToContain('The parsers.1 field references unknown class ')
             ->assertExitCode(1)
             ->execute();
     }
 
-    public function testGeneratorShouldReturnFailureIfMethodDoesNotExist(): void
+    public function testShouldReturnFailureIfMethodDoesNotExist(): void
     {
         Config::set('build.resource_parsers', [
             'output_path' => dirname(__DIR__, 3) . '/Output',
@@ -67,13 +67,13 @@ class GenerateResourceParsersCommandTest extends TestCase
             ],
         ]);
 
-        $this->artisan(GenerateResourceParsersCommand::class)
+        $this->artisan(BuildResourceParsersCommand::class)
             ->expectsOutputToContain('The parsers.1 field references unknown method ')
             ->assertExitCode(1)
             ->execute();
     }
 
-    public function testGeneratorShouldReturnFailureIfFileDoesNotExist(): void
+    public function testShouldReturnFailureIfFileDoesNotExist(): void
     {
         Config::set('build.resource_parsers', [
             'output_path' => '/where/is/this/file',
@@ -82,21 +82,21 @@ class GenerateResourceParsersCommandTest extends TestCase
             ],
         ]);
 
-        $this->artisan(GenerateResourceParsersCommand::class)
+        $this->artisan(BuildResourceParsersCommand::class)
             ->expectsOutputToContain('Output path "/where/is/this/file" does not exist.')
             ->assertExitCode(1)
             ->execute();
     }
 
     #[DataProvider('generatedContentProvider')]
-    public function testGeneratorShouldReturnExpectedContent(Closure $configFactory, array $expectedOutput): void
+    public function testShouldReturnExpectedContent(Closure $configFactory, array $expectedOutput): void
     {
         $outputPath = dirname(__DIR__, 3) . '/Output';
         $config = $configFactory->call($this, $outputPath);
 
         Config::set('build.resource_parsers', $config);
 
-        $this->artisan(GenerateResourceParsersCommand::class)
+        $this->artisan(BuildResourceParsersCommand::class)
             ->assertExitCode(0)
             ->execute();
 

@@ -54,7 +54,7 @@ class ResourceParserGeneratorServiceProvider extends ServiceProvider
         if ($this->app->environment('local', 'testing')) {
             // Commands
             $this->commands([
-                Console\Commands\GenerateResourceParsersCommand::class,
+                Console\Commands\BuildResourceParsersCommand::class,
             ]);
 
             // Dependencies

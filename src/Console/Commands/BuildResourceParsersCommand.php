@@ -18,10 +18,10 @@ use ResourceParserGenerator\Generators\ResourceParserGenerator;
 use ResourceParserGenerator\Resolvers\ResourceResolver;
 use Throwable;
 
-class GenerateResourceParsersCommand extends Command
+class BuildResourceParsersCommand extends Command
 {
-    protected $signature = 'generate:resource-parsers';
-    protected $description = 'Generate resource parsers based on configuration.';
+    protected $signature = 'build:resource-parsers';
+    protected $description = 'Generate resource parsers based on "build.resource_parsers" configuration.';
 
     public function handle(): int
     {

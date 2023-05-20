@@ -19,19 +19,19 @@ class ClassScope implements ClassScopeContract
     private DocBlock|null $docBlock = null;
 
     /**
-     * @var Collection<string, ClassMethodScope>
+     * @var Collection<string, ClassMethodScopeContract>|null
      */
-    private readonly Collection $methods;
+    private Collection|null $methods = null;
 
     /**
-     * @var Collection<string, ClassProperty>
+     * @var Collection<string, ClassPropertyContract>|null
      */
-    private readonly Collection $properties;
+    private Collection|null $properties = null;
 
     /**
-     * @var Collection<string, ClassConstantContract>
+     * @var Collection<string, ClassConstantContract>|null
      */
-    private readonly Collection $constants;
+    private Collection|null $constants = null;
 
     /**
      * @param class-string $fullyQualifiedName
@@ -49,28 +49,7 @@ class ClassScope implements ClassScopeContract
         private readonly array $traits,
         private readonly DocBlockParserContract $docBlockParser,
     ) {
-        $this->methods = collect();
-        $this->properties = collect();
-        $this->constants = collect();
-
-        foreach ($this->node->getMethods() as $method) {
-            $methodScope = ClassMethodScope::create($method, $this->resolver);
-            $this->methods->put($methodScope->name(), $methodScope);
-        }
-
-        foreach ($this->node->getProperties() as $property) {
-            foreach ($property->props as $prop) {
-                $propertyScope = ClassProperty::create($property, $prop, $this->resolver);
-                $this->properties->put($propertyScope->name(), $propertyScope);
-            }
-        }
-
-        foreach ($this->node->getConstants() as $constantGroup) {
-            foreach ($constantGroup->consts as $constant) {
-                $constantScope = ClassConstant::create($constant, $this->resolver);
-                $this->constants->put($constantScope->name(), $constantScope);
-            }
-        }
+        //
     }
 
     /**
@@ -102,14 +81,14 @@ class ClassScope implements ClassScopeContract
      */
     public function constants(): Collection
     {
-        return $this->constants->collect();
+        return $this->getConstants()->collect();
     }
 
     public function constant(string $name): ClassConstantContract|null
     {
         // TODO Docblock?
 
-        $constant = $this->constants->get($name);
+        $constant = $this->getConstants()->get($name);
 
         if ($constant === null && $this->parent()) {
             $constant = $this->parent()->constant($name);
@@ -167,12 +146,12 @@ class ClassScope implements ClassScopeContract
             : sprintf('AnonymousClass%d', $this->node->getLine());
     }
 
+    /**
+     * @return Collection<string, ClassMethodScopeContract>
+     */
     public function methods(): Collection
     {
-        /**
-         * @var Collection<string, ClassMethodScopeContract>
-         */
-        return $this->methods->collect();
+        return $this->getMethods()->collect();
     }
 
     public function method(string $name): ClassMethodScopeContract|null
@@ -181,7 +160,7 @@ class ClassScope implements ClassScopeContract
             return VirtualClassMethodScope::create($this->docBlock()->method($name));
         }
 
-        $method = $this->methods->get($name);
+        $method = $this->getMethods()->get($name);
 
         if ($method === null && $this->parent()) {
             $method = $this->parent()->method($name);
@@ -206,11 +185,11 @@ class ClassScope implements ClassScopeContract
     }
 
     /**
-     * @return Collection<string, ClassProperty>
+     * @return Collection<string, ClassPropertyContract>
      */
     public function properties(): Collection
     {
-        return $this->properties->collect();
+        return $this->getProperties()->collect();
     }
 
     public function property(string $name): ClassPropertyContract|null
@@ -219,7 +198,7 @@ class ClassScope implements ClassScopeContract
             return VirtualClassProperty::create($this->docBlock()->property($name));
         }
 
-        $property = $this->properties->get($name);
+        $property = $this->getProperties()->get($name);
 
         if ($property === null && $this->parent()) {
             $property = $this->parent()->property($name);
@@ -236,5 +215,66 @@ class ClassScope implements ClassScopeContract
     public function resolver(): ResolverContract
     {
         return $this->resolver;
+    }
+
+    /**
+     * @return Collection<string, ClassConstantContract>
+     */
+    private function getConstants(): Collection
+    {
+        if ($this->constants !== null) {
+            return $this->constants->collect();
+        }
+
+        $this->constants = collect();
+
+        foreach ($this->node->getConstants() as $constantGroup) {
+            foreach ($constantGroup->consts as $constant) {
+                $constantScope = ClassConstant::create($constant, $this->resolver);
+                $this->constants->put($constantScope->name(), $constantScope);
+            }
+        }
+
+        return $this->constants->collect();
+    }
+
+    /**
+     * @return Collection<string, ClassMethodScopeContract>
+     */
+    private function getMethods(): Collection
+    {
+        if ($this->methods !== null) {
+            return $this->methods->collect();
+        }
+
+        $this->methods = collect();
+
+        foreach ($this->node->getMethods() as $method) {
+            $methodScope = ClassMethodScope::create($method, $this->resolver);
+            $this->methods->put($methodScope->name(), $methodScope);
+        }
+
+        return $this->methods;
+    }
+
+    /**
+     * @return Collection<string, ClassPropertyContract>
+     */
+    private function getProperties(): Collection
+    {
+        if ($this->properties !== null) {
+            return $this->properties->collect();
+        }
+
+        $this->properties = collect();
+
+        foreach ($this->node->getProperties() as $property) {
+            foreach ($property->props as $prop) {
+                $propertyScope = ClassProperty::create($property, $prop, $this->resolver);
+                $this->properties->put($propertyScope->name(), $propertyScope);
+            }
+        }
+
+        return $this->properties;
     }
 }

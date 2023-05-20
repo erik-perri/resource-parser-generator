@@ -1,5 +1,5 @@
 import {relatedResourceBaseParser, relatedResourceShortFormatNotNamedLikeFormatNameParser, relatedResourceVerboseParser} from './relatedResourceParsers.ts';
-import {boolean, null, number, object, output, string, union} from 'zod';
+import {boolean, number, object, output, string, union, z} from 'zod';
 
 export const userResourceAuthenticationParser = object({
   id: string(),
@@ -13,15 +13,15 @@ export const userResourceAdminListParser = object({
   id: string(),
   email: string(),
   name: string(),
-  created_at: union(null(), string()),
-  updated_at: union(null(), string()),
+  created_at: union([string(), z.null()]),
+  updated_at: union([string(), z.null()]),
 });
 
 export type UserResourceAdminList = output<typeof userResourceAdminListParser>;
 
 export const userResourceTernariesParser = object({
   ternary_to_int: number(),
-  ternary_to_compound: union(boolean(), number(), string()),
+  ternary_to_compound: union([boolean(), number(), string()]),
   short_ternary: string(),
 });
 

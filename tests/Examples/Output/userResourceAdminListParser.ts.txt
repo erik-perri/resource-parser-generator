@@ -1,11 +1,11 @@
-import {null, object, output, string, union} from 'zod';
+import {object, output, string, union, z} from 'zod';
 
 export const userResourceAdminListParser = object({
   id: string(),
   email: string(),
   name: string(),
-  created_at: union(null(), string()),
-  updated_at: union(null(), string()),
+  created_at: union([string(), z.null()]),
+  updated_at: union([string(), z.null()]),
 });
 
 export type UserResourceAdminList = output<typeof userResourceAdminListParser>;

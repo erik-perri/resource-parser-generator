@@ -1,8 +1,0 @@
-import {object, output, string, undefined, union, z} from 'zod';
-
-export const userResourceCombinedParser = object({
-  email: union([string(), z.null()]),
-  name: union([string(), undefined()]),
-});
-
-export type UserResourceCombined = output<typeof userResourceCombinedParser>;

@@ -1,6 +1,6 @@
 import {object, output, string, union, z} from 'zod';
 
-export const userResourceAdminListParser = object({
+export const customParser = object({
   id: string(),
   email: string(),
   name: string(),
@@ -8,4 +8,4 @@ export const userResourceAdminListParser = object({
   updated_at: union([string(), z.null()]),
 });
 
-export type UserResourceAdminList = output<typeof userResourceAdminListParser>;
+export type CustomParser = output<typeof customParser>;

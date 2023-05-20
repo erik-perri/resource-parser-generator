@@ -107,10 +107,12 @@ class GenerateResourceParsersCommand extends Command
         $validateCallableArray = function ($key, $value, $fail) {
             if (!is_array($value) || (array_is_list($value) && count($value) !== 2)) {
                 $fail(sprintf('The %s field must be a callable array of exactly two items.', $key));
-            } elseif (!class_exists($value[0])) {
-                $fail(sprintf('The %s field references unknown class "%s".', $key, $value[0]));
-            } elseif (!method_exists($value[0], $value[1])) {
-                $fail(sprintf('The %s field references unknown method "%s::%s".', $key, $value[0], $value[1]));
+            } elseif (array_is_list($value)) {
+                if (!class_exists($value[0])) {
+                    $fail(sprintf('The %s field references unknown class "%s".', $key, $value[0]));
+                } elseif (!method_exists($value[0], $value[1])) {
+                    $fail(sprintf('The %s field references unknown method "%s::%s".', $key, $value[0], $value[1]));
+                }
             }
         };
 

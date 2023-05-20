@@ -11,10 +11,10 @@ use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Validator;
 use ResourceParserGenerator\Contracts\Generators\ParserNameGeneratorContract;
+use ResourceParserGenerator\Contracts\Generators\ResourceParserGeneratorContract;
 use ResourceParserGenerator\Contracts\Parsers\ResourceParserContract;
 use ResourceParserGenerator\DataObjects\Collections\ResourceParserContextCollection;
 use ResourceParserGenerator\DataObjects\ResourceConfiguration;
-use ResourceParserGenerator\Generators\ResourceParserGenerator;
 use ResourceParserGenerator\Resolvers\ResourceResolver;
 use Throwable;
 
@@ -63,7 +63,7 @@ class BuildResourceParsersCommand extends Command
             },
         );
 
-        $parserGenerator = $this->resolve(ResourceParserGenerator::class);
+        $parserGenerator = $this->resolve(ResourceParserGeneratorContract::class);
         $resourceResolver = ResourceResolver::create($parserCollection);
 
         // We need to update an empty local scope for all the loaded resources. This allows us to resolve references

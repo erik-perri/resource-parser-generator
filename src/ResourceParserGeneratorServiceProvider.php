@@ -20,6 +20,7 @@ use ResourceParserGenerator\Contracts\Converters\ReflectionTypeConverterContract
 use ResourceParserGenerator\Contracts\Converters\VariableTypeConverterContract;
 use ResourceParserGenerator\Contracts\Filesystem\ClassFileLocatorContract;
 use ResourceParserGenerator\Contracts\Generators\ParserNameGeneratorContract;
+use ResourceParserGenerator\Contracts\Generators\ResourceParserGeneratorContract;
 use ResourceParserGenerator\Contracts\Parsers\ClassConstFetchValueParserContract;
 use ResourceParserGenerator\Contracts\Parsers\ClassMethodReturnParserContract;
 use ResourceParserGenerator\Contracts\Parsers\ClassParserContract;
@@ -33,6 +34,7 @@ use ResourceParserGenerator\Converters\ReflectionTypeConverter;
 use ResourceParserGenerator\Converters\VariableTypeConverter;
 use ResourceParserGenerator\Filesystem\ClassFileLocator;
 use ResourceParserGenerator\Generators\ParserNameGenerator;
+use ResourceParserGenerator\Generators\ResourceParserGenerator;
 use ResourceParserGenerator\Parsers\ClassConstFetchValueParser;
 use ResourceParserGenerator\Parsers\ClassMethodReturnParser;
 use ResourceParserGenerator\Parsers\ClassParser;
@@ -75,6 +77,7 @@ class ResourceParserGeneratorServiceProvider extends ServiceProvider
 
             // Generators
             $this->app->singleton(ParserNameGeneratorContract::class, ParserNameGenerator::class);
+            $this->app->singleton(ResourceParserGeneratorContract::class, ResourceParserGenerator::class);
 
             // Locators
             $this->app->singleton(

@@ -5,9 +5,10 @@ declare(strict_types=1);
 namespace ResourceParserGenerator\Generators;
 
 use Illuminate\Support\Str;
+use ResourceParserGenerator\Contracts\Generators\ResourceParserGeneratorContract;
 use ResourceParserGenerator\DataObjects\Collections\ResourceParserContextCollection;
 
-class ResourceParserGenerator
+class ResourceParserGenerator implements ResourceParserGeneratorContract
 {
     public function generate(ResourceParserContextCollection $parsers): string
     {

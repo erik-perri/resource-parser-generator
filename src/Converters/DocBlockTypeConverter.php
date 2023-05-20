@@ -42,6 +42,14 @@ class DocBlockTypeConverter implements DocBlockTypeConverterContract
                 }
             }
 
+            if ($containerType instanceof Types\ClassType) {
+                return new Types\ClassType(
+                    $containerType->fullyQualifiedName(),
+                    $containerType->alias(),
+                    collect($type->genericTypes)->map(fn(TypeNode $type) => $this->convert($type, $resolver)),
+                );
+            }
+
             throw new RuntimeException(sprintf('Unhandled generic type for "%s"', $containerType->describe()));
         }
 

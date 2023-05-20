@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace ResourceParserGenerator\Tests\Unit\Converters;
 
 use Closure;
+use Illuminate\Support\Collection;
 use Mockery\CompositeExpectation;
 use PHPStan\PhpDocParser\Ast\Type\ArrayTypeNode;
 use PHPStan\PhpDocParser\Ast\Type\GenericTypeNode;
@@ -80,6 +81,20 @@ class DocBlockTypeConverterTest extends TestCase
             'class name imported' => [
                 'input' => new IdentifierTypeNode('Class'),
                 'expectedOutput' => 'App\\Class',
+                'resolverFactory' => fn() => $this->mock(ResolverContract::class)
+                    ->expects('resolveClass')
+                    ->with('Class')
+                    ->andReturn('App\\Class'),
+            ],
+            'class name imported with generics' => [
+                'input' => new GenericTypeNode(
+                    new IdentifierTypeNode('\\' . Collection::class),
+                    [
+                        new IdentifierTypeNode('int'),
+                        new IdentifierTypeNode('Class'),
+                    ],
+                ),
+                'expectedOutput' => 'Illuminate\Support\Collection<int, App\Class>',
                 'resolverFactory' => fn() => $this->mock(ResolverContract::class)
                     ->expects('resolveClass')
                     ->with('Class')

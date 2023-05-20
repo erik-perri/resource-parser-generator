@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace ResourceParserGenerator\Types;
 
+use Illuminate\Support\Collection;
 use ResourceParserGenerator\Contracts\Types\ParserTypeContract;
 use ResourceParserGenerator\Contracts\Types\TypeContract;
 use RuntimeException;
@@ -13,10 +14,12 @@ class ClassType implements TypeContract
     /**
      * @param class-string $fullyQualifiedName
      * @param string|null $alias
+     * @param Collection<int, TypeContract>|null $generics
      */
     public function __construct(
         private readonly string $fullyQualifiedName,
         private readonly string|null $alias,
+        private readonly Collection|null $generics = null,
     ) {
         //
     }
@@ -31,6 +34,14 @@ class ClassType implements TypeContract
      */
     public function describe(): string
     {
+        if ($this->generics) {
+            return sprintf(
+                '%s<%s>',
+                $this->fullyQualifiedName,
+                $this->generics->map(fn(TypeContract $type) => $type->describe())->join(', '),
+            );
+        }
+
         return $this->fullyQualifiedName;
     }
 
@@ -40,6 +51,14 @@ class ClassType implements TypeContract
     public function fullyQualifiedName(): string
     {
         return $this->fullyQualifiedName;
+    }
+
+    /**
+     * @return Collection<int, TypeContract>|null
+     */
+    public function generics(): Collection|null
+    {
+        return $this->generics?->collect();
     }
 
     public function parserType(): ParserTypeContract

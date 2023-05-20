@@ -7,14 +7,12 @@ namespace ResourceParserGenerator\Tests\Feature\Console\Commands;
 use Closure;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\File;
-use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\DataProvider;
 use ResourceParserGenerator\Console\Commands\BuildResourceParsersCommand;
 use ResourceParserGenerator\Tests\Examples\Resources\RelatedResource;
 use ResourceParserGenerator\Tests\Examples\Resources\UserResource;
 use ResourceParserGenerator\Tests\TestCase;
 
-#[CoversClass(BuildResourceParsersCommand::class)]
 class BuildResourceParsersCommandTest extends TestCase
 {
     protected function setUp(): void

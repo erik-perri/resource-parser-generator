@@ -33,12 +33,6 @@ export const userResourceTernariesParser = object({
 
 export type UserResourceTernaries = output<typeof userResourceTernariesParser>;
 
-export const relatedResourceBaseParser = object({
-  name: string(),
-});
-
-export type RelatedResourceBase = output<typeof relatedResourceBaseParser>;
-
 export const relatedResourceShortFormatNotNamedLikeFormatNameParser = object({
   id: number(),
 });
@@ -51,6 +45,12 @@ export const relatedResourceVerboseParser = object({
 });
 
 export type RelatedResourceVerbose = output<typeof relatedResourceVerboseParser>;
+
+export const relatedResourceBaseParser = object({
+  name: string(),
+});
+
+export type RelatedResourceBase = output<typeof relatedResourceBaseParser>;
 
 export const userResourceRelatedResourceParser = object({
   with_format_short: relatedResourceShortFormatNotNamedLikeFormatNameParser,

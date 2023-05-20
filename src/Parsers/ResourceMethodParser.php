@@ -37,56 +37,15 @@ class ResourceMethodParser implements ResourceParserContract
             return $parsed;
         }
 
+        // Parse the return type and find any default classes
         $returnType = $this->parseReturnType($className, $methodName);
 
-        $properties = $returnType->properties();
-
-        foreach ($properties as $key => $type) {
-            if ($type instanceof Types\ClassType) {
-                $returnClass = $this->classParser->parse($type->fullyQualifiedName());
-
-                if (!$returnClass->hasParent(Resource::class)) {
-                    throw new RuntimeException(
-                        sprintf(
-                            'Unexpected non-resource class return "%s" in resource for property "%s"',
-                            $type->fullyQualifiedName(),
-                            $key,
-                        ),
-                    );
-                }
-
-                $format = $type instanceof Types\ClassWithMethodType
-                    ? $type->methodName()
-                    : $this->findDefaultFormat($returnClass);
-                if (!$format) {
-                    throw new RuntimeException(
-                        sprintf(
-                            'Unable to determine format for resource class "%s" in resource for property "%s"',
-                            $type->fullyQualifiedName(),
-                            $key,
-                        ),
-                    );
-                }
-
-                if ($parsed->find($type->fullyQualifiedName(), $format)) {
-                    continue;
-                }
-
-                $parsed = $this->parse($type->fullyQualifiedName(), $format, $parsed);
-
-                // Replace the property type with a method type reference if we didn't have a reference, then we don't
-                // need to parse the default format again later.
-                if (!($type instanceof Types\ClassWithMethodType)) {
-                    $returnType = new Types\ArrayWithPropertiesType(
-                        $returnType->properties()
-                            ->except($key)
-                            ->put($key, new Types\ClassWithMethodType(
-                                $type->fullyQualifiedName(),
-                                $type->alias(),
-                                $format,
-                            )),
-                    );
-                }
+        // Parse any dependent resource methods
+        foreach ($returnType->properties() as $type) {
+            if ($type instanceof Types\ClassWithMethodType) {
+                $parsed = $parsed->find($type->fullyQualifiedName(), $type->methodName())
+                    ? $parsed
+                    : $this->parse($type->fullyQualifiedName(), $type->methodName(), $parsed);
             }
         }
 
@@ -122,7 +81,50 @@ class ResourceMethodParser implements ResourceParserContract
             );
         }
 
+        $properties = $returnType->properties();
+        foreach ($properties as $key => $type) {
+            $updatedType = $this->updateTypeIfResourceWithoutMethod($key, $type);
+            if ($updatedType) {
+                // Replace the property type with a method type reference if we didn't have a reference, then we don't
+                // need to parse the default format again later.
+                $returnType = new Types\ArrayWithPropertiesType(
+                    $returnType->properties()
+                        ->except($key)
+                        ->put($key, $updatedType),
+                );
+            }
+        }
+
         return $returnType;
+    }
+
+    private function updateTypeIfResourceWithoutMethod(string $key, TypeContract $type): TypeContract|null
+    {
+        if (!($type instanceof Types\ClassType) || $type instanceof Types\ClassWithMethodType) {
+            return null;
+        }
+
+        $returnClass = $this->classParser->parse($type->fullyQualifiedName());
+        if (!$returnClass->hasParent(Resource::class)) {
+            return null;
+        }
+
+        $format = $this->findDefaultFormat($returnClass);
+        if (!$format) {
+            throw new RuntimeException(
+                sprintf(
+                    'Unable to determine format for resource class "%s" in resource for property "%s"',
+                    $type->fullyQualifiedName(),
+                    $key,
+                ),
+            );
+        }
+
+        return new Types\ClassWithMethodType(
+            $type->fullyQualifiedName(),
+            $type->alias(),
+            $format,
+        );
     }
 
     private function findDefaultFormat(ClassScopeContract $resourceClass): string|null

@@ -82,14 +82,6 @@ class ClassMethodReturnParser implements ClassMethodReturnParserContract
 
                     $type = $this->expressionTypeConverter->convert($item->value, $context);
 
-                    if ($type instanceof Types\ClassType && $context->formatMethod()) {
-                        $type = new Types\ClassWithMethodType(
-                            $type->fullyQualifiedName(),
-                            $type->alias(),
-                            $context->formatMethod(),
-                        );
-                    }
-
                     $arrayProperties->put($key->value, $type);
                 }
 

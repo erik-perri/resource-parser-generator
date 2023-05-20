@@ -40,7 +40,7 @@ class ConverterContext
         return $this->resolver;
     }
 
-    public function setFormatMethod(string $format): self
+    public function setFormatMethod(string|null $format): self
     {
         $this->formatMethod = $format;
 

@@ -26,29 +26,6 @@ class User extends AliasedLaravelModel
     public const CONST_STRING = 'string';
     public const CONST_FLOAT = 1.1;
 
-    public function typedMethod(): int
-    {
-        return 1;
-    }
-
-    public function typedUnionMethod(): int|string
-    {
-        return 1;
-    }
-
-    /**
-     * @return string
-     */
-    public function untypedWithDocMethod()
-    {
-        return 'string';
-    }
-
-    public function untypedWithoutDocMethod()
-    {
-        return 'string';
-    }
-
     public static function getExplicitStaticValue(): int
     {
         return 1;

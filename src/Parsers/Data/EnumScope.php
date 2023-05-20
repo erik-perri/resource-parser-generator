@@ -75,7 +75,7 @@ class EnumScope implements ClassScopeContract
             return VirtualClassProperty::create($this->type);
         }
 
-        throw new RuntimeException('Enum properties are not supported');
+        throw new RuntimeException(sprintf('Enum property "%s" is not supported', $name));
     }
 
     public function propertyType(string $name): TypeContract|null

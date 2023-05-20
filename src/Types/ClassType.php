@@ -30,7 +30,7 @@ class ClassType implements TypeContract
     }
 
     /**
-     * @return class-string
+     * @return class-string|string
      */
     public function describe(): string
     {

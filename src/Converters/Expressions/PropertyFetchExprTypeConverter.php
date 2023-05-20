@@ -49,6 +49,10 @@ class PropertyFetchExprTypeConverter implements ExprTypeConverterContract
             }
         }
 
+        if ($context->isPropertyNonNull($rightSide) && $type instanceof UnionType) {
+            $type = $this->removeNullableFromUnion($expr, $type);
+        }
+
         return $type;
     }
 

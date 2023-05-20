@@ -89,7 +89,16 @@ class MethodCallExprTypeConverter implements ExprTypeConverterContract
             throw new RuntimeException('Unhandled missing second argument for whenLoaded');
         }
 
-        $returnWhenLoaded = $this->expressionTypeConverter->convert($args[1]->value, $context);
+        $loadedProperty = $args[0]->value;
+        if (!($loadedProperty instanceof String_)) {
+            throw new RuntimeException('Unhandled non-string first argument for whenLoaded');
+        }
+        $loadedProperty = $loadedProperty->value;
+
+        $returnWhenLoaded = $this->expressionTypeConverter->convert(
+            $args[1]->value,
+            (new ConverterContext($context->resolver(), [$loadedProperty]))
+        );
 
         $returnWhenUnloaded = count($args) > 2
             ? $this->expressionTypeConverter->convert($args[2]->value, $context)

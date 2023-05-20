@@ -15,7 +15,7 @@ use Illuminate\Database\Eloquent\Model as AliasedLaravelModel;
  * @property CarbonImmutable|null $created_at
  * @property CarbonImmutable|null $updated_at
  *
- * @property User $related
+ * @property-read User|null $related
  *
  * @method string getRouteKey()
  *

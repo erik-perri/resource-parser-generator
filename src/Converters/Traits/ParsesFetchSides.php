@@ -31,22 +31,7 @@ trait ParsesFetchSides
         $leftSide = $this->expressionTypeConverter()->convert($expr->var, $context);
 
         if ($expr instanceof NullsafePropertyFetch || $expr instanceof NullsafeMethodCall) {
-            if (!($leftSide instanceof UnionType)) {
-                throw new RuntimeException(sprintf(
-                    'Left side of "%s" fetch not union as expected, instead found "%s"',
-                    $expr->name,
-                    $leftSide->describe(),
-                ));
-            }
-
-            $leftSide = $leftSide->removeNullable();
-            if ($leftSide instanceof UnionType) {
-                throw new RuntimeException(sprintf(
-                    'Left side of "%s" fetch not single-union as expected, instead found "%s"',
-                    $expr->name,
-                    $leftSide->describe(),
-                ));
-            }
+            $leftSide = $this->removeNullableFromUnion($expr, $leftSide);
         }
 
         if (!($leftSide instanceof ClassType)) {
@@ -56,6 +41,30 @@ trait ParsesFetchSides
         }
 
         return $this->classParser()->parse($leftSide->fullyQualifiedName());
+    }
+
+    private function removeNullableFromUnion(
+        PropertyFetch|NullsafePropertyFetch|MethodCall|NullsafeMethodCall $expr,
+        TypeContract $type,
+    ): TypeContract {
+        if (!($type instanceof UnionType)) {
+            throw new RuntimeException(sprintf(
+                'Left side of "%s" fetch not union as expected, instead found "%s"',
+                $expr->name,
+                $type->describe(),
+            ));
+        }
+
+        $type = $type->removeNullable();
+        if ($type instanceof UnionType) {
+            throw new RuntimeException(sprintf(
+                'Left side of "%s" fetch not single-union as expected, instead found "%s"',
+                $expr->name,
+                $type->describe(),
+            ));
+        }
+
+        return $type;
     }
 
     private function convertRightSide(

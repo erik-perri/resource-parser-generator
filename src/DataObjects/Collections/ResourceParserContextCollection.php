@@ -10,6 +10,7 @@ use ResourceParserGenerator\DataObjects\ResourceConfiguration;
 use ResourceParserGenerator\DataObjects\ResourceContext;
 use ResourceParserGenerator\Resolvers\ResourceResolver;
 use ResourceParserGenerator\Types\Zod\ZodShapeReferenceType;
+use ResourceParserGenerator\Types\Zod\ZodUnionType;
 use RuntimeException;
 
 class ResourceParserContextCollection
@@ -81,13 +82,32 @@ class ResourceParserContextCollection
         ResourceResolver $resourceResolver
     ): self {
         foreach ($this->parserContexts as $context) {
-            foreach ($context->parserData->properties() as $propertyKey => $property) {
+            $properties = $context->parserData->properties();
+
+            foreach ($properties as $propertyKey => $property) {
                 if ($property instanceof ZodShapeReferenceType) {
-                    $context->parserData->properties()->put($propertyKey, ZodShapeReferenceType::create(
+                    $properties->put($propertyKey, ZodShapeReferenceType::create(
                         $property->className,
                         $property->methodName,
                         $localParsers,
                         $resourceResolver,
+                    ));
+                }
+
+                if ($property instanceof ZodUnionType) {
+                    $properties->put($propertyKey, new ZodUnionType(
+                        ...$property->types()->map(function ($type) use ($localParsers, $resourceResolver) {
+                            if ($type instanceof ZodShapeReferenceType) {
+                                return ZodShapeReferenceType::create(
+                                    $type->className,
+                                    $type->methodName,
+                                    $localParsers,
+                                    $resourceResolver,
+                                );
+                            }
+
+                            return $type;
+                        })->all()
                     ));
                 }
             }

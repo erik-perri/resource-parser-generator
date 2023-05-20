@@ -83,7 +83,8 @@ class UserResource extends JsonResource
     public function usingWhenLoaded(): array
     {
         return [
-            'related' => $this->whenLoaded('related', fn() => $this->resource->related->name),
+            'related' => $this->whenLoaded('post', fn() => PostResource::make($this->resource->latestPost)
+                ->format(PostResource::SIMPLE)),
         ];
     }
 

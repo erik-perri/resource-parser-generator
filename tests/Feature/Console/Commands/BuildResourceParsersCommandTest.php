@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\File;
 use PHPUnit\Framework\Attributes\DataProvider;
 use ResourceParserGenerator\Console\Commands\BuildResourceParsersCommand;
+use ResourceParserGenerator\Tests\Examples\Resources\PostResource;
 use ResourceParserGenerator\Tests\Examples\Resources\RelatedResource;
 use ResourceParserGenerator\Tests\Examples\Resources\UserResource;
 use ResourceParserGenerator\Tests\TestCase;
@@ -199,6 +200,26 @@ class BuildResourceParsersCommandTest extends TestCase
                     'userResourceParsers.ts' => file_get_contents($examples . '/split/userResourceParsers.ts.txt'),
                     'relatedResourceParsers.ts' => file_get_contents(
                         $examples . '/split/relatedResourceParsers.ts.txt',
+                    ),
+                ],
+            ],
+            'UserResource::usingWhenLoaded' => [
+                'config' => fn(string $outputPath) => [
+                    'output_path' => $outputPath,
+                    'parsers' => [
+                        [
+                            'resource' => [UserResource::class, 'usingWhenLoaded'],
+                            'output_file' => 'parsers.ts',
+                        ],
+                        [
+                            'resource' => [PostResource::class, 'base'],
+                            'output_file' => 'parsers.ts',
+                        ],
+                    ],
+                ],
+                'expectedOutput' => [
+                    'parsers.ts' => file_get_contents(
+                        $examples . '/UserResource-usingWhenLoaded.ts.txt',
                     ),
                 ],
             ],

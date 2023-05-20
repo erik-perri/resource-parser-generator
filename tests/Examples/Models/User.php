@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace ResourceParserGenerator\Tests\Examples\Models;
 
 use Carbon\CarbonImmutable;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model as AliasedLaravelModel;
 
 /**
@@ -16,6 +17,9 @@ use Illuminate\Database\Eloquent\Model as AliasedLaravelModel;
  * @property CarbonImmutable|null $updated_at
  *
  * @property-read User|null $related
+ *
+ * @property-read Post|null $latestPost
+ * @property-read Collection<int, Post> $latestPosts
  *
  * @method string getRouteKey()
  *

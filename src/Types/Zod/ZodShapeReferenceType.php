@@ -73,7 +73,7 @@ class ZodShapeReferenceType implements ParserTypeContract
     {
         if (!$this->localResources) {
             throw new RuntimeException(sprintf(
-                'ZodShapeReferenceType::availableResources not set for "%s::%s"',
+                'ZodShapeReferenceType::localResources not set for "%s::%s"',
                 $this->className,
                 $this->methodName,
             ));

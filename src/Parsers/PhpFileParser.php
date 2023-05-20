@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\File;
 use PhpParser\Node\Stmt;
 use PhpParser\Node\Stmt\Class_;
 use PhpParser\Node\Stmt\ClassLike;
+use PhpParser\Node\Stmt\Enum_;
 use PhpParser\Node\Stmt\GroupUse;
 use PhpParser\Node\Stmt\Namespace_;
 use PhpParser\Node\Stmt\Trait_;
@@ -16,14 +17,17 @@ use PhpParser\NodeFinder;
 use PhpParser\Parser;
 use ReflectionClass;
 use ResourceParserGenerator\Contracts\ClassScopeContract;
+use ResourceParserGenerator\Contracts\Converters\DeclaredTypeConverterContract;
 use ResourceParserGenerator\Contracts\Filesystem\ClassFileLocatorContract;
 use ResourceParserGenerator\Contracts\Parsers\PhpFileParserContract;
 use ResourceParserGenerator\Contracts\Resolvers\ResolverContract;
 use ResourceParserGenerator\Parsers\Data\ClassScope;
+use ResourceParserGenerator\Parsers\Data\EnumScope;
 use ResourceParserGenerator\Parsers\Data\FileScope;
 use ResourceParserGenerator\Parsers\Data\ReflectedClassScope;
 use ResourceParserGenerator\Resolvers\ClassNameResolver;
 use ResourceParserGenerator\Resolvers\Resolver;
+use ResourceParserGenerator\Types\UntypedType;
 use RuntimeException;
 
 class PhpFileParser implements PhpFileParserContract
@@ -32,6 +36,7 @@ class PhpFileParser implements PhpFileParserContract
         private readonly Parser $parser,
         private readonly NodeFinder $nodeFinder,
         private readonly ClassFileLocatorContract $classFileLocator,
+        private readonly DeclaredTypeConverterContract $declaredTypeConverter,
     ) {
         //
     }
@@ -51,6 +56,7 @@ class PhpFileParser implements PhpFileParserContract
         $this->parseGroupUseStatements($ast, $scope);
         $this->parseClassStatements($ast, $scope, $staticContext);
         $this->parseTraitStatements($ast, $scope);
+        $this->parseEnumStatements($ast, $scope);
 
         return $scope;
     }
@@ -309,5 +315,50 @@ class PhpFileParser implements PhpFileParserContract
         }
 
         return $traits;
+    }
+
+    /**
+     * @param Stmt[] $ast
+     * @param FileScope $scope
+     * @return void
+     */
+    private function parseEnumStatements(array $ast, FileScope $scope): void
+    {
+        /**
+         * @var Enum_[] $enums
+         */
+        $enums = $this->nodeFinder->findInstanceOf($ast, Enum_::class);
+
+        if (!count($enums)) {
+            return;
+        }
+
+        $classResolver = ClassNameResolver::create($scope);
+
+        foreach ($enums as $enum) {
+            $enumName = $enum->name
+                ? $enum->name->toString()
+                : sprintf('AnonymousEnum%d', $enum->getLine());
+
+            /**
+             * @var class-string $fullyQualifiedEnumName
+             */
+            $fullyQualifiedEnumName = $scope->namespace()
+                ? sprintf('%s\\%s', $scope->namespace(), $enumName)
+                : $enumName;
+
+            $resolver = Resolver::create($classResolver, null, $fullyQualifiedEnumName);
+
+            $type = $enum->scalarType
+                ? $this->declaredTypeConverter->convert($enum->scalarType, $resolver)
+                : new UntypedType();
+
+            $enumScope = EnumScope::create(
+                $fullyQualifiedEnumName,
+                $type,
+            );
+
+            $scope->addEnum($enumScope);
+        }
     }
 }

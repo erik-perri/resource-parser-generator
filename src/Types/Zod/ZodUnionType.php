@@ -48,4 +48,12 @@ class ZodUnionType implements ParserTypeContract
             ->map(fn(array $importItems) => collect($importItems)->unique()->sort()->values()->all())
             ->all();
     }
+
+    /**
+     * @return Collection<int|string, ParserTypeContract>
+     */
+    public function types(): Collection
+    {
+        return $this->types->collect();
+    }
 }

@@ -5,17 +5,23 @@ declare(strict_types=1);
 namespace ResourceParserGenerator\Parsers\Data;
 
 use Illuminate\Support\Collection;
+use ResourceParserGenerator\Contracts\ClassScopeContract;
 use RuntimeException;
 
 class FileScope
 {
     /**
-     * @var Collection<int, ClassScope>
+     * @var Collection<int, ClassScopeContract>
      */
     private readonly Collection $classes;
 
     /**
-     * @var Collection<int, ClassScope>
+     * @var Collection<int, ClassScopeContract>
+     */
+    private readonly Collection $enums;
+
+    /**
+     * @var Collection<int, ClassScopeContract>
      */
     private readonly Collection $traits;
 
@@ -28,7 +34,9 @@ class FileScope
 
     public function __construct()
     {
+        // TODO Combine classes, enums, and traits into classLikes?
         $this->classes = collect();
+        $this->enums = collect();
         $this->traits = collect();
         $this->imports = collect();
     }
@@ -38,9 +46,16 @@ class FileScope
         return resolve(self::class);
     }
 
-    public function addClass(ClassScope $classScope): self
+    public function addClass(ClassScopeContract $classScope): self
     {
         $this->classes->push($classScope);
+
+        return $this;
+    }
+
+    public function addEnum(ClassScopeContract $enumScope): self
+    {
+        $this->enums->push($enumScope);
 
         return $this;
     }
@@ -61,7 +76,7 @@ class FileScope
         return $this;
     }
 
-    public function addTrait(ClassScope $traitScope): self
+    public function addTrait(ClassScopeContract $traitScope): self
     {
         $this->traits->push($traitScope);
 
@@ -70,27 +85,47 @@ class FileScope
 
     public function hasClass(string $name): bool
     {
-        return $this->classes->contains(fn(ClassScope $class) => $class->name() === $name);
+        return $this->classes->contains(fn(ClassScopeContract $class) => $class->name() === $name);
     }
 
     /**
-     * @return Collection<int, ClassScope>
+     * @return Collection<int, ClassScopeContract>
      */
     public function classes(): Collection
     {
         return $this->classes->collect();
     }
 
-    public function class(string $name): ClassScope
+    public function class(string $name): ClassScopeContract
     {
         $class = $this->classes->first(
-            fn(ClassScope $class) => $class->name() === $name,
+            fn(ClassScopeContract $class) => $class->name() === $name,
         );
         if ($class === null) {
             throw new RuntimeException(sprintf('Class "%s" not found', $name));
         }
 
         return $class;
+    }
+
+    public function enum(string $string): ClassScopeContract
+    {
+        $enum = $this->enums->first(
+            fn(ClassScopeContract $enum) => $enum->name() === $string,
+        );
+        if ($enum === null) {
+            throw new RuntimeException(sprintf('Enum "%s" not found', $string));
+        }
+
+        return $enum;
+    }
+
+    /**
+     * @return Collection<int, ClassScopeContract>
+     */
+    public function enums(): Collection
+    {
+        return $this->enums->collect();
     }
 
     /**
@@ -113,8 +148,20 @@ class FileScope
         return $this;
     }
 
+    public function trait(string $name): ClassScopeContract
+    {
+        $trait = $this->traits->first(
+            fn(ClassScopeContract $trait) => $trait->name() === $name,
+        );
+        if ($trait === null) {
+            throw new RuntimeException(sprintf('Trait "%s" not found', $name));
+        }
+
+        return $trait;
+    }
+
     /**
-     * @return Collection<int, ClassScope>
+     * @return Collection<int, ClassScopeContract>
      */
     public function traits(): Collection
     {

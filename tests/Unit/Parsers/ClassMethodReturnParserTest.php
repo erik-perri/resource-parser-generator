@@ -7,6 +7,7 @@ namespace ResourceParserGenerator\Tests\Unit\Parsers;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\DataProvider;
 use ResourceParserGenerator\Parsers\ClassMethodReturnParser;
+use ResourceParserGenerator\Tests\Examples\Resources\PostResource;
 use ResourceParserGenerator\Tests\Examples\Resources\RelatedResource;
 use ResourceParserGenerator\Tests\Examples\Resources\UserResource;
 use ResourceParserGenerator\Tests\TestCase;
@@ -99,7 +100,7 @@ class ClassMethodReturnParserTest extends TestCase
                 'className' => UserResource::class,
                 'methodName' => 'usingWhenLoaded',
                 'expected' => [
-                    'related' => 'string|undefined',
+                    'related' => PostResource::class . '::base|undefined',
                 ],
             ],
             'UserResource::usingWhenLoadedFallback' => [

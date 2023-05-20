@@ -35,6 +35,11 @@ class ClassParser implements ClassParserContract
 
         $firstClass = $fileScope->classes()->first();
         if (!$firstClass) {
+            $firstEnum = $fileScope->enums()->first();
+            if ($firstEnum) {
+                return $firstEnum;
+            }
+
             throw new RuntimeException(sprintf('Could not find class "%s" in file "%s"', $className, $classFile));
         }
 

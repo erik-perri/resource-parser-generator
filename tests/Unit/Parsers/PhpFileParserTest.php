@@ -8,6 +8,7 @@ use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\DataProvider;
 use ResourceParserGenerator\Parsers\Data\ClassProperty;
 use ResourceParserGenerator\Parsers\Data\ClassScope;
+use ResourceParserGenerator\Parsers\Data\EnumScope;
 use ResourceParserGenerator\Parsers\Data\FileScope;
 use ResourceParserGenerator\Parsers\PhpFileParser;
 use ResourceParserGenerator\Tests\TestCase;
@@ -247,5 +248,55 @@ PHP;
         $this->assertEquals('int', $class->property('variableA')->type()->describe());
         $this->assertEquals('string', $class->property('variableB')->type()->describe());
         $this->assertEquals('bool', $class->property('variableC')->type()->describe());
+    }
+
+    public function testParsesEnums(): void
+    {
+        // Arrange
+        $parser = $this->make(PhpFileParser::class);
+        $contents = <<<PHP
+<?php
+namespace ResourceParserGenerator\Tests\Examples;
+enum TestEnum
+{
+    case A;
+    case B;
+    case C;
+}
+PHP;
+
+        // Act
+        $result = $parser->parse($contents);
+
+        // Assert
+        $enum = $result->enum('TestEnum');
+        $this->assertInstanceOf(EnumScope::class, $enum);
+        $this->assertEquals('TestEnum', $enum->name());
+        $this->assertEquals('untyped', $enum->propertyType('value')->describe());
+    }
+
+    public function testParsesBackedEnums(): void
+    {
+        // Arrange
+        $parser = $this->make(PhpFileParser::class);
+        $contents = <<<PHP
+<?php
+namespace ResourceParserGenerator\Tests\Examples;
+enum IntBackedEnum: int
+{
+    case A = 1;
+    case B = 2;
+    case C = 3;
+}
+PHP;
+
+        // Act
+        $result = $parser->parse($contents);
+
+        // Assert
+        $enum = $result->enum('IntBackedEnum');
+        $this->assertInstanceOf(EnumScope::class, $enum);
+        $this->assertEquals('IntBackedEnum', $enum->name());
+        $this->assertEquals('int', $enum->propertyType('value')->describe());
     }
 }

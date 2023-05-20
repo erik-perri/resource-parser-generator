@@ -38,7 +38,7 @@ use ResourceParserGenerator\Parsers\ClassMethodReturnParser;
 use ResourceParserGenerator\Parsers\ClassParser;
 use ResourceParserGenerator\Parsers\DocBlockParser;
 use ResourceParserGenerator\Parsers\PhpFileParser;
-use ResourceParserGenerator\Parsers\ResourceParser;
+use ResourceParserGenerator\Parsers\ResourceMethodParser;
 
 class ResourceParserGeneratorServiceProvider extends ServiceProvider
 {
@@ -90,7 +90,7 @@ class ResourceParserGeneratorServiceProvider extends ServiceProvider
             $this->app->singleton(ClassMethodReturnParserContract::class, ClassMethodReturnParser::class);
             $this->app->singleton(DocBlockParserContract::class, DocBlockParser::class);
             $this->app->singleton(PhpFileParserContract::class, PhpFileParser::class);
-            $this->app->singleton(ResourceParserContract::class, ResourceParser::class);
+            $this->app->singleton(ResourceParserContract::class, ResourceMethodParser::class);
         }
     }
 }

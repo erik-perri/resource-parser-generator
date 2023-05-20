@@ -4,38 +4,41 @@ declare(strict_types=1);
 
 namespace ResourceParserGenerator\Generators;
 
-use Illuminate\Support\Collection;
-use ResourceParserGenerator\Parsers\Data\ResourceParserData;
-use ResourceParserGenerator\Types\Zod\ZodShapeReferenceType;
+use Illuminate\Support\Str;
+use ResourceParserGenerator\DataObjects\Collections\ResourceParserContextCollection;
 
 class ResourceParserGenerator
 {
-    /**
-     * @param Collection<int, ResourceParserData> $parsers
-     * @return string
-     */
-    public function generate(Collection $parsers): string
+    public function generate(ResourceParserContextCollection $parsers): string
     {
         $imports = collect();
-        foreach ($parsers as $parser) {
-            foreach ($parser->properties() as $property) {
-                if ($property instanceof ZodShapeReferenceType) {
-                    $imports = $imports->mergeRecursive($property->shapeImport($parsers));
-                } else {
-                    $imports = $imports->mergeRecursive($property->imports());
-                }
+        foreach ($parsers->collect() as $parser) {
+            foreach ($parser->parserData->properties() as $property) {
+                $imports = $imports->mergeRecursive($property->imports());
             }
         }
 
         $imports = $imports->mergeRecursive(['zod' => ['object', 'output']])
             ->map(fn(array $importItems) => collect($importItems)->unique()->sort()->values()->all())
+            ->mapWithKeys(
+                fn(array $importItems, string $importName) => [$this->stripExtension($importName) => $importItems],
+            )
             ->sort();
 
         $content = view('resource-parser-generator::resource-parser-file', [
             'imports' => $imports,
-            'parsers' => $parsers,
+            'parsers' => $parsers->collect(),
         ])->render();
 
         return trim($content) . PHP_EOL;
+    }
+
+    private function stripExtension(string $filePath): string
+    {
+        $info = pathinfo($filePath);
+
+        return isset($info['extension'])
+            ? Str::of($filePath)->beforeLast('.' . $info['extension'])->value()
+            : $filePath;
     }
 }

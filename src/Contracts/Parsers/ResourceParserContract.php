@@ -4,19 +4,19 @@ declare(strict_types=1);
 
 namespace ResourceParserGenerator\Contracts\Parsers;
 
-use ResourceParserGenerator\Parsers\Data\ResourceParserCollection;
+use ResourceParserGenerator\DataObjects\Collections\ResourceParserContextCollection;
 
 interface ResourceParserContract
 {
     /**
      * @param class-string $className
      * @param string $methodName
-     * @param ResourceParserCollection|null $result
-     * @return ResourceParserCollection
+     * @param ResourceParserContextCollection|null $parsed
+     * @return ResourceParserContextCollection
      */
     public function parse(
         string $className,
         string $methodName,
-        ResourceParserCollection $result = null
-    ): ResourceParserCollection;
+        ResourceParserContextCollection $parsed = null,
+    ): ResourceParserContextCollection;
 }

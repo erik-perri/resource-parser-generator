@@ -6,80 +6,196 @@ namespace ResourceParserGenerator\Console\Commands;
 
 use Illuminate\Console\Command;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\File;
-use ResourceParserGenerator\Contracts\Filesystem\ParserFileSplitterContract;
+use Illuminate\Support\Facades\Validator;
+use ResourceParserGenerator\Contracts\Generators\ParserNameGeneratorContract;
 use ResourceParserGenerator\Contracts\Parsers\ResourceParserContract;
-use ResourceParserGenerator\Filesystem\NoOpFileSplitter;
-use ResourceParserGenerator\Filesystem\SplitByResourceFileSplitter;
-use ResourceParserGenerator\Generators\ResourceParserFileGenerator;
-use ResourceParserGenerator\Parsers\Data\ResourceParserCollection;
+use ResourceParserGenerator\DataObjects\Collections\ResourceParserContextCollection;
+use ResourceParserGenerator\DataObjects\ResourceConfiguration;
+use ResourceParserGenerator\Generators\ResourceParserGenerator;
+use ResourceParserGenerator\Resolvers\ResourceResolver;
 use Throwable;
 
 class GenerateResourceParsersCommand extends Command
 {
-    protected $signature = 'generate:resource-parsers '
-    . '{output-path : Where to put the parser(s). A directory if using a split strategy or a file if not.} '
-    . '{resource-class-method-spec* : The resource(s) to make parsers for. Format: "ClassName::methodName"} '
-    . '{--split-strategy=resource : How to split the output files. Valid options: resource, none}';
-
-    protected $description = 'Generate resource parsers';
+    protected $signature = 'generate:resource-parsers';
+    protected $description = 'Generate resource parsers based on configuration.';
 
     public function handle(): int
     {
-        $methods = $this->methods();
-        if (!count($methods)) {
+        // Load and validate the configuration.
+        [$configuredResources, $outputPath] = $this->parseConfiguration('build.resource_parsers');
+        if ($configuredResources === null) {
             return static::FAILURE;
         }
 
-        $outputPath = $this->argument('output-path');
-        if (!is_string($outputPath)) {
-            $this->components->error('Output path must be a string.');
-            return static::FAILURE;
-        }
+        // Fill any unspecified values in the configuration using the name generator.
+        $configuredResources = $configuredResources->map($this->fillUnspecifiedConfiguration(...));
 
-        $parserFileSplitter = $this->splitter($outputPath);
-        if (!$parserFileSplitter) {
-            return static::FAILURE;
-        }
-
-        if ($parserFileSplitter instanceof NoOpFileSplitter) {
-            $outputPath = dirname($outputPath);
-        }
-
-        if (!File::exists($outputPath)) {
-            $this->components->error('Output path "' . $outputPath . '" does not exist.');
-            return static::FAILURE;
-        }
-
-        $parserCollection = $this->make(ResourceParserCollection::class);
-        $resourceParser = $this->make(ResourceParserContract::class);
-        $parserFileGenerator = $this->make(ResourceParserFileGenerator::class);
-
-        foreach ($methods as [$className, $methodName]) {
-            /**
-             * @var class-string $className
-             */
+        // Parse the resources and their dependencies
+        $parserCollection = ResourceParserContextCollection::create();
+        $resourceParser = $this->resolve(ResourceParserContract::class);
+        foreach ($configuredResources as $config) {
             try {
-                $resourceParser->parse($className, $methodName, $parserCollection);
+                $parserCollection = $resourceParser->parse($config->className, $config->methodName, $parserCollection);
             } catch (Throwable $error) {
-                $this->components->error(
-                    'Failed to generate parser for "' . $className . '::' . $methodName . '": ' . $error->getMessage(),
-                );
+                $this->components->error(sprintf(
+                    'Failed to generate parser for "%s::%s"',
+                    $config->className,
+                    $config->methodName,
+                ));
+                $this->components->bulletList([$error->getMessage()]);
                 return static::FAILURE;
             }
         }
 
-        $generatedFiles = $parserFileGenerator->generate($parserCollection, $parserFileSplitter);
+        // Fill the configuration on any dependencies that were not explicitly configured.
+        $parserCollection = $parserCollection->updateConfiguration(
+            function (ResourceConfiguration $defaultConfig) use ($configuredResources) {
+                $configuredResource = $configuredResources->first(fn(ResourceConfiguration $resource) => $resource->is(
+                    $defaultConfig->className,
+                    $defaultConfig->methodName,
+                ));
 
-        foreach ($generatedFiles as $fileName => $fileContents) {
+                return $this->fillUnspecifiedConfiguration($configuredResource ?? $defaultConfig);
+            },
+        );
+
+        $parserGenerator = $this->resolve(ResourceParserGenerator::class);
+        $resourceResolver = ResourceResolver::create($parserCollection);
+
+        // We need to update an empty local scope for all the loaded resources. This allows us to resolve references
+        // to other resources that have not yet been handled by a file (ResourceA uses ResourceB, but we haven't updated
+        // ResourceB's ZodShapeReferenceType resolution scope in the loop below yet).
+        $parserCollection->updateLocalScope(new ResourceParserContextCollection(collect()), $resourceResolver);
+
+        foreach ($parserCollection->splitToFiles() as $fileName => $parsers) {
+            // Update the local scope to include the parsers from this file, so it knows not to attempt importing them.
+            $parsers->updateLocalScope($parsers, $resourceResolver);
+
             $filePath = $outputPath . '/' . $fileName;
+            $fileContents = $parserGenerator->generate($parsers);
 
-            $this->components->twoColumnDetail('Writing file', $filePath);
+            $this->components->twoColumnDetail(
+                sprintf('Writing %s', $filePath),
+                sprintf('%s bytes', number_format(strlen($fileContents))),
+            );
 
             File::put($filePath, $fileContents);
         }
 
         return static::SUCCESS;
+    }
+
+    /**
+     * @param string $configKey
+     * @return array{0: Collection<int, ResourceConfiguration>|null, 1: string|null}
+     * @noinspection PhpSameParameterValueInspection
+     */
+    private function parseConfiguration(string $configKey): array
+    {
+        $config = Config::get($configKey);
+        if (!$config) {
+            $this->components->error(
+                sprintf('No configuration found at "%s" for resource parser generation.', $configKey),
+            );
+            return [null, null];
+        }
+
+        $validateCallableArray = function ($key, $value, $fail) {
+            if (!is_array($value) || (array_is_list($value) && count($value) !== 2)) {
+                $fail(sprintf('The %s field must be a callable array of exactly two items.', $key));
+            } elseif (!class_exists($value[0])) {
+                $fail(sprintf('The %s field references unknown class "%s".', $key, $value[0]));
+            } elseif (!method_exists($value[0], $value[1])) {
+                $fail(sprintf('The %s field references unknown method "%s::%s".', $key, $value[0], $value[1]));
+            }
+        };
+
+        $validator = Validator::make(
+            Arr::wrap($config),
+            [
+                'output_path' => ['required', 'string'],
+                'parsers' => ['required', 'array'],
+                'parsers.*' => [
+                    'array',
+                    $validateCallableArray,
+                ],
+                'parsers.*.output_file' => [
+                    'doesnt_start_with:/',
+                    'string',
+                ],
+                'parsers.*.resource' => [
+                    'required_with:parsers.*.output_file',
+                    'array',
+                    $validateCallableArray,
+                ],
+                'parsers.*.type' => ['string', 'ascii'],
+                'parsers.*.variable' => ['string', 'ascii'],
+            ],
+            [],
+            [
+                'output_path' => 'build.resource_parsers.output_path',
+                'parsers' => 'build.resource_parsers.parsers',
+            ],
+        );
+
+        $errors = $validator->errors();
+
+        if (count($errors)) {
+            $this->components->error('Errors found in configuration:');
+            $this->components->bulletList($errors->all());
+            return [null, null];
+        }
+
+        $valid = $validator->valid();
+
+        $outputPath = $valid['output_path'];
+        if (!File::exists($outputPath)) {
+            $this->components->error(sprintf('Output path "%s" does not exist.', $outputPath));
+            return [null, null];
+        }
+
+        return [
+            // @phpstan-ignore-next-line -- The validation rule was a big enough pain, not worth typing this for PHPStan
+            collect($valid['parsers'])->map(function ($parser) {
+                if (array_is_list($parser)) {
+                    return new ResourceConfiguration($parser[0], $parser[1], null, null, null);
+                }
+
+                return new ResourceConfiguration(
+                    $parser['resource'][0],
+                    $parser['resource'][1],
+                    $parser['type'] ?? null,
+                    $parser['variable'] ?? null,
+                    $parser['output_file'] ?? null,
+                );
+            }),
+            $outputPath,
+        ];
+    }
+
+    private function fillUnspecifiedConfiguration(
+        ResourceConfiguration $configuration,
+    ): ResourceConfiguration {
+        $generator = $this->resolve(ParserNameGeneratorContract::class);
+
+        $file = $configuration->outputFilePath
+            ?? $generator->generateFileName($configuration->className);
+        $type = $configuration->outputType
+            ?? $generator->generateTypeName($configuration->className, $configuration->methodName);
+        $variable = $configuration->outputVariable
+            ?? $generator->generateVariableName($configuration->className, $configuration->methodName);
+
+        return new ResourceConfiguration(
+            $configuration->className,
+            $configuration->methodName,
+            $type,
+            $variable,
+            $file,
+        );
     }
 
     /**
@@ -89,59 +205,8 @@ class GenerateResourceParsersCommand extends Command
      * @param array<string, mixed> $parameters
      * @return T
      */
-    private function make(string $class, array $parameters = [])
+    private function resolve(string $class, array $parameters = [])
     {
         return resolve($class, $parameters);
-    }
-
-    /**
-     * @return array<string[]>
-     */
-    private function methods(): array
-    {
-        /** @var string[] $methodSpecs */
-        $methodSpecs = Arr::wrap($this->argument('resource-class-method-spec'));
-        $methods = [];
-
-        foreach ($methodSpecs as $methodSpec) {
-            [$className, $methodName] = explode('::', $methodSpec);
-
-            if (!class_exists($className)) {
-                $this->components->error('Class "' . $className . '" does not exist.');
-                return [];
-            }
-
-            if (!method_exists($className, $methodName)) {
-                $this->components->error('Class "' . $className . '" does not contain a "' . $methodName . '" method.');
-                return [];
-            }
-
-            $methods[] = [$className, $methodName];
-        }
-
-        return $methods;
-    }
-
-    private function splitter(string $outputPath): ParserFileSplitterContract|null
-    {
-        $splitStrategy = $this->option('split-strategy');
-        if ($splitStrategy === 'none' && !str_contains($outputPath, '.')) {
-            $this->components->error('Output path must be a file if using the "none" split strategy.');
-            return null;
-        }
-
-        $splitter = match ($splitStrategy) {
-            'resource' => $this->make(SplitByResourceFileSplitter::class),
-            'none' => $this->make(NoOpFileSplitter::class, ['fileName' => basename($outputPath)]),
-            // TODO method?
-            default => null,
-        };
-
-        if (!$splitter) {
-            $this->components->error(sprintf('Invalid split strategy "%s"', $splitStrategy));
-            return null;
-        }
-
-        return $splitter;
     }
 }

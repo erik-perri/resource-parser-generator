@@ -9,14 +9,16 @@ use ResourceParserGenerator\Contracts\Parsers\ClassMethodReturnParserContract;
 use ResourceParserGenerator\Contracts\Parsers\ClassParserContract;
 use ResourceParserGenerator\Contracts\Parsers\ResourceParserContract;
 use ResourceParserGenerator\Contracts\Types\TypeContract;
-use ResourceParserGenerator\Parsers\Data\ResourceParserCollection;
-use ResourceParserGenerator\Parsers\Data\ResourceParserData;
+use ResourceParserGenerator\DataObjects\Collections\ResourceParserContextCollection;
+use ResourceParserGenerator\DataObjects\ResourceConfiguration;
+use ResourceParserGenerator\DataObjects\ResourceContext;
+use ResourceParserGenerator\DataObjects\ResourceMethodData;
 use ResourceParserGenerator\Types;
 use RuntimeException;
 use Sourcetoad\EnhancedResources\Formatting\Attributes\IsDefault;
 use Sourcetoad\EnhancedResources\Resource;
 
-class ResourceParser implements ResourceParserContract
+class ResourceMethodParser implements ResourceParserContract
 {
     public function __construct(
         private readonly ClassParserContract $classParser,
@@ -28,11 +30,11 @@ class ResourceParser implements ResourceParserContract
     public function parse(
         string $className,
         string $methodName,
-        ResourceParserCollection $result = null
-    ): ResourceParserCollection {
-        $result ??= new ResourceParserCollection();
-        if ($result->has($className, $methodName)) {
-            return $result;
+        ResourceParserContextCollection $parsed = null,
+    ): ResourceParserContextCollection {
+        $parsed ??= ResourceParserContextCollection::create(collect());
+        if ($parsed->find($className, $methodName)) {
+            return $parsed;
         }
 
         $returnType = $this->parseReturnType($className, $methodName);
@@ -66,11 +68,11 @@ class ResourceParser implements ResourceParserContract
                     );
                 }
 
-                if ($result->has($type->fullyQualifiedName(), $format)) {
+                if ($parsed->find($type->fullyQualifiedName(), $format)) {
                     continue;
                 }
 
-                $this->parse($type->fullyQualifiedName(), $format, $result);
+                $parsed = $this->parse($type->fullyQualifiedName(), $format, $parsed);
 
                 // Replace the property type with a method type reference if we didn't have a reference, then we don't
                 // need to parse the default format again later.
@@ -88,13 +90,16 @@ class ResourceParser implements ResourceParserContract
             }
         }
 
-        $result->add(ResourceParserData::create(
+        $parserData = ResourceMethodData::create(
             $className,
             $methodName,
             $returnType->properties()->map(fn(TypeContract $property) => $property->parserType())
-        ));
+        );
 
-        return $result;
+        return $parsed->concat(new ResourceContext(
+            new ResourceConfiguration($className, $methodName, null, null, null),
+            $parserData,
+        ));
     }
 
     /**

@@ -8,7 +8,7 @@ use InvalidArgumentException;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\DataProvider;
 use ResourceParserGenerator\Filesystem\ClassFileLocator;
-use ResourceParserGenerator\Tests\Examples\UserResource;
+use ResourceParserGenerator\Tests\Examples\Resources\UserResource;
 use ResourceParserGenerator\Tests\TestCase;
 use RuntimeException;
 
@@ -64,7 +64,7 @@ class ClassFileLocatorTest extends TestCase
         return [
             UserResource::class => [
                 'class' => UserResource::class,
-                'file' => sprintf('%s/Examples/UserResource.php', dirname(__DIR__, 2)),
+                'file' => sprintf('%s/Examples/Resources/UserResource.php', dirname(__DIR__, 2)),
             ],
         ];
     }

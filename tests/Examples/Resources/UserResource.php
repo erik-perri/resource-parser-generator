@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace ResourceParserGenerator\Tests\Examples;
+namespace ResourceParserGenerator\Tests\Examples\Resources;
 
 use DateTimeZone;
 use Illuminate\Http\Request;

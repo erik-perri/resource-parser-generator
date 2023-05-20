@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace ResourceParserGenerator\Tests\Examples;
+namespace ResourceParserGenerator\Tests\Examples\Resources;
 
 use ResourceParserGenerator\Tests\Examples\Models\User;
 use Sourcetoad\EnhancedResources\Formatting\Attributes\Format;

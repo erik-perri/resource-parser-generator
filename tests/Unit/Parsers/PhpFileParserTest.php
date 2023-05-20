@@ -122,20 +122,20 @@ PHP,
             'single use' => [
                 'contents' => <<<PHP
 <?php
-use ResourceParserGenerator\Tests\Examples\UserResource;
+use ResourceParserGenerator\Tests\Examples\Resources\UserResource;
 PHP,
                 'expected' => [
-                    'UserResource' => 'ResourceParserGenerator\Tests\Examples\UserResource',
+                    'UserResource' => 'ResourceParserGenerator\Tests\Examples\Resources\UserResource',
                 ],
             ],
             'multiple uses' => [
                 'contents' => <<<PHP
 <?php
-use ResourceParserGenerator\Tests\Examples\{NoHints,UserResource};
+use ResourceParserGenerator\Tests\Examples\{NoHints,Resources\UserResource};
 PHP,
                 'expected' => [
                     'NoHints' => 'ResourceParserGenerator\Tests\Examples\NoHints',
-                    'UserResource' => 'ResourceParserGenerator\Tests\Examples\UserResource',
+                    'UserResource' => 'ResourceParserGenerator\Tests\Examples\Resources\UserResource',
                 ],
             ],
             'multiple uses with aliases and whitespace and comments' => [
@@ -143,12 +143,12 @@ PHP,
 <?php
 use ResourceParserGenerator\Tests\Examples\{
     NoHints as NoHintsAlias, // No hints
-    UserResource as UserResourceAlias // User resource
+    Resources\UserResource as UserResourceAlias // User resource
 };
 PHP,
                 'expected' => [
                     'NoHintsAlias' => 'ResourceParserGenerator\Tests\Examples\NoHints',
-                    'UserResourceAlias' => 'ResourceParserGenerator\Tests\Examples\UserResource',
+                    'UserResourceAlias' => 'ResourceParserGenerator\Tests\Examples\Resources\UserResource',
                 ],
             ],
         ];

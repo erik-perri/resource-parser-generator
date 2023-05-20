@@ -8,8 +8,8 @@ use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\File;
 use PHPUnit\Framework\Attributes\CoversClass;
 use ResourceParserGenerator\Console\Commands\GenerateResourceParsersCommand;
-use ResourceParserGenerator\Tests\Examples\RelatedResource;
-use ResourceParserGenerator\Tests\Examples\UserResource;
+use ResourceParserGenerator\Tests\Examples\Resources\RelatedResource;
+use ResourceParserGenerator\Tests\Examples\Resources\UserResource;
 use ResourceParserGenerator\Tests\TestCase;
 
 #[CoversClass(GenerateResourceParsersCommand::class)]

@@ -45,7 +45,7 @@ class BuildResourceParsersCommandTest extends TestCase
         Config::set('build.resource_parsers', [
             'output_path' => dirname(__DIR__, 3) . '/Output',
             'parsers' => [
-                [UserResource::class, 'adminList'],
+                [UserResource::class, 'base'],
                 ['ResourceParserGenerator\MissingClass', 'base'],
             ],
         ]);
@@ -61,7 +61,7 @@ class BuildResourceParsersCommandTest extends TestCase
         Config::set('build.resource_parsers', [
             'output_path' => dirname(__DIR__, 3) . '/Output',
             'parsers' => [
-                [UserResource::class, 'adminList'],
+                [UserResource::class, 'base'],
                 [UserResource::class, 'notARealMethod'],
             ],
         ]);
@@ -77,7 +77,7 @@ class BuildResourceParsersCommandTest extends TestCase
         Config::set('build.resource_parsers', [
             'output_path' => '/where/is/this/file',
             'parsers' => [
-                [UserResource::class, 'adminList'],
+                [UserResource::class, 'base'],
             ],
         ]);
 
@@ -109,25 +109,25 @@ class BuildResourceParsersCommandTest extends TestCase
         $examples = dirname(__DIR__, 3) . '/Examples/Generated';
 
         return [
-            'UserResource::adminList not configured' => [
+            'UserResource::base not configured' => [
                 'config' => fn(string $outputPath) => [
                     'output_path' => $outputPath,
                     'parsers' => [
-                        [UserResource::class, 'adminList'],
+                        [UserResource::class, 'base'],
                     ],
                 ],
                 'expectedOutput' => [
                     'userResourceParsers.ts' => file_get_contents(
-                        $examples . '/UserResource-adminList-not-configured.ts.txt',
+                        $examples . '/UserResource-base-not-configured.ts.txt',
                     ),
                 ],
             ],
-            'UserResource::adminList configured' => [
+            'UserResource::base configured' => [
                 'config' => fn(string $outputPath) => [
                     'output_path' => $outputPath,
                     'parsers' => [
                         [
-                            'resource' => [UserResource::class, 'adminList'],
+                            'resource' => [UserResource::class, 'base'],
                             'output_file' => 'custom.ts',
                             'type' => 'CustomParser',
                             'variable' => 'customParser',
@@ -136,7 +136,7 @@ class BuildResourceParsersCommandTest extends TestCase
                 ],
                 'expectedOutput' => [
                     'custom.ts' => file_get_contents(
-                        $examples . '/UserResource-adminList-configured.ts.txt',
+                        $examples . '/UserResource-base-configured.ts.txt',
                     ),
                 ],
             ],
@@ -145,11 +145,7 @@ class BuildResourceParsersCommandTest extends TestCase
                     'output_path' => $outputPath,
                     'parsers' => [
                         [
-                            'resource' => [UserResource::class, 'adminList'],
-                            'output_file' => 'parsers.ts',
-                        ],
-                        [
-                            'resource' => [UserResource::class, 'authentication'],
+                            'resource' => [UserResource::class, 'base'],
                             'output_file' => 'parsers.ts',
                         ],
                         [
@@ -186,8 +182,7 @@ class BuildResourceParsersCommandTest extends TestCase
                 'config' => fn(string $outputPath) => [
                     'output_path' => $outputPath,
                     'parsers' => [
-                        [UserResource::class, 'adminList'],
-                        [UserResource::class, 'authentication'],
+                        [UserResource::class, 'base'],
                         [UserResource::class, 'combined'],
                         [UserResource::class, 'ternaries'],
                         [UserResource::class, 'relatedResource'],

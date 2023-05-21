@@ -39,22 +39,12 @@ class ClassMethodReturnParserTest extends TestCase
     public static function methodReturnProvider(): array
     {
         return [
-            'UserResource::adminList' => [
-                'method' => [UserResource::class, 'adminList'],
+            'UserResource::base' => [
+                'method' => [UserResource::class, 'base'],
                 'expected' => [
                     'id' => 'string',
-                    'name' => 'string',
                     'email' => 'string',
                     'created_at' => 'null|string',
-                    'updated_at' => 'null|string',
-                ],
-            ],
-            'UserResource::authentication' => [
-                'method' => [UserResource::class, 'authentication'],
-                'expected' => [
-                    'id' => 'string',
-                    'email' => 'string',
-                    'name' => 'string',
                 ],
             ],
             'UserResource::combined' => [

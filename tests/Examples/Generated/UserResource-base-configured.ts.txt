@@ -3,9 +3,7 @@ import {object, output, string, union, z} from 'zod';
 export const customParser = object({
   id: string(),
   email: string(),
-  name: string(),
   created_at: union([string(), z.null()]),
-  updated_at: union([string(), z.null()]),
 });
 
 export type CustomParser = output<typeof customParser>;

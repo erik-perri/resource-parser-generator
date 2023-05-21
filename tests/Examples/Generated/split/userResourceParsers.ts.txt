@@ -1,23 +1,13 @@
 import {relatedResourceBaseParser, relatedResourceShortFormatNotNamedLikeFormatNameParser, relatedResourceVerboseParser} from './relatedResourceParsers';
 import {boolean, number, object, output, string, undefined, union, z} from 'zod';
 
-export const userResourceAdminListParser = object({
+export const userResourceBaseParser = object({
   id: string(),
   email: string(),
-  name: string(),
   created_at: union([string(), z.null()]),
-  updated_at: union([string(), z.null()]),
 });
 
-export type UserResourceAdminList = output<typeof userResourceAdminListParser>;
-
-export const userResourceAuthenticationParser = object({
-  id: string(),
-  email: string(),
-  name: string(),
-});
-
-export type UserResourceAuthentication = output<typeof userResourceAuthenticationParser>;
+export type UserResourceBase = output<typeof userResourceBaseParser>;
 
 export const userResourceCombinedParser = object({
   email: union([string(), z.null()]),

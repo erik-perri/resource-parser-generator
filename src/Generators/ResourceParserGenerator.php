@@ -7,19 +7,19 @@ namespace ResourceParserGenerator\Generators;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
 use ResourceParserGenerator\Contracts\Generators\ResourceParserGeneratorContract;
-use ResourceParserGenerator\DataObjects\ResourceContext;
+use ResourceParserGenerator\DataObjects\ResourceData;
 
 class ResourceParserGenerator implements ResourceParserGeneratorContract
 {
     /**
-     * @param Collection<int, ResourceContext> $parsers
+     * @param Collection<int, ResourceData> $parsers
      * @return string
      */
     public function generate(Collection $parsers): string
     {
         $imports = collect();
         foreach ($parsers as $parser) {
-            foreach ($parser->parserData->properties() as $property) {
+            foreach ($parser->properties() as $property) {
                 $imports = $imports->mergeRecursive($property->imports());
             }
         }

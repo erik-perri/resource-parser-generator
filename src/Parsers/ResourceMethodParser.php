@@ -6,11 +6,10 @@ namespace ResourceParserGenerator\Parsers;
 
 use ResourceParserGenerator\Contracts\Parsers\ClassMethodReturnParserContract;
 use ResourceParserGenerator\Contracts\Parsers\ResourceParserContract;
-use ResourceParserGenerator\Contracts\ResourceParserContextRepositoryContract;
+use ResourceParserGenerator\Contracts\ResourceGeneratorContextContract;
 use ResourceParserGenerator\Contracts\Types\TypeContract;
 use ResourceParserGenerator\DataObjects\ResourceConfiguration;
-use ResourceParserGenerator\DataObjects\ResourceContext;
-use ResourceParserGenerator\DataObjects\ResourceMethodData;
+use ResourceParserGenerator\DataObjects\ResourceData;
 use ResourceParserGenerator\Types;
 use RuntimeException;
 
@@ -18,7 +17,7 @@ class ResourceMethodParser implements ResourceParserContract
 {
     public function __construct(
         private readonly ClassMethodReturnParserContract $classMethodReturnParser,
-        private readonly ResourceParserContextRepositoryContract $resourceParserRepository,
+        private readonly ResourceGeneratorContextContract $resourceParserRepository,
     ) {
         //
     }
@@ -26,7 +25,7 @@ class ResourceMethodParser implements ResourceParserContract
     public function parse(
         string $className,
         string $methodName,
-    ): ResourceContext {
+    ): ResourceData {
         if ($alreadyParsed = $this->resourceParserRepository->findGlobal($className, $methodName)) {
             return $alreadyParsed;
         }
@@ -48,15 +47,11 @@ class ResourceMethodParser implements ResourceParserContract
             $this->parseDependentResources($type);
         }
 
-        $parserData = ResourceMethodData::create(
+        $context = new ResourceData(
             $className,
             $methodName,
-            $returnType->properties()->map(fn(TypeContract $property) => $property->parserType())
-        );
-
-        $context = new ResourceContext(
+            $returnType->properties()->map(fn(TypeContract $property) => $property->parserType()),
             new ResourceConfiguration($className, $methodName, null, null, null),
-            $parserData,
         );
 
         $this->resourceParserRepository->add($context);

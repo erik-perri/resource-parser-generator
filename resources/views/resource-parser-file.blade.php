@@ -1,9 +1,9 @@
 @php
     use Illuminate\Support\Collection;
-    use ResourceParserGenerator\DataObjects\ResourceContext;
+    use ResourceParserGenerator\DataObjects\ResourceData;
 
     /** @var Collection<string, string[]> $imports */
-    /** @var Collection<string, ResourceContext> $parsers */
+    /** @var Collection<string, ResourceData> $parsers */
 @endphp
 
 @foreach($imports as $from => $imported)
@@ -12,7 +12,7 @@ import {{ '{' }}{{ implode(', ', $imported) }}{{ '}' }} from '{{$from}}';
 
 @foreach($parsers as $parserName => $parser)
 @include('resource-parser-generator::resource-parser', [
-    'properties' => $parser->parserData->properties(),
+    'properties' => $parser->properties(),
     'typeName' => $parser->configuration->outputType,
     'variableName' => $parser->configuration->outputVariable,
 ])

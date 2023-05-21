@@ -7,34 +7,21 @@ namespace ResourceParserGenerator\DataObjects;
 use Illuminate\Support\Collection;
 use ResourceParserGenerator\Contracts\Types\ParserTypeContract;
 
-class ResourceMethodData
+class ResourceData
 {
     /**
      * @param class-string $className
      * @param string $methodName
      * @param Collection<string, ParserTypeContract> $properties
+     * @param ResourceConfiguration $configuration
      */
     public function __construct(
         private readonly string $className,
         private readonly string $methodName,
         private readonly Collection $properties,
+        public readonly ResourceConfiguration $configuration,
     ) {
         //
-    }
-
-    /**
-     * @param class-string $className
-     * @param string $methodName
-     * @param Collection<string, ParserTypeContract> $properties
-     * @return self
-     */
-    public static function create(string $className, string $methodName, Collection $properties): self
-    {
-        return resolve(self::class, [
-            'className' => $className,
-            'methodName' => $methodName,
-            'properties' => $properties,
-        ]);
     }
 
     /**
@@ -57,5 +44,15 @@ class ResourceMethodData
     {
         // TODO Make this immutable again
         return $this->properties;
+    }
+
+    public function updateConfiguration(ResourceConfiguration $configuration): self
+    {
+        return resolve(self::class, [
+            'className' => $this->className,
+            'methodName' => $this->methodName,
+            'properties' => $this->properties,
+            'configuration' => $configuration,
+        ]);
     }
 }

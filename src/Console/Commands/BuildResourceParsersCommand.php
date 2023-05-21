@@ -13,7 +13,7 @@ use Illuminate\Support\Facades\Validator;
 use ResourceParserGenerator\Contracts\Generators\ParserNameGeneratorContract;
 use ResourceParserGenerator\Contracts\Generators\ResourceParserGeneratorContract;
 use ResourceParserGenerator\Contracts\Parsers\ResourceParserContract;
-use ResourceParserGenerator\Contracts\ResourceParserContextRepositoryContract;
+use ResourceParserGenerator\Contracts\ResourceGeneratorContextContract;
 use ResourceParserGenerator\DataObjects\ResourceConfiguration;
 use Throwable;
 
@@ -49,7 +49,7 @@ class BuildResourceParsersCommand extends Command
             }
         }
 
-        $parserRepository = $this->resolve(ResourceParserContextRepositoryContract::class);
+        $parserRepository = $this->resolve(ResourceGeneratorContextContract::class);
         $parserGenerator = $this->resolve(ResourceParserGeneratorContract::class);
 
         // Fill the configuration on any dependencies that were not explicitly configured.
@@ -65,10 +65,9 @@ class BuildResourceParsersCommand extends Command
         );
 
         foreach ($parserCollection->splitToFiles() as $fileName => $parsers) {
-            $parserRepository->setLocalContext($parsers);
-
             $filePath = $outputPath . '/' . $fileName;
-            $fileContents = $parserGenerator->generate($parsers);
+
+            $fileContents = $parserRepository->withLocalContext($parsers, fn() => $parserGenerator->generate($parsers));
 
             $this->components->twoColumnDetail(
                 sprintf('Writing %s', $filePath),
@@ -77,8 +76,6 @@ class BuildResourceParsersCommand extends Command
 
             File::put($filePath, $fileContents);
         }
-
-        $parserRepository->setLocalContext(collect());
 
         return static::SUCCESS;
     }

@@ -100,7 +100,7 @@ class ClassMethodReturnParserTest extends TestCase
                 'className' => UserResource::class,
                 'methodName' => 'usingWhenLoaded',
                 'expected' => [
-                    'related' => PostResource::class . '::base|undefined',
+                    'related' => PostResource::class . '::simple|undefined',
                 ],
             ],
             'UserResource::usingWhenLoadedFallback' => [

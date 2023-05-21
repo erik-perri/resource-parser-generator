@@ -212,7 +212,7 @@ class BuildResourceParsersCommandTest extends TestCase
                             'output_file' => 'parsers.ts',
                         ],
                         [
-                            'resource' => [PostResource::class, 'base'],
+                            'resource' => [PostResource::class, 'simple'],
                             'output_file' => 'parsers.ts',
                         ],
                     ],

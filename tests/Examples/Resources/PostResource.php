@@ -16,7 +16,7 @@ class PostResource extends Resource
     public const SIMPLE = 'simple';
 
     #[Format(self::SIMPLE)]
-    public function base(): array
+    public function simple(): array
     {
         return [
             'status' => $this->resource->status->value,

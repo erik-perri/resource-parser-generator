@@ -1,13 +1,13 @@
 import {object, output, string, undefined, union} from 'zod';
 
 export const userResourceUsingWhenLoadedParser = object({
-  related: union([postResourceBaseParser, undefined()]),
+  related: union([postResourceSimpleParser, undefined()]),
 });
 
 export type UserResourceUsingWhenLoaded = output<typeof userResourceUsingWhenLoadedParser>;
 
-export const postResourceBaseParser = object({
+export const postResourceSimpleParser = object({
   status: string(),
 });
 
-export type PostResourceBase = output<typeof postResourceBaseParser>;
+export type PostResourceSimple = output<typeof postResourceSimpleParser>;

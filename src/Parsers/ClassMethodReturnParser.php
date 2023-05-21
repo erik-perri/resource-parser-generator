@@ -14,6 +14,7 @@ use ResourceParserGenerator\Contracts\Parsers\ClassMethodReturnParserContract;
 use ResourceParserGenerator\Contracts\Parsers\ClassParserContract;
 use ResourceParserGenerator\Contracts\Types\TypeContract;
 use ResourceParserGenerator\Converters\Data\ConverterContext;
+use ResourceParserGenerator\Converters\ExpressionContextProcessor;
 use ResourceParserGenerator\Parsers\Data\ClassMethodScope;
 use ResourceParserGenerator\Resolvers\VariableResolver;
 use ResourceParserGenerator\Types;
@@ -23,6 +24,7 @@ class ClassMethodReturnParser implements ClassMethodReturnParserContract
 {
     public function __construct(
         private readonly ExpressionTypeConverterContract $expressionTypeConverter,
+        private readonly ExpressionContextProcessor $expressionContextProcessor,
         private readonly ClassParserContract $classParser,
     ) {
         //
@@ -65,8 +67,6 @@ class ClassMethodReturnParser implements ClassMethodReturnParserContract
                 continue;
             }
 
-            $context = new ConverterContext($resolver);
-
             if ($returnNode->expr instanceof Array_) {
                 $arrayProperties = collect();
 
@@ -80,14 +80,20 @@ class ClassMethodReturnParser implements ClassMethodReturnParserContract
                         throw new RuntimeException('Unexpected non-string key in resource');
                     }
 
+                    $context = ConverterContext::create($resolver);
                     $type = $this->expressionTypeConverter->convert($item->value, $context);
+                    $type = $this->expressionContextProcessor->process($type, $context);
 
                     $arrayProperties->put($key->value, $type);
                 }
 
                 $types[] = new Types\ArrayWithPropertiesType($arrayProperties);
             } else {
-                $types[] = $this->expressionTypeConverter->convert($returnNode->expr, $context);
+                $context = ConverterContext::create($resolver);
+                $type = $this->expressionTypeConverter->convert($returnNode->expr, $context);
+                $type = $this->expressionContextProcessor->process($type, $context);
+
+                $types[] = $type;
             }
         }
 

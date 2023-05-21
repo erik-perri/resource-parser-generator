@@ -218,9 +218,55 @@ class BuildResourceParsersCommandTest extends TestCase
                     ],
                 ],
                 'expectedOutput' => [
-                    'parsers.ts' => file_get_contents(
-                        $examples . '/UserResource-usingWhenLoaded.ts.txt',
-                    ),
+                    'parsers.ts' => <<<TS
+import {object, output, string, undefined, union} from 'zod';
+
+export const userResourceUsingWhenLoadedParser = object({
+  related: union([postResourceSimpleParser, undefined()]),
+});
+
+export type UserResourceUsingWhenLoaded = output<typeof userResourceUsingWhenLoadedParser>;
+
+export const postResourceSimpleParser = object({
+  status: string(),
+});
+
+export type PostResourceSimple = output<typeof postResourceSimpleParser>;
+
+TS,
+                ],
+            ],
+            'UserResource::usingResourceCollection' => [
+                'config' => fn(string $outputPath) => [
+                    'output_path' => $outputPath,
+                    'parsers' => [
+                        [
+                            'resource' => [UserResource::class, 'usingResourceCollection'],
+                            'output_file' => 'parsers.ts',
+                        ],
+                        [
+                            'resource' => [PostResource::class, 'simple'],
+                            'output_file' => 'parsers.ts',
+                        ],
+                    ],
+                ],
+                'expectedOutput' => [
+                    'parsers.ts' => <<<TS
+import {array, object, output, string} from 'zod';
+
+export const userResourceUsingResourceCollectionParser = object({
+  posts: array(postResourceSimpleParser),
+});
+
+export type UserResourceUsingResourceCollection = output<typeof userResourceUsingResourceCollectionParser>;
+
+export const postResourceSimpleParser = object({
+  status: string(),
+});
+
+export type PostResourceSimple = output<typeof postResourceSimpleParser>;
+
+TS,
                 ],
             ],
         ];

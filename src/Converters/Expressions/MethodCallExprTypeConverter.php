@@ -97,7 +97,7 @@ class MethodCallExprTypeConverter implements ExprTypeConverterContract
 
         $returnWhenLoaded = $this->expressionTypeConverter->convert(
             $args[1]->value,
-            (new ConverterContext($context->resolver(), [$loadedProperty]))
+            ConverterContext::create($context->resolver(), collect([$loadedProperty])),
         );
 
         $returnWhenUnloaded = count($args) > 2

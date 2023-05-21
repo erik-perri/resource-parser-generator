@@ -11,8 +11,10 @@ use ResourceParserGenerator\Contracts\Converters\Expressions\ExprTypeConverterCo
 use ResourceParserGenerator\Contracts\Parsers\ClassParserContract;
 use ResourceParserGenerator\Contracts\Types\TypeContract;
 use ResourceParserGenerator\Converters\Data\ConverterContext;
-use ResourceParserGenerator\Types\ClassType;
+use ResourceParserGenerator\Types;
 use RuntimeException;
+use Sourcetoad\EnhancedResources\AnonymousResourceCollection;
+use Sourcetoad\EnhancedResources\Resource;
 
 class StaticCallExprTypeConverter implements ExprTypeConverterContract
 {
@@ -35,7 +37,7 @@ class StaticCallExprTypeConverter implements ExprTypeConverterContract
         }
 
         $classType = $this->declaredTypeConverter->convert($expr->class, $context->resolver());
-        if (!($classType instanceof ClassType)) {
+        if (!($classType instanceof Types\ClassType)) {
             throw new RuntimeException('Static call class is not a class type');
         }
 
@@ -45,6 +47,21 @@ class StaticCallExprTypeConverter implements ExprTypeConverterContract
             throw new RuntimeException(
                 sprintf('Unknown method "%s" in "%s"', $methodName->name, $classScope->name()),
             );
+        }
+
+        // When we encounter a `::collection` call on a resource, we convert the type to the resource flag the context
+        // as actually being a collection.  This allows us to hook into the existing format handling for loading the
+        // collection format.  It then gets converted into an array of the resource by the context processor.
+        // TODO Figure out a cleaner approach.
+        $methodReturn = $methodScope->returnType();
+        if ($classScope->hasParent(Resource::class) &&
+            $methodName->name === 'collection' &&
+            $methodReturn instanceof Types\ClassType &&
+            $methodReturn->fullyQualifiedName() === AnonymousResourceCollection::class
+        ) {
+            $context->setIsCollection(true);
+
+            return new Types\ClassType($classType->fullyQualifiedName(), $classType->alias());
         }
 
         return $methodScope->returnType();

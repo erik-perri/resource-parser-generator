@@ -9,16 +9,22 @@ use ResourceParserGenerator\Contracts\Converters\Expressions\ExprTypeConverterCo
 use ResourceParserGenerator\Contracts\Converters\ExpressionTypeConverterContract;
 use ResourceParserGenerator\Contracts\Types\TypeContract;
 use ResourceParserGenerator\Converters\Data\ConverterContext;
+use ResourceParserGenerator\Converters\ExpressionContextProcessor;
 
 class ArrowFunctionExprTypeConverter implements ExprTypeConverterContract
 {
-    public function __construct(private readonly ExpressionTypeConverterContract $expressionTypeConverter)
-    {
+    public function __construct(
+        private readonly ExpressionTypeConverterContract $expressionTypeConverter,
+        private readonly ExpressionContextProcessor $expressionContextProcessor,
+    ) {
         //
     }
 
     public function convert(ArrowFunction $expr, ConverterContext $context): TypeContract
     {
-        return $this->expressionTypeConverter->convert($expr->expr, $context);
+        $childContext = ConverterContext::create($context->resolver(), $context->nonNullProperties());
+        $type = $this->expressionTypeConverter->convert($expr->expr, $childContext);
+
+        return $this->expressionContextProcessor->process($type, $childContext);
     }
 }

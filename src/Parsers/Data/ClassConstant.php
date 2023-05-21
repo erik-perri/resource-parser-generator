@@ -38,7 +38,7 @@ class ClassConstant implements ClassConstantContract
 
     public function type(): TypeContract
     {
-        return $this->exprTypeConverter->convert($this->constant->value, new ConverterContext($this->resolver));
+        return $this->exprTypeConverter->convert($this->constant->value, ConverterContext::create($this->resolver));
     }
 
     public function value(): mixed

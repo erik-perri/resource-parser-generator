@@ -33,7 +33,6 @@ use ResourceParserGenerator\Converters\Expressions\PropertyFetchExprTypeConverte
 use ResourceParserGenerator\Converters\Expressions\StaticCallExprTypeConverter;
 use ResourceParserGenerator\Converters\Expressions\StringExprTypeConverter;
 use ResourceParserGenerator\Converters\Expressions\TernaryExprTypeConverter;
-use ResourceParserGenerator\Types;
 use RuntimeException;
 
 class ExpressionTypeConverter implements ExpressionTypeConverterContract
@@ -77,18 +76,6 @@ class ExpressionTypeConverter implements ExpressionTypeConverterContract
          */
         $handler = resolve($handlerClass);
 
-        $type = $handler->convert($expr, $context);
-
-        if ($type instanceof Types\ClassType && $context->formatMethod()) {
-            $type = new Types\ClassWithMethodType(
-                $type->fullyQualifiedName(),
-                $type->alias(),
-                $context->formatMethod(),
-            );
-
-            $context->setFormatMethod(null);
-        }
-
-        return $type;
+        return $handler->convert($expr, $context);
     }
 }

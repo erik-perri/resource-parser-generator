@@ -9,6 +9,7 @@ use Illuminate\Support\Collection;
 use ResourceParserGenerator\Contracts\Resolvers\ResourceResolverContract;
 use ResourceParserGenerator\DataObjects\ResourceConfiguration;
 use ResourceParserGenerator\DataObjects\ResourceContext;
+use ResourceParserGenerator\Types\Zod\ZodArrayType;
 use ResourceParserGenerator\Types\Zod\ZodShapeReferenceType;
 use ResourceParserGenerator\Types\Zod\ZodUnionType;
 use RuntimeException;
@@ -114,6 +115,18 @@ class ResourceParserContextCollection
 
                             return $type;
                         })->all()
+                    ));
+                }
+
+                if ($property instanceof ZodArrayType && $property->values instanceof ZodShapeReferenceType) {
+                    $properties->put($propertyKey, new ZodArrayType(
+                        $property->keys,
+                        ZodShapeReferenceType::create(
+                            $property->values->className,
+                            $property->values->methodName,
+                            $localParsers,
+                            $resourceResolver,
+                        ),
                     ));
                 }
             }

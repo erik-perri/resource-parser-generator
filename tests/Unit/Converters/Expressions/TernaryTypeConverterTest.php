@@ -29,7 +29,7 @@ class TernaryTypeConverterTest extends TestCase
          * @var ResolverContract|MockInterface $resolver
          */
         $resolver = $this->mock(ResolverContract::class);
-        $context = new ConverterContext($resolver);
+        $context = new ConverterContext($resolver, collect());
 
         /**
          * @var ExpressionTypeConverter|MockInterface $typeConverter

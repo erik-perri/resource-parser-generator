@@ -131,6 +131,13 @@ class ClassMethodReturnParserTest extends TestCase
                     'with_format_verbose' => RelatedResource::class . '::verbose',
                 ],
             ],
+            'UserResource::usingResourceCollection' => [
+                'className' => UserResource::class,
+                'methodName' => 'usingResourceCollection',
+                'expected' => [
+                    'posts' => PostResource::class . '::simple[]',
+                ],
+            ],
         ];
     }
 }

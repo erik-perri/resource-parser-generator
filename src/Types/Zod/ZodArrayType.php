@@ -9,8 +9,8 @@ use ResourceParserGenerator\Contracts\Types\ParserTypeContract;
 class ZodArrayType implements ParserTypeContract
 {
     public function __construct(
-        private readonly ParserTypeContract|null $keys,
-        private readonly ParserTypeContract|null $values,
+        public readonly ParserTypeContract|null $keys,
+        public readonly ParserTypeContract|null $values,
     ) {
         //
     }
@@ -21,8 +21,8 @@ class ZodArrayType implements ParserTypeContract
             return sprintf('record(%s, %s)', $this->keys->constraint(), $this->values->constraint());
         }
 
-        if ($this->keys) {
-            return sprintf('array(%s)', $this->keys->constraint());
+        if ($this->values) {
+            return sprintf('array(%s)', $this->values->constraint());
         }
 
         return 'array()';

@@ -95,6 +95,13 @@ class UserResource extends JsonResource
         ];
     }
 
+    public function usingResourceCollection(): array
+    {
+        return [
+            'posts' => PostResource::collection($this->resource->latestPosts)->format(PostResource::SIMPLE),
+        ];
+    }
+
     public function staticCallOrConst(): array
     {
         return [

@@ -56,12 +56,16 @@ class StaticCallExprTypeConverter implements ExprTypeConverterContract
         $methodReturn = $methodScope->returnType();
         if ($classScope->hasParent(Resource::class) &&
             $methodName->name === 'collection' &&
-            $methodReturn instanceof Types\ClassType &&
-            $methodReturn->fullyQualifiedName() === AnonymousResourceCollection::class
+            $methodReturn instanceof Types\ClassType
         ) {
-            $context->setIsCollection(true);
+            $isAnonymousResource = $methodReturn->fullyQualifiedName() === AnonymousResourceCollection::class
+                || $this->classParser->parse($methodReturn->fullyQualifiedName())
+                    ->hasParent(AnonymousResourceCollection::class);
+            if ($isAnonymousResource) {
+                $context->setIsCollection(true);
 
-            return new Types\ClassType($classType->fullyQualifiedName(), $classType->alias());
+                return new Types\ClassType($classType->fullyQualifiedName(), $classType->alias());
+            }
         }
 
         return $methodScope->returnType();

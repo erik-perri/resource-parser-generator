@@ -198,6 +198,27 @@ class BuildResourceParsersCommandTest extends TestCase
                     ),
                 ],
             ],
+            'UserResource::childArrays' => [
+                'config' => fn(string $outputPath) => [
+                    'output_path' => $outputPath,
+                    'parsers' => [
+                        [UserResource::class, 'childArrays'],
+                    ],
+                ],
+                'expectedOutput' => [
+                    'userResourceParsers.ts' => <<<TS
+import {postResourceBaseParser} from './postResourceParsers';
+import {array, object, output, string, union, z} from 'zod';
+
+export const userResourceChildArraysParser = object({
+  should_have_been_a_resource: union([array(), object({string(), union([postResourceBaseParser, z.null()])})]),
+});
+
+export type UserResourceChildArrays = output<typeof userResourceChildArraysParser>;
+
+TS,
+                ],
+            ],
             'UserResource::usingWhenLoaded' => [
                 'config' => fn(string $outputPath) => [
                     'output_path' => $outputPath,
@@ -216,17 +237,17 @@ class BuildResourceParsersCommandTest extends TestCase
                     'parsers.ts' => <<<TS
 import {object, output, string, undefined, union} from 'zod';
 
-export const userResourceUsingWhenLoadedParser = object({
-  related: union([postResourceSimpleParser, undefined()]),
-});
-
-export type UserResourceUsingWhenLoaded = output<typeof userResourceUsingWhenLoadedParser>;
-
 export const postResourceSimpleParser = object({
   status: string(),
 });
 
 export type PostResourceSimple = output<typeof postResourceSimpleParser>;
+
+export const userResourceUsingWhenLoadedParser = object({
+  related: union([postResourceSimpleParser, undefined()]),
+});
+
+export type UserResourceUsingWhenLoaded = output<typeof userResourceUsingWhenLoadedParser>;
 
 TS,
                 ],
@@ -249,17 +270,17 @@ TS,
                     'parsers.ts' => <<<TS
 import {array, object, output, string} from 'zod';
 
-export const userResourceUsingResourceCollectionParser = object({
-  posts: array(postResourceSimpleParser),
-});
-
-export type UserResourceUsingResourceCollection = output<typeof userResourceUsingResourceCollectionParser>;
-
 export const postResourceSimpleParser = object({
   status: string(),
 });
 
 export type PostResourceSimple = output<typeof postResourceSimpleParser>;
+
+export const userResourceUsingResourceCollectionParser = object({
+  posts: array(postResourceSimpleParser),
+});
+
+export type UserResourceUsingResourceCollection = output<typeof userResourceUsingResourceCollectionParser>;
 
 TS,
                 ],

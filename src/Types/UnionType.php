@@ -36,17 +36,6 @@ class UnionType implements TypeContract
         );
     }
 
-    /**
-     * @param callable(TypeContract): bool $callback
-     * @return self
-     */
-    public function removeFromUnion(callable $callback): self
-    {
-        return new self(
-            ...$this->types->reject($callback)->all(),
-        );
-    }
-
     public function describe(): string
     {
         return $this->types
@@ -56,12 +45,20 @@ class UnionType implements TypeContract
             ->implode('|');
     }
 
-    /**
-     * @return Collection<int, TypeContract>
-     */
-    public function types(): Collection
+    public function isNullable(): bool
     {
-        return $this->types->collect();
+        return $this->types->contains(fn(TypeContract $type) => $type instanceof NullType);
+    }
+
+    /**
+     * @param callable(TypeContract): bool $callback
+     * @return self
+     */
+    public function removeFromUnion(callable $callback): self
+    {
+        return new self(
+            ...$this->types->reject($callback)->all(),
+        );
     }
 
     public function removeNullable(): TypeContract
@@ -97,5 +94,13 @@ class UnionType implements TypeContract
             return $type->parserType();
         })->flatten()->all();
         return new ZodUnionType(...$flatTypes);
+    }
+
+    /**
+     * @return Collection<int, TypeContract>
+     */
+    public function types(): Collection
+    {
+        return $this->types->collect();
     }
 }

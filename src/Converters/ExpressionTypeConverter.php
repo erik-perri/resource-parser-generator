@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace ResourceParserGenerator\Converters;
 
 use PhpParser\Node\Expr;
+use PhpParser\Node\Expr\Array_;
 use PhpParser\Node\Expr\ArrowFunction;
 use PhpParser\Node\Expr\ClassConstFetch;
 use PhpParser\Node\Expr\ConstFetch;
@@ -45,6 +46,7 @@ class ExpressionTypeConverter implements ExpressionTypeConverterContract
     public function __construct()
     {
         $this->typeHandlers = [
+            Array_::class => Expressions\ArrayExprTypeConverter::class,
             ArrowFunction::class => ArrowFunctionExprTypeConverter::class,
             ClassConstFetch::class => ClassConstFetchExprTypeConverter::class,
             ConstFetch::class => ConstFetchExprTypeConverter::class,

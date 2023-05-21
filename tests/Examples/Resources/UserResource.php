@@ -25,6 +25,22 @@ class UserResource extends JsonResource
         ];
     }
 
+    public function childArrays(): array
+    {
+        return [
+            'should_have_been_a_resource' => $this->whenLoaded(
+                'related',
+                [
+                    'id' => $this->resource->related->getRouteKey(),
+                    'should_have_been_when_loaded' => $this->resource->latestPost
+                        ? PostResource::make($this->resource->latestPost)
+                        : null,
+                ],
+                [],
+            ),
+        ];
+    }
+
     public function combined(): array
     {
         if ($this->resource->created_at) {
@@ -39,6 +55,17 @@ class UserResource extends JsonResource
         }
     }
 
+    public function relatedResource(): array
+    {
+        return [
+            'with_format_default' => RelatedResource::make($this->resource->related),
+            'with_format_short' => RelatedResource::make($this->resource->related)
+                ->format('short'),
+            'with_format_verbose' => RelatedResource::make($this->resource->related)
+                ->format(RelatedResource::FORMAT_VERBOSE),
+        ];
+    }
+
     public function scalars(): array
     {
         return [
@@ -50,6 +77,18 @@ class UserResource extends JsonResource
             'boolean_true' => true,
             'boolean_false' => false,
             'null' => null,
+        ];
+    }
+
+    public function staticCallOrConst(): array
+    {
+        return [
+            'const_float' => User::CONST_FLOAT,
+            'const_string' => User::CONST_STRING,
+            'explicit_method' => User::getExplicitStaticValue(),
+            'hinted_method' => User::getHintedStaticValue(),
+            'reflected_const' => DateTimeZone::AMERICA,
+            'reflected_method' => Phar::getSupportedCompression(),
         ];
     }
 
@@ -69,6 +108,13 @@ class UserResource extends JsonResource
         ];
     }
 
+    public function usingResourceCollection(): array
+    {
+        return [
+            'posts' => PostResource::collection($this->resource->latestPosts)->format(PostResource::SIMPLE),
+        ];
+    }
+
     public function usingWhenLoaded(): array
     {
         return [
@@ -81,36 +127,6 @@ class UserResource extends JsonResource
     {
         return [
             'related' => $this->whenLoaded('related', fn() => $this->resource->related->name, 'none'),
-        ];
-    }
-
-    public function usingResourceCollection(): array
-    {
-        return [
-            'posts' => PostResource::collection($this->resource->latestPosts)->format(PostResource::SIMPLE),
-        ];
-    }
-
-    public function staticCallOrConst(): array
-    {
-        return [
-            'const_float' => User::CONST_FLOAT,
-            'const_string' => User::CONST_STRING,
-            'explicit_method' => User::getExplicitStaticValue(),
-            'hinted_method' => User::getHintedStaticValue(),
-            'reflected_const' => DateTimeZone::AMERICA,
-            'reflected_method' => Phar::getSupportedCompression(),
-        ];
-    }
-
-    public function relatedResource(): array
-    {
-        return [
-            'with_format_default' => RelatedResource::make($this->resource->related),
-            'with_format_short' => RelatedResource::make($this->resource->related)
-                ->format('short'),
-            'with_format_verbose' => RelatedResource::make($this->resource->related)
-                ->format(RelatedResource::FORMAT_VERBOSE),
         ];
     }
 }

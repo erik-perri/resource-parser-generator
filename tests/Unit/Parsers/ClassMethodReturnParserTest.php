@@ -107,7 +107,7 @@ class ClassMethodReturnParserTest extends TestCase
             'UserResource::relatedResource' => [
                 'method' => [UserResource::class, 'relatedResource'],
                 'expected' => [
-                    'with_format_default' => RelatedResource::class,
+                    'with_format_default' => RelatedResource::class . '::base',
                     'with_format_short' => RelatedResource::class . '::shortFormatNotNamedLikeFormatName',
                     'with_format_verbose' => RelatedResource::class . '::verbose',
                 ],
@@ -116,6 +116,13 @@ class ClassMethodReturnParserTest extends TestCase
                 'method' => [UserResource::class, 'usingResourceCollection'],
                 'expected' => [
                     'posts' => PostResource::class . '::simple[]',
+                ],
+            ],
+            'UserResource::childArrays' => [
+                'method' => [UserResource::class, 'childArrays'],
+                'expected' => [
+                    'should_have_been_a_resource' => 'array|'
+                        . 'array<{id: string; should_have_been_when_loaded: null|' . PostResource::class . '::base}>',
                 ],
             ],
         ];

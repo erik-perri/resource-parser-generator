@@ -4,25 +4,21 @@ declare(strict_types=1);
 
 namespace ResourceParserGenerator\Parsers;
 
-use ResourceParserGenerator\Contracts\ClassScopeContract as ClassScopeContract;
 use ResourceParserGenerator\Contracts\Parsers\ClassMethodReturnParserContract;
-use ResourceParserGenerator\Contracts\Parsers\ClassParserContract;
 use ResourceParserGenerator\Contracts\Parsers\ResourceParserContract;
+use ResourceParserGenerator\Contracts\ResourceParserContextRepositoryContract;
 use ResourceParserGenerator\Contracts\Types\TypeContract;
-use ResourceParserGenerator\DataObjects\Collections\ResourceParserContextCollection;
 use ResourceParserGenerator\DataObjects\ResourceConfiguration;
 use ResourceParserGenerator\DataObjects\ResourceContext;
 use ResourceParserGenerator\DataObjects\ResourceMethodData;
 use ResourceParserGenerator\Types;
 use RuntimeException;
-use Sourcetoad\EnhancedResources\Formatting\Attributes\IsDefault;
-use Sourcetoad\EnhancedResources\Resource;
 
 class ResourceMethodParser implements ResourceParserContract
 {
     public function __construct(
-        private readonly ClassParserContract $classParser,
         private readonly ClassMethodReturnParserContract $classMethodReturnParser,
+        private readonly ResourceParserContextRepositoryContract $resourceParserRepository,
     ) {
         //
     }
@@ -30,44 +26,11 @@ class ResourceMethodParser implements ResourceParserContract
     public function parse(
         string $className,
         string $methodName,
-        ResourceParserContextCollection $parsed = null,
-    ): ResourceParserContextCollection {
-        $parsed ??= ResourceParserContextCollection::create(collect());
-        if ($parsed->find($className, $methodName)) {
-            return $parsed;
+    ): ResourceContext {
+        if ($alreadyParsed = $this->resourceParserRepository->findGlobal($className, $methodName)) {
+            return $alreadyParsed;
         }
 
-        // Parse the return type and find any default classes
-        $returnType = $this->parseReturnType($className, $methodName);
-
-        // Parse any dependent resource methods
-        foreach ($returnType->properties() as $type) {
-            if ($type instanceof Types\ClassWithMethodType) {
-                $parsed = $parsed->find($type->fullyQualifiedName(), $type->methodName())
-                    ? $parsed
-                    : $this->parse($type->fullyQualifiedName(), $type->methodName(), $parsed);
-            }
-        }
-
-        $parserData = ResourceMethodData::create(
-            $className,
-            $methodName,
-            $returnType->properties()->map(fn(TypeContract $property) => $property->parserType())
-        );
-
-        return $parsed->concat(new ResourceContext(
-            new ResourceConfiguration($className, $methodName, null, null, null),
-            $parserData,
-        ));
-    }
-
-    /**
-     * @param class-string $className
-     * @param string $methodName
-     * @return Types\ArrayWithPropertiesType
-     */
-    private function parseReturnType(string $className, string $methodName): Types\ArrayWithPropertiesType
-    {
         $returnType = $this->classMethodReturnParser->parse($className, $methodName);
 
         if (!($returnType instanceof Types\ArrayWithPropertiesType)) {
@@ -81,61 +44,41 @@ class ResourceMethodParser implements ResourceParserContract
             );
         }
 
-        $properties = $returnType->properties();
-        foreach ($properties as $key => $type) {
-            $updatedType = $this->updateTypeIfResourceWithoutMethod($key, $type);
-            if ($updatedType) {
-                // Replace the property type with a method type reference if we didn't have a reference, then we don't
-                // need to parse the default format again later.
-                $returnType = new Types\ArrayWithPropertiesType(
-                    $returnType->properties()
-                        ->except($key)
-                        ->put($key, $updatedType),
-                );
-            }
+        foreach ($returnType->properties() as $type) {
+            $this->parseDependentResources($type);
         }
 
-        return $returnType;
-    }
-
-    private function updateTypeIfResourceWithoutMethod(string $key, TypeContract $type): TypeContract|null
-    {
-        if (!($type instanceof Types\ClassType) || $type instanceof Types\ClassWithMethodType) {
-            return null;
-        }
-
-        $returnClass = $this->classParser->parse($type->fullyQualifiedName());
-        if (!$returnClass->hasParent(Resource::class)) {
-            return null;
-        }
-
-        $format = $this->findDefaultFormat($returnClass);
-        if (!$format) {
-            throw new RuntimeException(
-                sprintf(
-                    'Unable to determine format for resource class "%s" in resource for property "%s"',
-                    $type->fullyQualifiedName(),
-                    $key,
-                ),
-            );
-        }
-
-        return new Types\ClassWithMethodType(
-            $type->fullyQualifiedName(),
-            $type->alias(),
-            $format,
+        $parserData = ResourceMethodData::create(
+            $className,
+            $methodName,
+            $returnType->properties()->map(fn(TypeContract $property) => $property->parserType())
         );
+
+        $context = new ResourceContext(
+            new ResourceConfiguration($className, $methodName, null, null, null),
+            $parserData,
+        );
+
+        $this->resourceParserRepository->add($context);
+
+        return $context;
     }
 
-    private function findDefaultFormat(ClassScopeContract $resourceClass): string|null
+    private function parseDependentResources(TypeContract $type): void
     {
-        foreach ($resourceClass->methods() as $methodName => $methodScope) {
-            $attribute = $methodScope->attribute(IsDefault::class);
-            if ($attribute) {
-                return $methodName;
+        if ($type instanceof Types\ClassWithMethodType) {
+            $this->parse($type->fullyQualifiedName(), $type->methodName());
+        } elseif ($type instanceof Types\UnionType) {
+            $type->types()->each(fn(TypeContract $type) => $this->parseDependentResources($type));
+        } elseif ($type instanceof Types\ArrayWithPropertiesType) {
+            $type->properties()->each(fn(TypeContract $type) => $this->parseDependentResources($type));
+        } elseif ($type instanceof Types\ArrayType) {
+            if ($type->keys) {
+                $this->parseDependentResources($type->keys);
+            }
+            if ($type->values) {
+                $this->parseDependentResources($type->values);
             }
         }
-
-        return null;
     }
 }

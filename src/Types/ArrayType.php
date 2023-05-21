@@ -11,8 +11,8 @@ use ResourceParserGenerator\Types\Zod\ZodArrayType;
 class ArrayType implements TypeContract
 {
     public function __construct(
-        private readonly TypeContract|null $keys,
-        private readonly TypeContract|null $values,
+        public readonly TypeContract|null $keys,
+        public readonly TypeContract|null $values,
     ) {
         //
     }

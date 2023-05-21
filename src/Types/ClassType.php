@@ -63,6 +63,10 @@ class ClassType implements TypeContract
 
     public function parserType(): ParserTypeContract
     {
-        throw new RuntimeException(class_basename(self::class) . ' cannot be converted to parser type.');
+        throw new RuntimeException(sprintf(
+            '%s of "%s" cannot be converted to parser type.',
+            class_basename(self::class),
+            $this->fullyQualifiedName(),
+        ));
     }
 }

@@ -13,9 +13,8 @@ use Illuminate\Support\Facades\Validator;
 use ResourceParserGenerator\Contracts\Generators\ParserNameGeneratorContract;
 use ResourceParserGenerator\Contracts\Generators\ResourceParserGeneratorContract;
 use ResourceParserGenerator\Contracts\Parsers\ResourceParserContract;
-use ResourceParserGenerator\DataObjects\Collections\ResourceParserContextCollection;
+use ResourceParserGenerator\Contracts\ResourceParserContextRepositoryContract;
 use ResourceParserGenerator\DataObjects\ResourceConfiguration;
-use ResourceParserGenerator\Resolvers\ResourceResolver;
 use Throwable;
 
 class BuildResourceParsersCommand extends Command
@@ -35,11 +34,10 @@ class BuildResourceParsersCommand extends Command
         $configuredResources = $configuredResources->map($this->fillUnspecifiedConfiguration(...));
 
         // Parse the resources and their dependencies
-        $parserCollection = ResourceParserContextCollection::create();
         $resourceParser = $this->resolve(ResourceParserContract::class);
         foreach ($configuredResources as $config) {
             try {
-                $parserCollection = $resourceParser->parse($config->className, $config->methodName, $parserCollection);
+                $resourceParser->parse($config->className, $config->methodName);
             } catch (Throwable $error) {
                 $this->components->error(sprintf(
                     'Failed to generate parser for "%s::%s"',
@@ -51,8 +49,11 @@ class BuildResourceParsersCommand extends Command
             }
         }
 
+        $parserRepository = $this->resolve(ResourceParserContextRepositoryContract::class);
+        $parserGenerator = $this->resolve(ResourceParserGeneratorContract::class);
+
         // Fill the configuration on any dependencies that were not explicitly configured.
-        $parserCollection = $parserCollection->updateConfiguration(
+        $parserCollection = $parserRepository->updateConfiguration(
             function (ResourceConfiguration $defaultConfig) use ($configuredResources) {
                 $configuredResource = $configuredResources->first(fn(ResourceConfiguration $resource) => $resource->is(
                     $defaultConfig->className,
@@ -63,10 +64,9 @@ class BuildResourceParsersCommand extends Command
             },
         );
 
-        $parserGenerator = $this->resolve(ResourceParserGeneratorContract::class);
-        $resourceResolver = ResourceResolver::create($parserCollection);
+        foreach ($parserCollection->splitToFiles() as $fileName => $parsers) {
+            $parserRepository->setLocalContext($parsers);
 
-        foreach ($parserCollection->splitToFiles($resourceResolver) as $fileName => $parsers) {
             $filePath = $outputPath . '/' . $fileName;
             $fileContents = $parserGenerator->generate($parsers);
 
@@ -77,6 +77,8 @@ class BuildResourceParsersCommand extends Command
 
             File::put($filePath, $fileContents);
         }
+
+        $parserRepository->setLocalContext(collect());
 
         return static::SUCCESS;
     }

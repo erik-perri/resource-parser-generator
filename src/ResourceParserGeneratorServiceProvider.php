@@ -27,11 +27,13 @@ use ResourceParserGenerator\Contracts\Parsers\ClassParserContract;
 use ResourceParserGenerator\Contracts\Parsers\DocBlockParserContract;
 use ResourceParserGenerator\Contracts\Parsers\PhpFileParserContract;
 use ResourceParserGenerator\Contracts\Parsers\ResourceParserContract;
+use ResourceParserGenerator\Contracts\ResourceParserContextRepositoryContract;
 use ResourceParserGenerator\Converters\DeclaredTypeConverter;
 use ResourceParserGenerator\Converters\DocBlockTypeConverter;
 use ResourceParserGenerator\Converters\ExpressionTypeConverter;
 use ResourceParserGenerator\Converters\ReflectionTypeConverter;
 use ResourceParserGenerator\Converters\VariableTypeConverter;
+use ResourceParserGenerator\DataObjects\ResourceParserContextRepository;
 use ResourceParserGenerator\Filesystem\ClassFileLocator;
 use ResourceParserGenerator\Generators\ParserNameGenerator;
 use ResourceParserGenerator\Generators\ResourceParserGenerator;
@@ -74,6 +76,12 @@ class ResourceParserGeneratorServiceProvider extends ServiceProvider
             $this->app->singleton(ExpressionTypeConverterContract::class, ExpressionTypeConverter::class);
             $this->app->singleton(ReflectionTypeConverterContract::class, ReflectionTypeConverter::class);
             $this->app->singleton(VariableTypeConverterContract::class, VariableTypeConverter::class);
+
+            // Data Objects
+            $this->app->singleton(
+                ResourceParserContextRepositoryContract::class,
+                ResourceParserContextRepository::class,
+            );
 
             // Generators
             $this->app->singleton(ParserNameGeneratorContract::class, ParserNameGenerator::class);

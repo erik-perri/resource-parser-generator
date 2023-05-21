@@ -66,15 +66,7 @@ class BuildResourceParsersCommand extends Command
         $parserGenerator = $this->resolve(ResourceParserGeneratorContract::class);
         $resourceResolver = ResourceResolver::create($parserCollection);
 
-        // We need to update an empty local scope for all the loaded resources. This allows us to resolve references
-        // to other resources that have not yet been handled by a file (ResourceA uses ResourceB, but we haven't updated
-        // ResourceB's ZodShapeReferenceType resolution scope in the loop below yet).
-        $parserCollection->updateLocalScope(new ResourceParserContextCollection(collect()), $resourceResolver);
-
-        foreach ($parserCollection->splitToFiles() as $fileName => $parsers) {
-            // Update the local scope to include the parsers from this file, so it knows not to attempt importing them.
-            $parsers->updateLocalScope($parsers, $resourceResolver);
-
+        foreach ($parserCollection->splitToFiles($resourceResolver) as $fileName => $parsers) {
             $filePath = $outputPath . '/' . $fileName;
             $fileContents = $parserGenerator->generate($parsers);
 

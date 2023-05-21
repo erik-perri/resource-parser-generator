@@ -6,9 +6,9 @@ namespace ResourceParserGenerator\DataObjects\Collections;
 
 use Closure;
 use Illuminate\Support\Collection;
+use ResourceParserGenerator\Contracts\Resolvers\ResourceResolverContract;
 use ResourceParserGenerator\DataObjects\ResourceConfiguration;
 use ResourceParserGenerator\DataObjects\ResourceContext;
-use ResourceParserGenerator\Resolvers\ResourceResolver;
 use ResourceParserGenerator\Types\Zod\ZodShapeReferenceType;
 use ResourceParserGenerator\Types\Zod\ZodUnionType;
 use RuntimeException;
@@ -59,9 +59,10 @@ class ResourceParserContextCollection
     }
 
     /**
+     * @param ResourceResolverContract $resourceResolver
      * @return Collection<int, self>
      */
-    public function splitToFiles(): Collection
+    public function splitToFiles(ResourceResolverContract $resourceResolver): Collection
     {
         return $this->parserContexts
             ->groupBy(function (ResourceContext $context) {
@@ -74,12 +75,17 @@ class ResourceParserContextCollection
                 }
                 return $context->configuration->outputFilePath;
             })
-            ->map(fn(Collection $contexts) => new self($contexts));
+            ->map(fn(Collection $parserGroup) => tap(
+                new self($parserGroup),
+                function (ResourceParserContextCollection $parsers) use ($resourceResolver) {
+                    $parsers->updateLocalScope($parsers, $resourceResolver);
+                },
+            ));
     }
 
     public function updateLocalScope(
         ResourceParserContextCollection $localParsers,
-        ResourceResolver $resourceResolver
+        ResourceResolverContract $resourceResolver
     ): self {
         foreach ($this->parserContexts as $context) {
             $properties = $context->parserData->properties();

@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 namespace ResourceParserGenerator\Parsers;
 
+use Illuminate\Cache\ArrayStore;
+use Illuminate\Cache\Repository;
+use Illuminate\Contracts\Cache\Repository as RepositoryContract;
 use Illuminate\Support\Facades\File;
 use ReflectionClass;
 use ResourceParserGenerator\Contracts\ClassScopeContract;
@@ -15,14 +18,29 @@ use RuntimeException;
 
 class ClassParser implements ClassParserContract
 {
+    private readonly RepositoryContract $cache;
+
     public function __construct(
         private readonly ClassFileLocatorContract $classLocator,
         private readonly PhpFileParserContract $fileParser,
     ) {
-        //
+        $this->cache = new Repository(new ArrayStore());
     }
 
     public function parse(string $className, string|null $staticContext = null): ClassScopeContract
+    {
+        return $this->cache->rememberForever(
+            sprintf('%s::%s', $staticContext, $className),
+            fn() => $this->parseClass($className, $staticContext),
+        );
+    }
+
+    /**
+     * @param class-string $className
+     * @param class-string|null $staticContext
+     * @return ClassScopeContract
+     */
+    private function parseClass(string $className, string|null $staticContext = null): ClassScopeContract
     {
         if (class_exists($className) && !$this->classLocator->exists($className)) {
             return ReflectedClassScope::create(new ReflectionClass($className));

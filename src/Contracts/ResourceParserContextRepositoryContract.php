@@ -20,6 +20,11 @@ interface ResourceParserContextRepositoryContract
      */
     public function findGlobal(string $className, string $methodName): ResourceContext|null;
 
+    /**
+     * @param class-string $className
+     * @param string $methodName
+     * @return ResourceContext|null
+     */
     public function findLocal(string $className, string $methodName): ResourceContext|null;
 
     /**

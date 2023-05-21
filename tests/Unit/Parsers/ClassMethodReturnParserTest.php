@@ -17,10 +17,11 @@ use ResourceParserGenerator\Types\ArrayWithPropertiesType;
 class ClassMethodReturnParserTest extends TestCase
 {
     #[DataProvider('methodReturnProvider')]
-    public function testParsesClassMethodReturn(string $className, string $methodName, array|string $expected): void
+    public function testParsesClassMethodReturn(array $method, array|string $expected): void
     {
         // Arrange
         $parser = $this->make(ClassMethodReturnParser::class);
+        [$className, $methodName] = $method;
 
         // Act
         $result = $parser->parse($className, $methodName);
@@ -39,8 +40,7 @@ class ClassMethodReturnParserTest extends TestCase
     {
         return [
             'UserResource::adminList' => [
-                'className' => UserResource::class,
-                'methodName' => 'adminList',
+                'method' => [UserResource::class, 'adminList'],
                 'expected' => [
                     'id' => 'string',
                     'name' => 'string',
@@ -50,8 +50,7 @@ class ClassMethodReturnParserTest extends TestCase
                 ],
             ],
             'UserResource::authentication' => [
-                'className' => UserResource::class,
-                'methodName' => 'authentication',
+                'method' => [UserResource::class, 'authentication'],
                 'expected' => [
                     'id' => 'string',
                     'email' => 'string',
@@ -59,16 +58,14 @@ class ClassMethodReturnParserTest extends TestCase
                 ],
             ],
             'UserResource::combined' => [
-                'className' => UserResource::class,
-                'methodName' => 'combined',
+                'method' => [UserResource::class, 'combined'],
                 'expected' => [
                     'email' => 'null|string',
                     'name' => 'string|undefined',
                 ],
             ],
             'UserResource::ternaries' => [
-                'className' => UserResource::class,
-                'methodName' => 'ternaries',
+                'method' => [UserResource::class, 'ternaries'],
                 'expected' => [
                     'ternary_to_int' => 'int',
                     'ternary_to_compound' => 'bool|int|string',
@@ -76,8 +73,7 @@ class ClassMethodReturnParserTest extends TestCase
                 ],
             ],
             'UserResource::scalars' => [
-                'className' => UserResource::class,
-                'methodName' => 'scalars',
+                'method' => [UserResource::class, 'scalars'],
                 'expectedReturns' => [
                     'string' => 'string',
                     'negative_number' => 'int',
@@ -90,29 +86,25 @@ class ClassMethodReturnParserTest extends TestCase
                 ],
             ],
             'UserResource::usingParameter' => [
-                'className' => UserResource::class,
-                'methodName' => 'usingParameter',
+                'method' => [UserResource::class, 'usingParameter'],
                 'expectedReturns' => [
                     'path' => 'null|string',
                 ],
             ],
             'UserResource::usingWhenLoaded' => [
-                'className' => UserResource::class,
-                'methodName' => 'usingWhenLoaded',
+                'method' => [UserResource::class, 'usingWhenLoaded'],
                 'expected' => [
                     'related' => PostResource::class . '::simple|undefined',
                 ],
             ],
             'UserResource::usingWhenLoadedFallback' => [
-                'className' => UserResource::class,
-                'methodName' => 'usingWhenLoadedFallback',
+                'method' => [UserResource::class, 'usingWhenLoadedFallback'],
                 'expected' => [
                     'related' => 'string',
                 ],
             ],
             'UserResource::staticCallOrConst' => [
-                'className' => UserResource::class,
-                'methodName' => 'staticCallOrConst',
+                'method' => [UserResource::class, 'staticCallOrConst'],
                 'expected' => [
                     'const_float' => 'float',
                     'const_string' => 'string',
@@ -123,8 +115,7 @@ class ClassMethodReturnParserTest extends TestCase
                 ],
             ],
             'UserResource::relatedResource' => [
-                'className' => UserResource::class,
-                'methodName' => 'relatedResource',
+                'method' => [UserResource::class, 'relatedResource'],
                 'expected' => [
                     'with_format_default' => RelatedResource::class,
                     'with_format_short' => RelatedResource::class . '::shortFormatNotNamedLikeFormatName',
@@ -132,8 +123,7 @@ class ClassMethodReturnParserTest extends TestCase
                 ],
             ],
             'UserResource::usingResourceCollection' => [
-                'className' => UserResource::class,
-                'methodName' => 'usingResourceCollection',
+                'method' => [UserResource::class, 'usingResourceCollection'],
                 'expected' => [
                     'posts' => PostResource::class . '::simple[]',
                 ],

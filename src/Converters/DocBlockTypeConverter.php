@@ -73,6 +73,8 @@ class DocBlockTypeConverter implements DocBlockTypeConverterContract
             switch ($type->name) {
                 case 'array':
                     return new Types\ArrayType(null, null);
+                case 'array-key':
+                    return new Types\UnionType(new Types\IntType(), new Types\StringType());
                 case 'bool':
                     return new Types\BoolType();
                 case 'callable':

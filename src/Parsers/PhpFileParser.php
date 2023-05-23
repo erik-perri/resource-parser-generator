@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace ResourceParserGenerator\Parsers;
 
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\File;
 use PhpParser\Node\Stmt;
 use PhpParser\Node\Stmt\Class_;
@@ -199,7 +200,8 @@ class PhpFileParser implements PhpFileParserContract
                 $class,
                 $resolver,
                 $this->parseClassExtends($class, $resolver),
-                ...$this->parseClassTraits($class, $resolver),
+                $this->parseClassTraits($class, $resolver),
+                null,
             );
 
             $scope->addClass($classScope);
@@ -243,7 +245,8 @@ class PhpFileParser implements PhpFileParserContract
                 $trait,
                 $resolver,
                 null,
-                ...$this->parseClassTraits($trait, $resolver),
+                $this->parseClassTraits($trait, $resolver),
+                null,
             );
 
             $scope->addTrait($traitScope);
@@ -284,11 +287,11 @@ class PhpFileParser implements PhpFileParserContract
     /**
      * @param ClassLike $class
      * @param Resolver $resolver
-     * @return array<int, ClassScopeContract>
+     * @return Collection<int, ClassScopeContract>
      */
-    private function parseClassTraits(ClassLike $class, Resolver $resolver): array
+    private function parseClassTraits(ClassLike $class, Resolver $resolver): Collection
     {
-        $traits = [];
+        $traits = collect();
 
         foreach ($class->getTraitUses() as $traitUse) {
             foreach ($traitUse->traits as $trait) {
@@ -310,7 +313,7 @@ class PhpFileParser implements PhpFileParserContract
                     throw new RuntimeException(sprintf('Could not find trait class "%s"', $traitClassName));
                 }
 
-                $traits[] = $traitClassScope;
+                $traits->add($traitClassScope);
             }
         }
 

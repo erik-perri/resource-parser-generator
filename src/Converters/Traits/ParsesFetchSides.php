@@ -40,7 +40,7 @@ trait ParsesFetchSides
             );
         }
 
-        return $this->classParser()->parse($leftSide->fullyQualifiedName());
+        return $this->classParser()->parseType($leftSide);
     }
 
     private function removeNullableFromUnion(

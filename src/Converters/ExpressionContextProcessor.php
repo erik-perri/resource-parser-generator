@@ -79,7 +79,7 @@ class ExpressionContextProcessor
 
     private function findDefaultFormat(Types\ClassType $type): string|null
     {
-        $resourceClass = $this->classParser->parse($type->fullyQualifiedName());
+        $resourceClass = $this->classParser->parseType($type);
         if (!$resourceClass->hasParent(Resource::class)) {
             return null;
         }

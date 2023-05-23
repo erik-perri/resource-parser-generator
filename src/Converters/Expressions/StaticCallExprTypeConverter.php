@@ -41,7 +41,7 @@ class StaticCallExprTypeConverter implements ExprTypeConverterContract
             throw new RuntimeException('Static call class is not a class type');
         }
 
-        $classScope = $this->classParser->parse($classType->fullyQualifiedName());
+        $classScope = $this->classParser->parseType($classType);
         $methodScope = $classScope->method($methodName->name);
         if (!$methodScope) {
             throw new RuntimeException(
@@ -59,7 +59,7 @@ class StaticCallExprTypeConverter implements ExprTypeConverterContract
             $methodReturn instanceof Types\ClassType
         ) {
             $isAnonymousResource = $methodReturn->fullyQualifiedName() === AnonymousResourceCollection::class
-                || $this->classParser->parse($methodReturn->fullyQualifiedName())
+                || $this->classParser->parseType($methodReturn)
                     ->hasParent(AnonymousResourceCollection::class);
             if ($isAnonymousResource) {
                 $context->setIsCollection(true);

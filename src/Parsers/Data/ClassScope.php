@@ -38,7 +38,8 @@ class ClassScope implements ClassScopeContract
      * @param ClassLike $node
      * @param ResolverContract $resolver
      * @param ClassScopeContract|null $extends
-     * @param array<int, ClassScopeContract> $traits
+     * @param Collection<int, ClassScopeContract> $traits
+     * @param Collection<int, TypeContract>|null $knownGenerics
      * @param DocBlockParserContract $docBlockParser
      */
     public function __construct(
@@ -46,7 +47,8 @@ class ClassScope implements ClassScopeContract
         private readonly ClassLike $node,
         private readonly ResolverContract $resolver,
         private readonly ClassScopeContract|null $extends,
-        private readonly array $traits,
+        private readonly Collection $traits,
+        private readonly Collection|null $knownGenerics,
         private readonly DocBlockParserContract $docBlockParser,
     ) {
         //
@@ -57,7 +59,8 @@ class ClassScope implements ClassScopeContract
      * @param ClassLike $node
      * @param ResolverContract $resolver
      * @param ClassScopeContract|null $extends
-     * @param ClassScopeContract ...$traits
+     * @param Collection<int, ClassScopeContract> $traits
+     * @param Collection<int, TypeContract>|null $knownGenerics
      * @return self
      */
     public static function create(
@@ -65,7 +68,8 @@ class ClassScope implements ClassScopeContract
         ClassLike $node,
         ResolverContract $resolver,
         ClassScopeContract|null $extends,
-        ClassScopeContract ...$traits,
+        Collection $traits,
+        Collection|null $knownGenerics,
     ): self {
         return resolve(self::class, [
             'fullyQualifiedName' => $fullyQualifiedName,
@@ -73,6 +77,7 @@ class ClassScope implements ClassScopeContract
             'resolver' => $resolver,
             'extends' => $extends,
             'traits' => $traits,
+            'knownGenerics' => $knownGenerics,
         ]);
     }
 
@@ -119,6 +124,11 @@ class ClassScope implements ClassScopeContract
         return $this->docBlock;
     }
 
+    public function extends(): ClassScopeContract|null
+    {
+        return $this->extends;
+    }
+
     public function fullyQualifiedName(): string
     {
         return $this->fullyQualifiedName;
@@ -139,11 +149,12 @@ class ClassScope implements ClassScopeContract
         return false;
     }
 
-    public function name(): string
+    /**
+     * @return Collection<int, TypeContract>|null
+     */
+    public function knownGenerics(): Collection|null
     {
-        return $this->node->name
-            ? $this->node->name->toString()
-            : sprintf('AnonymousClass%d', $this->node->getLine());
+        return $this->knownGenerics;
     }
 
     /**
@@ -177,6 +188,18 @@ class ClassScope implements ClassScopeContract
         }
 
         return $method;
+    }
+
+    public function name(): string
+    {
+        return $this->node->name
+            ? $this->node->name->toString()
+            : sprintf('AnonymousClass%d', $this->node->getLine());
+    }
+
+    public function node(): ClassLike
+    {
+        return $this->node;
     }
 
     public function parent(): ClassScopeContract|null
@@ -215,6 +238,14 @@ class ClassScope implements ClassScopeContract
     public function resolver(): ResolverContract
     {
         return $this->resolver;
+    }
+
+    /**
+     * @return Collection<int, ClassScopeContract>
+     */
+    public function traits(): Collection
+    {
+        return $this->traits;
     }
 
     /**

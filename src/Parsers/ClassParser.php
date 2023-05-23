@@ -13,7 +13,9 @@ use ResourceParserGenerator\Contracts\ClassScopeContract;
 use ResourceParserGenerator\Contracts\Filesystem\ClassFileLocatorContract;
 use ResourceParserGenerator\Contracts\Parsers\ClassParserContract;
 use ResourceParserGenerator\Contracts\Parsers\PhpFileParserContract;
+use ResourceParserGenerator\Parsers\Data\ClassScope;
 use ResourceParserGenerator\Parsers\Data\ReflectedClassScope;
+use ResourceParserGenerator\Types\ClassType;
 use RuntimeException;
 
 class ClassParser implements ClassParserContract
@@ -33,6 +35,25 @@ class ClassParser implements ClassParserContract
             sprintf('%s::%s', $staticContext, $className),
             fn() => $this->parseClass($className, $staticContext),
         );
+    }
+
+    public function parseType(ClassType $type, ?string $staticContext = null,): ClassScopeContract
+    {
+        $classScope = $this->parse($type->fullyQualifiedName(), $staticContext);
+        if (!($classScope instanceof ClassScope)) {
+            return $classScope;
+        }
+
+        return $type->generics()
+            ? ClassScope::create(
+                $classScope->fullyQualifiedName(),
+                $classScope->node(),
+                $classScope->resolver(),
+                $classScope->extends(),
+                $classScope->traits(),
+                $type->generics(),
+            )
+            : $classScope;
     }
 
     /**

@@ -39,7 +39,7 @@ class ClassConstFetchExprTypeConverter implements ExprTypeConverterContract
             throw new RuntimeException('Class const fetch class is not a class type');
         }
 
-        $classScope = $this->classParser->parse($classType->fullyQualifiedName(), $context->resolver()->resolveThis());
+        $classScope = $this->classParser->parseType($classType, $context->resolver()->resolveThis());
         $constScope = $classScope->constant($constName->name);
         if (!$constScope) {
             throw new RuntimeException(

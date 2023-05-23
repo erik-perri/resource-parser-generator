@@ -135,8 +135,8 @@ class ClassMethodReturnParserTest extends TestCase
             'UserResource::childArrays' => [
                 'method' => [UserResource::class, 'childArrays'],
                 'expected' => [
-                    'should_have_been_a_resource' => 'array|'
-                        . 'array<{id: string; should_have_been_when_loaded: null|' . PostResource::class . '::base}>',
+                    'should_have_been_a_resource' => 'array<{id: string; should_have_been_when_loaded: null|'
+                        . PostResource::class . '::base}>|never[]',
                 ],
             ],
         ];

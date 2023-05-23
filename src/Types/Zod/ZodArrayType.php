@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace ResourceParserGenerator\Types\Zod;
 
 use ResourceParserGenerator\Contracts\Types\ParserTypeContract;
+use RuntimeException;
 
 class ZodArrayType implements ParserTypeContract
 {
@@ -25,7 +26,7 @@ class ZodArrayType implements ParserTypeContract
             return sprintf('array(%s)', $this->values->constraint());
         }
 
-        return 'array()';
+        throw new RuntimeException('Untyped Zod arrays are not supported');
     }
 
     public function imports(): array

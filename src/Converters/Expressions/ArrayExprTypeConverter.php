@@ -14,6 +14,7 @@ use ResourceParserGenerator\Converters\Data\ConverterContext;
 use ResourceParserGenerator\Converters\ExpressionContextProcessor;
 use ResourceParserGenerator\Types\ArrayType;
 use ResourceParserGenerator\Types\ArrayWithPropertiesType;
+use ResourceParserGenerator\Types\NeverType;
 use RuntimeException;
 
 class ArrayExprTypeConverter implements ExprTypeConverterContract
@@ -29,7 +30,7 @@ class ArrayExprTypeConverter implements ExprTypeConverterContract
     {
         $items = collect($expr->items)->filter();
         if ($items->isEmpty()) {
-            return new ArrayType(null, null);
+            return new ArrayType(null, new NeverType());
         }
 
         return new ArrayWithPropertiesType(

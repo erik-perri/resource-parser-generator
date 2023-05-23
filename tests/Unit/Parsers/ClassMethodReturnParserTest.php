@@ -112,10 +112,17 @@ class ClassMethodReturnParserTest extends TestCase
                     'with_format_verbose' => RelatedResource::class . '::verbose',
                 ],
             ],
+            'UserResource::enumWithoutValue' => [
+                'method' => [UserResource::class, 'enumWithoutValue'],
+                'expected' => [
+                    'latestStatus' => 'string|undefined',
+                ],
+            ],
             'UserResource::usingCollectionPluck' => [
                 'method' => [UserResource::class, 'usingCollectionPluck'],
                 'expected' => [
-                    'latestPostIds' => 'int[]',
+                    'enum_all_without_pluck' => 'string[]',
+                    'latest_post_ids' => 'int[]',
                     'permissions' => 'string[]',
                 ],
             ],

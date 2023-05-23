@@ -55,6 +55,13 @@ class UserResource extends JsonResource
         }
     }
 
+    public function enumWithoutValue(): array
+    {
+        return [
+            'latestStatus' => $this->whenLoaded('latestPost', fn() => $this->resource->latestPost->status),
+        ];
+    }
+
     public function relatedResource(): array
     {
         return [
@@ -111,7 +118,8 @@ class UserResource extends JsonResource
     public function usingCollectionPluck(): array
     {
         return [
-            'latestPostIds' => $this->resource->latestPosts->pluck('id')->all(),
+            'enum_all_without_pluck' => $this->resource->permissions->all(),
+            'latest_post_ids' => $this->resource->latestPosts->pluck('id')->all(),
             'permissions' => $this->resource->permissions->pluck('value')->all(),
         ];
     }

@@ -41,4 +41,12 @@ class IntersectionType implements TypeContract
             ...$this->types->map(fn(TypeContract $type) => $type->parserType())->all(),
         );
     }
+
+    /**
+     * @return Collection<int, TypeContract>
+     */
+    public function types(): Collection
+    {
+        return $this->types->collect();
+    }
 }

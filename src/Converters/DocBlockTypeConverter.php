@@ -76,6 +76,8 @@ class DocBlockTypeConverter implements DocBlockTypeConverterContract
                 case 'array-key':
                     return new Types\UnionType(new Types\IntType(), new Types\StringType());
                 case 'bool':
+                case 'false':
+                case 'true':
                     return new Types\BoolType();
                 case 'callable':
                     return new Types\CallableType();

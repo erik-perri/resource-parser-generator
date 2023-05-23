@@ -6,6 +6,7 @@ namespace ResourceParserGenerator\Tests\Unit\Parsers;
 
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\DataProvider;
+use ResourceParserGenerator\Contracts\Filesystem\ClassFileLocatorContract;
 use ResourceParserGenerator\Parsers\Data\ClassProperty;
 use ResourceParserGenerator\Parsers\Data\ClassScope;
 use ResourceParserGenerator\Parsers\Data\EnumScope;
@@ -194,6 +195,8 @@ PHP;
     public function testHelpsResolveClassNames(): void
     {
         // Arrange
+        $locatorContract = $this->mock(ClassFileLocatorContract::class);
+
         $parser = $this->make(PhpFileParser::class);
         $contents = <<<PHP
 <?php
@@ -208,6 +211,13 @@ class TestClass
     private \ResourceParserGenerator\Tests\Examples\AbsoluteClass \$propertyFour;
 }
 PHP;
+
+        $locatorContract->expects('exists')
+            ->with('ResourceParserGenerator\Tests\Examples\AdjacentClass')
+            ->andReturn(true);
+        $locatorContract->expects('exists')
+            ->with('ResourceParserGenerator\Imports\RelativePath\RelativeClass')
+            ->andReturn(true);
 
         // Act
         $result = $parser->parse($contents);

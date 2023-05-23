@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace ResourceParserGenerator\Resolvers;
 
+use ResourceParserGenerator\Contracts\Filesystem\ClassFileLocatorContract;
 use ResourceParserGenerator\Contracts\Resolvers\ClassNameResolverContract;
 use ResourceParserGenerator\Parsers\Data\FileScope;
 
@@ -11,6 +12,7 @@ class ClassNameResolver implements ClassNameResolverContract
 {
     public function __construct(
         private readonly FileScope $fileScope,
+        private readonly ClassFileLocatorContract $classFileLocator,
     ) {
         //
     }
@@ -43,7 +45,9 @@ class ClassNameResolver implements ClassNameResolverContract
                      */
                     $className = $importPath . '\\' . $remainingParts;
 
-                    return $className;
+                    if ($this->classFileLocator->exists($className) || class_exists($className)) {
+                        return $className;
+                    }
                 }
             }
         }
@@ -60,14 +64,18 @@ class ClassNameResolver implements ClassNameResolverContract
              */
             $className = $this->fileScope->namespace() . '\\' . $name;
 
-            return $className;
+            if ($this->classFileLocator->exists($className) || class_exists($className)) {
+                return $className;
+            }
         }
 
         if ($this->fileScope->hasClass($name)) {
             /**
              * @var class-string $name
              */
-            return $name;
+            if ($this->classFileLocator->exists($name) || class_exists($name)) {
+                return $name;
+            }
         }
 
         return null;

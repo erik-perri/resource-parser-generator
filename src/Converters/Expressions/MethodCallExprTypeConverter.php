@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace ResourceParserGenerator\Converters\Expressions;
 
 use Illuminate\Http\Resources\MissingValue;
+use Illuminate\Support\Collection;
 use PhpParser\Node\Expr\ClassConstFetch;
 use PhpParser\Node\Expr\MethodCall;
 use PhpParser\Node\Expr\NullsafeMethodCall;
@@ -17,11 +18,8 @@ use ResourceParserGenerator\Contracts\Parsers\ClassParserContract;
 use ResourceParserGenerator\Contracts\Types\TypeContract;
 use ResourceParserGenerator\Converters\Data\ConverterContext;
 use ResourceParserGenerator\Converters\Traits\ParsesFetchSides;
-use ResourceParserGenerator\Types\ClassType;
-use ResourceParserGenerator\Types\MixedType;
-use ResourceParserGenerator\Types\NullType;
-use ResourceParserGenerator\Types\UndefinedType;
-use ResourceParserGenerator\Types\UnionType;
+use ResourceParserGenerator\Parsers\Data\ClassScope;
+use ResourceParserGenerator\Types;
 use RuntimeException;
 use Sourcetoad\EnhancedResources\Formatting\Attributes\Format;
 use Sourcetoad\EnhancedResources\Resource;
@@ -47,6 +45,17 @@ class MethodCallExprTypeConverter implements ExprTypeConverterContract
             throw new RuntimeException('Right side of method call is not a string');
         }
 
+        if ($leftSide->fullyQualifiedName() === Collection::class || $leftSide->hasParent(Collection::class)) {
+            switch ($rightSide) {
+                case 'all':
+                    return $this->handleCollectionAll($leftSide);
+                case 'pluck':
+                    return $this->handleCollectionPluck($expr, $context, $leftSide);
+                default:
+                    break;
+            }
+        }
+
         $methodScope = $leftSide->method($rightSide);
         if (!$methodScope) {
             throw new RuntimeException(sprintf('Unknown method "%s" in "%s"', $rightSide, $leftSide->name()));
@@ -59,60 +68,109 @@ class MethodCallExprTypeConverter implements ExprTypeConverterContract
         }
 
         if ($leftSide->hasParent(Resource::class) && $rightSide === 'format') {
-            $this->handleFormat($expr, $context, $leftSide);
+            $this->handleResourceFormat($expr, $context, $leftSide);
         }
 
         if ($expr instanceof NullsafeMethodCall) {
-            if ($type instanceof UnionType) {
-                $type = $type->addToUnion(new NullType());
+            if ($type instanceof Types\UnionType) {
+                $type = $type->addToUnion(new Types\NullType());
             } else {
-                $type = new UnionType($type, new NullType());
+                $type = new Types\UnionType($type, new Types\NullType());
             }
         }
 
         return $type;
     }
 
-    private function handleWhenLoaded(
+    private function handleCollectionAll(ClassScopeContract $leftSide): TypeContract
+    {
+        if (!($leftSide instanceof ClassScope)) {
+            throw new RuntimeException(sprintf(
+                'Unexpected fake class type for collection "%s"',
+                $leftSide->fullyQualifiedName(),
+            ));
+        }
+
+        $generics = $leftSide->knownGenerics();
+        if (!$generics?->count()) {
+            throw new RuntimeException(sprintf(
+                'Unexpected missing generics for collection "%s"',
+                $leftSide->fullyQualifiedName(),
+            ));
+        }
+
+        return new Types\ArrayType(null, $generics->last());
+    }
+
+    private function handleCollectionPluck(
         MethodCall|NullsafeMethodCall $expr,
         ConverterContext $context,
-        TypeContract $type,
+        ClassScopeContract $leftSide
     ): TypeContract {
-        if (!($type instanceof UnionType)) {
+        $arguments = $expr->getArgs();
+        if (!count($arguments)) {
+            throw new RuntimeException('Unhandled missing first argument for pluck');
+        }
+
+        if (!($leftSide instanceof ClassScope)) {
+            throw new RuntimeException(sprintf(
+                'Unexpected fake class type for collection "%s"',
+                $leftSide->fullyQualifiedName(),
+            ));
+        }
+
+        $generics = $leftSide->knownGenerics();
+        if (!$generics?->count()) {
+            throw new RuntimeException(sprintf(
+                'Unexpected missing generics for collection "%s"',
+                $leftSide->fullyQualifiedName(),
+            ));
+        }
+
+        $argument = reset($arguments)->value;
+        if ($argument instanceof String_) {
+            $argument = $argument->value;
+        } elseif ($argument instanceof ClassConstFetch) {
+            $argument = $this->classConstFetchValueParser->parse($argument, $context->resolver());
+        } else {
+            throw new RuntimeException(sprintf('Unhandled first argument type for pluck "%s"', get_class($argument)));
+        }
+
+        if (!is_string($argument)) {
             throw new RuntimeException(
-                sprintf('Unexpected non-union whenLoaded method return, found "%s"', $type->describe()),
+                sprintf('Unhandled first argument value type for pluck "%s"', gettype($argument)),
             );
         }
 
-        $args = $expr->getArgs();
-        if (count($args) < 2) {
-            throw new RuntimeException('Unhandled missing second argument for whenLoaded');
+        /**
+         * @var TypeContract $pluckingFromType
+         */
+        $pluckingFromType = $generics->last();
+        if (!($pluckingFromType instanceof Types\ClassType)) {
+            throw new RuntimeException(sprintf(
+                'Unexpected non-class type for pluck call "%s"',
+                $pluckingFromType->describe(),
+            ));
         }
 
-        $loadedProperty = $args[0]->value;
-        if (!($loadedProperty instanceof String_)) {
-            throw new RuntimeException('Unhandled non-string first argument for whenLoaded');
+        $pluckingFromScope = $this->classParser->parseType($pluckingFromType);
+        $pluckedType = $pluckingFromScope->propertyType($argument);
+        if (!$pluckedType) {
+            throw new RuntimeException(sprintf(
+                'Unknown type for property "%s" on "%s"',
+                $argument,
+                $pluckingFromScope->fullyQualifiedName(),
+            ));
         }
-        $loadedProperty = $loadedProperty->value;
 
-        $returnWhenLoaded = $this->expressionTypeConverter->convert(
-            $args[1]->value,
-            ConverterContext::create($context->resolver(), collect([$loadedProperty])),
+        return new Types\ClassType(
+            $leftSide->fullyQualifiedName(),
+            null,
+            collect([new Types\IntType(), $pluckedType]),
         );
-
-        $returnWhenUnloaded = count($args) > 2
-            ? $this->expressionTypeConverter->convert($args[2]->value, $context)
-            : new UndefinedType();
-
-        return $type
-            ->addToUnion($returnWhenLoaded)
-            ->addToUnion($returnWhenUnloaded)
-            ->removeFromUnion(fn(TypeContract $type) => $type instanceof MixedType)
-            ->removeFromUnion(fn(TypeContract $type) => $type instanceof ClassType
-                && $type->fullyQualifiedName() === MissingValue::class);
     }
 
-    private function handleFormat(
+    private function handleResourceFormat(
         MethodCall|NullsafeMethodCall $expr,
         ConverterContext $context,
         ClassScopeContract $classScope,
@@ -138,6 +196,45 @@ class MethodCallExprTypeConverter implements ExprTypeConverterContract
                 }
             }
         }
+    }
+
+    private function handleWhenLoaded(
+        MethodCall|NullsafeMethodCall $expr,
+        ConverterContext $context,
+        TypeContract $type,
+    ): TypeContract {
+        if (!($type instanceof Types\UnionType)) {
+            throw new RuntimeException(
+                sprintf('Unexpected non-union whenLoaded method return, found "%s"', $type->describe()),
+            );
+        }
+
+        $args = $expr->getArgs();
+        if (count($args) < 2) {
+            throw new RuntimeException('Unhandled missing second argument for whenLoaded');
+        }
+
+        $loadedProperty = $args[0]->value;
+        if (!($loadedProperty instanceof String_)) {
+            throw new RuntimeException('Unhandled non-string first argument for whenLoaded');
+        }
+        $loadedProperty = $loadedProperty->value;
+
+        $returnWhenLoaded = $this->expressionTypeConverter->convert(
+            $args[1]->value,
+            ConverterContext::create($context->resolver(), collect([$loadedProperty])),
+        );
+
+        $returnWhenUnloaded = count($args) > 2
+            ? $this->expressionTypeConverter->convert($args[2]->value, $context)
+            : new Types\UndefinedType();
+
+        return $type
+            ->addToUnion($returnWhenLoaded)
+            ->addToUnion($returnWhenUnloaded)
+            ->removeFromUnion(fn(TypeContract $type) => $type instanceof Types\MixedType)
+            ->removeFromUnion(fn(TypeContract $type) => $type instanceof Types\ClassType
+                && $type->fullyQualifiedName() === MissingValue::class);
     }
 
     protected function expressionTypeConverter(): ExpressionTypeConverterContract

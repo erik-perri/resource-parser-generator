@@ -108,6 +108,14 @@ class UserResource extends JsonResource
         ];
     }
 
+    public function usingCollectionPluck(): array
+    {
+        return [
+            'latestPostIds' => $this->resource->latestPosts->pluck('id')->all(),
+            'permissions' => $this->resource->permissions->pluck('value')->all(),
+        ];
+    }
+
     public function usingResourceCollection(): array
     {
         return [

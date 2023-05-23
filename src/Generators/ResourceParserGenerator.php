@@ -24,6 +24,7 @@ class ResourceParserGenerator implements ResourceParserGeneratorContract
             }
         }
 
+        // TODO Make these imports configurable.
         $imports = $imports->mergeRecursive(['zod' => ['object', 'output']])
             ->map(fn(array $importItems) => collect($importItems)->unique()->sort()->values()->all())
             ->mapWithKeys(

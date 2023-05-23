@@ -12,9 +12,7 @@ use ResourceParserGenerator\Contracts\Converters\ExpressionTypeConverterContract
 use ResourceParserGenerator\Contracts\Types\TypeContract;
 use ResourceParserGenerator\Converters\Data\ConverterContext;
 use ResourceParserGenerator\Converters\ExpressionContextProcessor;
-use ResourceParserGenerator\Types\ArrayType;
-use ResourceParserGenerator\Types\ArrayWithPropertiesType;
-use ResourceParserGenerator\Types\NeverType;
+use ResourceParserGenerator\Types;
 use RuntimeException;
 
 class ArrayExprTypeConverter implements ExprTypeConverterContract
@@ -30,10 +28,10 @@ class ArrayExprTypeConverter implements ExprTypeConverterContract
     {
         $items = collect($expr->items)->filter();
         if ($items->isEmpty()) {
-            return new ArrayType(null, new NeverType());
+            return new Types\EmptyArrayType();
         }
 
-        return new ArrayWithPropertiesType(
+        return new Types\ArrayWithPropertiesType(
             $items->mapWithKeys(function (ArrayItem $item) use ($context) {
                 $key = $item->key;
                 if (!($key instanceof String_)) {

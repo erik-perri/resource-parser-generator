@@ -27,7 +27,7 @@ class ClassMethodReturnParserTest extends TestCase
         $result = $parser->parse($className, $methodName);
 
         if ($result instanceof ArrayWithPropertiesType) {
-            $result = $result->describeRecursive();
+            $result = $result->describeArray();
         } else {
             $result = $result->describe();
         }
@@ -135,8 +135,10 @@ class ClassMethodReturnParserTest extends TestCase
             'UserResource::childArrays' => [
                 'method' => [UserResource::class, 'childArrays'],
                 'expected' => [
-                    'should_have_been_a_resource' => 'array<{id: string; should_have_been_when_loaded: null|'
-                        . PostResource::class . '::base}>|never[]',
+                    'should_have_been_a_resource' => [
+                        'id' => 'string',
+                        'should_have_been_when_loaded' => 'null|' . PostResource::class . '::base',
+                    ],
                 ],
             ],
         ];

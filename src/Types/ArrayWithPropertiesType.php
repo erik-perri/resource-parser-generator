@@ -33,12 +33,12 @@ class ArrayWithPropertiesType implements TypeContract
     /**
      * @return array<string, string|array<string, string>>
      */
-    public function describeRecursive(): array
+    public function describeArray(): array
     {
         // @phpstan-ignore-next-line -- The type complaint is due to the potentially recursive nature of this method.
         return $this->properties()->mapWithKeys(fn(TypeContract $type, string $property) => [
             $property => $type instanceof self
-                ? $type->describeRecursive()
+                ? $type->describeArray()
                 : $type->describe(),
         ])->all();
     }

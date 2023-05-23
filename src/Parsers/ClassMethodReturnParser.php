@@ -87,14 +87,14 @@ class ClassMethodReturnParser implements ClassMethodReturnParserContract
                     $arrayProperties->put($key->value, $type);
                 }
 
-                $types[] = new Types\ArrayWithPropertiesType($arrayProperties);
+                $type = new Types\ArrayWithPropertiesType($arrayProperties);
             } else {
                 $context = ConverterContext::create($resolver);
                 $type = $this->expressionTypeConverter->convert($returnNode->expr, $context);
                 $type = $this->expressionContextProcessor->process($type, $context);
-
-                $types[] = $type;
             }
+
+            $types[] = $this->combineSimilarTypes($type);
         }
 
         $types = $this->combineArrayReturns($types);
@@ -170,5 +170,33 @@ class ClassMethodReturnParser implements ClassMethodReturnParserContract
         return $otherTypes
             ->merge([new Types\ArrayWithPropertiesType($mergedArrays)])
             ->all();
+    }
+
+    private function combineSimilarTypes(TypeContract $type): TypeContract
+    {
+        if ($type instanceof Types\ArrayWithPropertiesType) {
+            return new Types\ArrayWithPropertiesType($type->properties()->map(
+                fn(TypeContract $type) => $this->combineSimilarTypes($type),
+            ));
+        }
+
+        if ($type instanceof Types\UnionType) {
+            $types = $type->types();
+
+            if ($types->count() === 2) {
+                [$typeA, $typeB] = [$types->first(), $types->last()];
+
+                if ($typeA instanceof Types\EmptyArrayType &&
+                    ($typeB instanceof Types\ArrayType || $typeB instanceof Types\ArrayWithPropertiesType)) {
+                    return $typeB;
+                }
+                if ($typeB instanceof Types\EmptyArrayType &&
+                    ($typeA instanceof Types\ArrayType || $typeA instanceof Types\ArrayWithPropertiesType)) {
+                    return $typeA;
+                }
+            }
+        }
+
+        return $type;
     }
 }

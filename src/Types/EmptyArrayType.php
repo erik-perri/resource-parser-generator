@@ -6,22 +6,18 @@ namespace ResourceParserGenerator\Types;
 
 use ResourceParserGenerator\Contracts\Types\ParserTypeContract;
 use ResourceParserGenerator\Contracts\Types\TypeContract;
+use ResourceParserGenerator\Types\Zod\ZodArrayType;
 use ResourceParserGenerator\Types\Zod\ZodNeverType;
 
-class NeverType implements TypeContract
+class EmptyArrayType implements TypeContract
 {
-    public function __construct()
-    {
-        //
-    }
-
     public function describe(): string
     {
-        return 'never';
+        return '[]';
     }
 
     public function parserType(): ParserTypeContract
     {
-        return new ZodNeverType();
+        return new ZodArrayType(null, new ZodNeverType());
     }
 }

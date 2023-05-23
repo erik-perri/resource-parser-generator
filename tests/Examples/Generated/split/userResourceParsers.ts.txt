@@ -1,17 +1,17 @@
 import {relatedResourceBaseParser, relatedResourceShortFormatNotNamedLikeFormatNameParser, relatedResourceVerboseParser} from './relatedResourceParsers';
-import {boolean, number, object, output, string, undefined, union, z} from 'zod';
+import {boolean, nullable, number, object, optional, output, string, union} from 'zod';
 
 export const userResourceBaseParser = object({
   id: string(),
   email: string(),
-  created_at: union([string(), z.null()]),
+  created_at: nullable(string()),
 });
 
 export type UserResourceBase = output<typeof userResourceBaseParser>;
 
 export const userResourceCombinedParser = object({
-  email: union([string(), z.null()]),
-  name: union([string(), undefined()]),
+  email: nullable(string()),
+  name: optional(string()),
 });
 
 export type UserResourceCombined = output<typeof userResourceCombinedParser>;

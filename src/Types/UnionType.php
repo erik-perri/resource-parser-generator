@@ -7,6 +7,8 @@ namespace ResourceParserGenerator\Types;
 use Illuminate\Support\Collection;
 use ResourceParserGenerator\Contracts\Types\ParserTypeContract;
 use ResourceParserGenerator\Contracts\Types\TypeContract;
+use ResourceParserGenerator\Types\Zod\ZodNullableType;
+use ResourceParserGenerator\Types\Zod\ZodOptionalType;
 use ResourceParserGenerator\Types\Zod\ZodUnionType;
 use RuntimeException;
 
@@ -45,9 +47,13 @@ class UnionType implements TypeContract
             ->implode('|');
     }
 
-    public function isNullable(): bool
+    /**
+     * @param class-string $typeClass
+     * @return bool
+     */
+    public function hasType(string $typeClass): bool
     {
-        return $this->types->contains(fn(TypeContract $type) => $type instanceof NullType);
+        return $this->types->some(fn(TypeContract $type) => $type instanceof $typeClass);
     }
 
     /**
@@ -85,15 +91,29 @@ class UnionType implements TypeContract
     {
         /**
          * TODO Flatten the union before this point
-         * @var ParserTypeContract[] $flatTypes
+         * @var Collection<int, TypeContract> $flatTypes
          */
         $flatTypes = $this->types->map(function (TypeContract $type) {
-            if ($type instanceof UnionType) {
-                return $type->types()->map(fn(TypeContract $type) => $type->parserType())->all();
+            return $type instanceof UnionType ? $type->types() : $type;
+        })->flatten();
+
+        if ($flatTypes->count() === 2) {
+            if ($this->hasType(NullType::class)) {
+                return new ZodNullableType($flatTypes
+                    ->filter(fn(TypeContract $type) => !($type instanceof NullType))
+                    ->firstOrFail()
+                    ->parserType());
             }
-            return $type->parserType();
-        })->flatten()->all();
-        return new ZodUnionType(...$flatTypes);
+
+            if ($this->hasType(UndefinedType::class)) {
+                return new ZodOptionalType($flatTypes
+                    ->filter(fn(TypeContract $type) => !($type instanceof UndefinedType))
+                    ->firstOrFail()
+                    ->parserType());
+            }
+        }
+
+        return new ZodUnionType(...$flatTypes->map(fn(TypeContract $type) => $type->parserType())->all());
     }
 
     /**

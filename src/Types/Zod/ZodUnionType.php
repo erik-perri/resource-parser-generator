@@ -40,10 +40,6 @@ class ZodUnionType implements ParserTypeContract
             $imports = $imports->mergeRecursive($type->imports());
         }
 
-        if ($imports->count() === 1) {
-            return $imports->all();
-        }
-
         return $imports
             ->map(fn(array $importItems) => collect($importItems)->unique()->sort()->values()->all())
             ->all();

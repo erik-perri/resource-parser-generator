@@ -208,10 +208,10 @@ class BuildResourceParsersCommandTest extends TestCase
                 'expectedOutput' => [
                     'userResourceParsers.ts' => <<<TS
 import {postResourceBaseParser} from './postResourceParsers';
-import {object, output, string, union, z} from 'zod';
+import {nullable, object, output, string} from 'zod';
 
 export const userResourceChildArraysParser = object({
-  should_have_been_a_resource: object({string(), union([postResourceBaseParser, z.null()])}),
+  should_have_been_a_resource: object({nullable(postResourceBaseParser), string()}),
 });
 
 export type UserResourceChildArrays = output<typeof userResourceChildArraysParser>;
@@ -235,7 +235,7 @@ TS,
                 ],
                 'expectedOutput' => [
                     'parsers.ts' => <<<TS
-import {object, output, string, undefined, union} from 'zod';
+import {object, optional, output, string} from 'zod';
 
 export const postResourceSimpleParser = object({
   status: string(),
@@ -244,7 +244,7 @@ export const postResourceSimpleParser = object({
 export type PostResourceSimple = output<typeof postResourceSimpleParser>;
 
 export const userResourceUsingWhenLoadedParser = object({
-  related: union([postResourceSimpleParser, undefined()]),
+  related: optional(postResourceSimpleParser),
 });
 
 export type UserResourceUsingWhenLoaded = output<typeof userResourceUsingWhenLoadedParser>;

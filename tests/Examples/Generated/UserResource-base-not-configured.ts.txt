@@ -1,9 +1,9 @@
-import {object, output, string, union, z} from 'zod';
+import {nullable, object, output, string} from 'zod';
 
 export const userResourceBaseParser = object({
   id: string(),
   email: string(),
-  created_at: union([string(), z.null()]),
+  created_at: nullable(string()),
 });
 
 export type UserResourceBase = output<typeof userResourceBaseParser>;

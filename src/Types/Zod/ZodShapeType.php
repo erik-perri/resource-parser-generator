@@ -21,7 +21,9 @@ class ZodShapeType implements ParserTypeContract
             $key => $type->parserType()->constraint(),
         ])->sort();
 
-        return sprintf('object({%s})', $properties->join(', '));
+        return sprintf('object({%s})', $properties
+            ->map(fn(string $type, string $key) => sprintf('%s: %s', $key, $type))
+            ->join(', '));
     }
 
     public function imports(): array

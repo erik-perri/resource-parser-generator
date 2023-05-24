@@ -211,7 +211,7 @@ import {postResourceBaseParser} from './postResourceParsers';
 import {nullable, object, output, string} from 'zod';
 
 export const userResourceChildArraysParser = object({
-  should_have_been_a_resource: object({nullable(postResourceBaseParser), string()}),
+  should_have_been_a_resource: object({should_have_been_when_loaded: nullable(postResourceBaseParser), id: string()}),
 });
 
 export type UserResourceChildArrays = output<typeof userResourceChildArraysParser>;

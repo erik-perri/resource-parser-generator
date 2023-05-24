@@ -108,6 +108,18 @@ class UserResource extends JsonResource
         ];
     }
 
+    public function usingCasts(): array
+    {
+        return [
+            'as_string' => (string)$this->resource->latestPost?->id,
+            'as_int' => (int)$this->resource->getKey(),
+            'as_bool' => (bool)$this->resource->created_at,
+            'as_bool_not' => !$this->resource->created_at,
+            'as_bool_and' => $this->resource->created_at && $this->resource->latestPost !== null,
+            'as_bool_or' => $this->resource->created_at || $this->resource->latestPost !== null,
+        ];
+    }
+
     public function usingParameter(Request $request): array
     {
         return [

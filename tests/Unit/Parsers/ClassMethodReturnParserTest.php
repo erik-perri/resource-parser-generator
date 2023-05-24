@@ -75,6 +75,17 @@ class ClassMethodReturnParserTest extends TestCase
                     'null' => 'null',
                 ],
             ],
+            'UserResource::usingCasts' => [
+                'method' => [UserResource::class, 'usingCasts'],
+                'expectedReturns' => [
+                    'as_string' => 'string',
+                    'as_int' => 'int',
+                    'as_bool' => 'bool',
+                    'as_bool_not' => 'bool',
+                    'as_bool_and' => 'bool',
+                    'as_bool_or' => 'bool',
+                ],
+            ],
             'UserResource::usingParameter' => [
                 'method' => [UserResource::class, 'usingParameter'],
                 'expectedReturns' => [

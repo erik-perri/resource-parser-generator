@@ -7,6 +7,12 @@ namespace ResourceParserGenerator\Converters;
 use PhpParser\Node\Expr;
 use PhpParser\Node\Expr\Array_;
 use PhpParser\Node\Expr\ArrowFunction;
+use PhpParser\Node\Expr\BinaryOp\BooleanAnd;
+use PhpParser\Node\Expr\BinaryOp\BooleanOr;
+use PhpParser\Node\Expr\BooleanNot;
+use PhpParser\Node\Expr\Cast\Bool_ as CastBool_;
+use PhpParser\Node\Expr\Cast\Int_ as CastInt_;
+use PhpParser\Node\Expr\Cast\String_ as CastString_;
 use PhpParser\Node\Expr\ClassConstFetch;
 use PhpParser\Node\Expr\ConstFetch;
 use PhpParser\Node\Expr\MethodCall;
@@ -25,6 +31,7 @@ use ResourceParserGenerator\Contracts\Converters\ExpressionTypeConverterContract
 use ResourceParserGenerator\Contracts\Types\TypeContract;
 use ResourceParserGenerator\Converters\Data\ConverterContext;
 use ResourceParserGenerator\Converters\Expressions\ArrowFunctionExprTypeConverter;
+use ResourceParserGenerator\Converters\Expressions\BoolExprTypeConverter;
 use ResourceParserGenerator\Converters\Expressions\ClassConstFetchExprTypeConverter;
 use ResourceParserGenerator\Converters\Expressions\ConstFetchExprTypeConverter;
 use ResourceParserGenerator\Converters\Expressions\DoubleExprTypeConverter;
@@ -48,9 +55,14 @@ class ExpressionTypeConverter implements ExpressionTypeConverterContract
         $this->typeHandlers = [
             Array_::class => Expressions\ArrayExprTypeConverter::class,
             ArrowFunction::class => ArrowFunctionExprTypeConverter::class,
+            CastBool_::class => BoolExprTypeConverter::class,
+            BooleanAnd::class => BoolExprTypeConverter::class,
+            BooleanNot::class => BoolExprTypeConverter::class,
+            BooleanOr::class => BoolExprTypeConverter::class,
             ClassConstFetch::class => ClassConstFetchExprTypeConverter::class,
             ConstFetch::class => ConstFetchExprTypeConverter::class,
             DNumber::class => DoubleExprTypeConverter::class,
+            CastInt_::class => NumberExprTypeConverter::class,
             LNumber::class => NumberExprTypeConverter::class,
             MethodCall::class => MethodCallExprTypeConverter::class,
             NullsafeMethodCall::class => MethodCallExprTypeConverter::class,
@@ -58,6 +70,7 @@ class ExpressionTypeConverter implements ExpressionTypeConverterContract
             PropertyFetch::class => PropertyFetchExprTypeConverter::class,
             StaticCall::class => StaticCallExprTypeConverter::class,
             String_::class => StringExprTypeConverter::class,
+            CastString_::class => StringExprTypeConverter::class,
             Ternary::class => TernaryExprTypeConverter::class,
             UnaryMinus::class => NumberExprTypeConverter::class,
             UnaryPlus::class => NumberExprTypeConverter::class,

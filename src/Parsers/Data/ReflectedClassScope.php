@@ -43,6 +43,18 @@ class ReflectedClassScope implements ClassScopeContract
         ]);
     }
 
+    public function constants(): Collection
+    {
+        /**
+         * @var Collection<string, ClassConstantContract>
+         */
+        return collect($this->reflection->getConstants())
+            ->map(fn(mixed $constant, string $name) => ReflectedClassConstant::create(
+                $this->variableTypeConverter->convert($constant),
+                $constant,
+            ));
+    }
+
     public function constant(string $name): ClassConstantContract|null
     {
         if (!$this->reflection->hasConstant($name)) {

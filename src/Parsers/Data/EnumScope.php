@@ -39,6 +39,11 @@ class EnumScope implements ClassScopeContract
         return $this->fullyQualifiedName;
     }
 
+    public function constants(): Collection
+    {
+        throw new RuntimeException('Enum constants are not supported');
+    }
+
     public function constant(string $name): ClassConstantContract|null
     {
         throw new RuntimeException('Enum constants are not supported');

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace ResourceParserGenerator\Converters;
 
+use BenSampo\Enum\Enum;
 use Closure;
 use ResourceParserGenerator\Contracts\ClassScopeContract;
 use ResourceParserGenerator\Contracts\Parsers\ClassParserContract;
@@ -44,6 +45,13 @@ class ExpressionContextProcessor
                 }
 
                 return $type;
+            } elseif ($returnScope->hasParent(Enum::class)) {
+                $constants = $returnScope->constants();
+                if ($constants->isEmpty()) {
+                    throw new RuntimeException('Unexpected legacy enum without constants');
+                }
+
+                return $constants->firstOrFail()->type();
             }
 
             // Convert any resource classes into a ClassWithMethodType containing their format

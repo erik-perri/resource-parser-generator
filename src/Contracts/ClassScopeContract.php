@@ -10,6 +10,11 @@ use ResourceParserGenerator\Contracts\Types\TypeContract;
 
 interface ClassScopeContract
 {
+    /**
+     * @return Collection<string, ClassConstantContract>
+     */
+    public function constants(): Collection;
+
     public function constant(string $name): ClassConstantContract|null;
 
     /**

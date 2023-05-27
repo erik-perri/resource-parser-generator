@@ -59,6 +59,7 @@ class UserResource extends JsonResource
     {
         return [
             'latestStatus' => $this->whenLoaded('latestPost', fn() => $this->resource->latestPost->status),
+            'legacyStatus' => $this->whenLoaded('latestPost', fn() => $this->resource->latestPost->legacyStatus),
         ];
     }
 

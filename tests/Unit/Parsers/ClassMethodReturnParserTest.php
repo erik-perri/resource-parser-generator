@@ -136,6 +136,7 @@ class ClassMethodReturnParserTest extends TestCase
                 'method' => [UserResource::class, 'enumWithoutValue'],
                 'expected' => [
                     'latestStatus' => 'string|undefined',
+                    'legacyStatus' => 'string|undefined',
                 ],
             ],
             'UserResource::usingCollectionPluck' => [

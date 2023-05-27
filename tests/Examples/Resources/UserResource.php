@@ -151,18 +151,27 @@ class UserResource extends JsonResource
         ];
     }
 
-    public function usingWhenLoaded(): array
+    public function usingWhen(): array
     {
         return [
-            'related' => $this->whenLoaded('post', fn() => PostResource::make($this->resource->latestPost)
-                ->format(PostResource::SIMPLE)),
+            'no_fallback' => $this->when(
+                !!$this->resource->created_at,
+                fn() => $this->resource->created_at->format('Y-m-d'),
+            ),
+            'with_fallback' => $this->when(
+                !!$this->resource->created_at,
+                fn() => $this->resource->created_at->format('Y-m-d'),
+                null,
+            ),
         ];
     }
 
-    public function usingWhenLoadedFallback(): array
+    public function usingWhenLoaded(): array
     {
         return [
-            'related' => $this->whenLoaded('related', fn() => $this->resource->related->name, 'none'),
+            'no_fallback' => $this->whenLoaded('post', fn() => PostResource::make($this->resource->latestPost)
+                ->format(PostResource::SIMPLE)),
+            'with_fallback' => $this->whenLoaded('related', fn() => $this->resource->related->name, 'none'),
         ];
     }
 }

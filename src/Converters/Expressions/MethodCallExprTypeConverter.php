@@ -9,7 +9,12 @@ use Illuminate\Support\Collection;
 use PhpParser\Node\Expr\ClassConstFetch;
 use PhpParser\Node\Expr\MethodCall;
 use PhpParser\Node\Expr\NullsafeMethodCall;
+use PhpParser\Node\Expr\PropertyFetch;
+use PhpParser\Node\Expr\Variable;
+use PhpParser\Node\Identifier;
 use PhpParser\Node\Scalar\String_;
+use PhpParser\NodeAbstract;
+use PhpParser\NodeFinder;
 use ResourceParserGenerator\Contracts\ClassScopeContract;
 use ResourceParserGenerator\Contracts\Converters\Expressions\ExprTypeConverterContract;
 use ResourceParserGenerator\Contracts\Converters\ExpressionTypeConverterContract;
@@ -32,6 +37,7 @@ class MethodCallExprTypeConverter implements ExprTypeConverterContract
         private readonly ClassConstFetchValueParserContract $classConstFetchValueParser,
         private readonly ClassParserContract $classParser,
         private readonly ExpressionTypeConverterContract $expressionTypeConverter,
+        private readonly NodeFinder $nodeFinder,
     ) {
         //
     }
@@ -63,7 +69,9 @@ class MethodCallExprTypeConverter implements ExprTypeConverterContract
 
         $type = $methodScope->returnType();
 
-        if ($rightSide === 'whenLoaded') {
+        if ($rightSide === 'when') {
+            $type = $this->handleWhen($expr, $context, $type);
+        } elseif ($rightSide === 'whenLoaded') {
             $type = $this->handleWhenLoaded($expr, $context, $type);
         }
 
@@ -198,6 +206,39 @@ class MethodCallExprTypeConverter implements ExprTypeConverterContract
         }
     }
 
+    private function handleWhen(
+        MethodCall|NullsafeMethodCall $expr,
+        ConverterContext $context,
+        TypeContract $type
+    ): TypeContract {
+        if (!($type instanceof Types\UnionType)) {
+            throw new RuntimeException(
+                sprintf('Unexpected non-union whenLoaded method return, found "%s"', $type->describe()),
+            );
+        }
+
+        $args = $expr->getArgs();
+        if (count($args) < 2) {
+            throw new RuntimeException('Unhandled missing second argument for whenLoaded');
+        }
+
+        $returnWhenTrue = $this->expressionTypeConverter->convert(
+            $args[1]->value,
+            ConverterContext::create($context->resolver(), $this->findResourcePropertyAccesses($args[0])),
+        );
+
+        $returnWhenFalse = count($args) > 2
+            ? $this->expressionTypeConverter->convert($args[2]->value, $context)
+            : new Types\UndefinedType();
+
+        return $type
+            ->addToUnion($returnWhenTrue)
+            ->addToUnion($returnWhenFalse)
+            ->removeFromUnion(fn(TypeContract $type) => $type instanceof Types\MixedType)
+            ->removeFromUnion(fn(TypeContract $type) => $type instanceof Types\ClassType
+                && $type->fullyQualifiedName() === MissingValue::class);
+    }
+
     private function handleWhenLoaded(
         MethodCall|NullsafeMethodCall $expr,
         ConverterContext $context,
@@ -235,6 +276,37 @@ class MethodCallExprTypeConverter implements ExprTypeConverterContract
             ->removeFromUnion(fn(TypeContract $type) => $type instanceof Types\MixedType)
             ->removeFromUnion(fn(TypeContract $type) => $type instanceof Types\ClassType
                 && $type->fullyQualifiedName() === MissingValue::class);
+    }
+
+    /**
+     * @param NodeAbstract $node
+     * @return Collection<int, string>
+     */
+    private function findResourcePropertyAccesses(NodeAbstract $node): Collection
+    {
+        $properties = collect();
+
+        /**
+         * @var PropertyFetch[] $fetches
+         */
+        $fetches = $this->nodeFinder->find($node, fn(NodeAbstract $node) => $node instanceof PropertyFetch);
+
+        foreach ($fetches as $fetch) {
+            $fetchingFrom = $fetch->var;
+
+            if (!($fetch->name instanceof Identifier) ||
+                !($fetchingFrom instanceof PropertyFetch) ||
+                !($fetchingFrom->var instanceof Variable) ||
+                !($fetchingFrom->name instanceof Identifier) ||
+                $fetchingFrom->var->name !== 'this' ||
+                $fetchingFrom->name->name !== 'resource') {
+                continue;
+            }
+
+            $properties->add($fetch->name->name);
+        }
+
+        return $properties;
     }
 
     protected function expressionTypeConverter(): ExpressionTypeConverterContract

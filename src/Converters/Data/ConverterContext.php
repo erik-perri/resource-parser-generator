@@ -18,6 +18,7 @@ class ConverterContext
      */
     public function __construct(
         private readonly ResolverContract $resolver,
+        // TODO Adjust non-null properties to support nested properties so we can support un-nulling a chain of fetches.
         private readonly Collection $nonNullProperties,
     ) {
         //

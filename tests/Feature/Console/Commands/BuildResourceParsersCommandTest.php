@@ -276,7 +276,8 @@ export const postResourceSimpleParser = object({
 export type PostResourceSimple = output<typeof postResourceSimpleParser>;
 
 export const userResourceUsingWhenLoadedParser = object({
-  related: optional(postResourceSimpleParser),
+  no_fallback: optional(postResourceSimpleParser),
+  with_fallback: string(),
 });
 
 export type UserResourceUsingWhenLoaded = output<typeof userResourceUsingWhenLoadedParser>;

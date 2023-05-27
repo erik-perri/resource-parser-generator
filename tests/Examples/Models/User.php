@@ -16,7 +16,7 @@ use ResourceParserGenerator\Tests\Examples\Enums\Permission;
  * @property string $email
  * @property string $name
  * @property CarbonImmutable|null $created_at
- * @property CarbonImmutable|null $updated_at
+ * @property ?CarbonImmutable $updated_at
  *
  * @property-read User|null $related
  *

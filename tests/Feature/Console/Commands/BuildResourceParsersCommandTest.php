@@ -87,6 +87,38 @@ class BuildResourceParsersCommandTest extends TestCase
             ->execute();
     }
 
+    public function testShouldFailWhenCheckSwitchFails(): void
+    {
+        $outputPath = dirname(__DIR__, 3) . '/Output';
+        $config = [
+            'output_path' => $outputPath,
+            'parsers' => [
+                [UserResource::class, 'base'],
+            ],
+        ];
+
+        Config::set('build.resource_parsers', $config);
+
+        $this->artisan(BuildResourceParsersCommand::class)
+            ->assertExitCode(0)
+            ->execute();
+
+        $this->artisan(BuildResourceParsersCommand::class, ['--check' => true])
+            ->assertExitCode(0)
+            ->execute();
+
+        file_put_contents($outputPath . '/userResourceParsers.ts', '// Out of date content');
+
+        $this->artisan(BuildResourceParsersCommand::class, ['--check' => true])
+            ->assertExitCode(1)
+            ->execute();
+
+        $this->assertEquals(
+            '// Out of date content',
+            file_get_contents($outputPath . '/userResourceParsers.ts'),
+        );
+    }
+
     #[DataProvider('generatedContentProvider')]
     public function testShouldReturnExpectedContent(Closure $configFactory, array $expectedOutput): void
     {

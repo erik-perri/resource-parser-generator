@@ -19,7 +19,7 @@ use Throwable;
 
 class BuildResourceParsersCommand extends Command
 {
-    protected $signature = 'build:resource-parsers {--config=build.resource_parsers}';
+    protected $signature = 'build:resource-parsers {--check} {--config=build.resource_parsers}';
     protected $description = 'Generate resource parsers based on the specified configuration.';
 
     public function handle(): int
@@ -64,20 +64,37 @@ class BuildResourceParsersCommand extends Command
             },
         );
 
+        $isChecking = (bool)$this->option('check');
+        $returnValue = static::SUCCESS;
+
         foreach ($parserCollection->splitToFiles() as $fileName => $parsers) {
             $filePath = $outputPath . '/' . $fileName;
 
             $fileContents = $parserRepository->withLocalContext($parsers, fn() => $parserGenerator->generate($parsers));
 
-            $this->components->twoColumnDetail(
-                sprintf('Writing %s', $filePath),
-                sprintf('%s bytes', number_format(strlen($fileContents))),
-            );
+            if ($isChecking) {
+                $existingContents = File::exists($filePath) ? File::get($filePath) : null;
+                $isMatch = $existingContents === $fileContents;
 
-            File::put($filePath, $fileContents);
+                $this->components->twoColumnDetail(
+                    sprintf('Checking %s', $filePath),
+                    $isMatch ? 'Up to date' : 'Out of date',
+                );
+
+                if (!$isMatch) {
+                    $returnValue = static::FAILURE;
+                }
+            } else {
+                $this->components->twoColumnDetail(
+                    sprintf('Writing %s', $filePath),
+                    sprintf('%s bytes', number_format(strlen($fileContents))),
+                );
+
+                File::put($filePath, $fileContents);
+            }
         }
 
-        return static::SUCCESS;
+        return $returnValue;
     }
 
     /**

@@ -50,7 +50,28 @@ class ResourceMethodParser implements ResourceParserContract
         $context = new ResourceData(
             $className,
             $methodName,
-            $returnType->properties()->map(fn(TypeContract $property) => $property->parserType()),
+            $returnType->properties()->map(function (
+                TypeContract $property,
+                string $name,
+            ) use (
+                $className,
+                $methodName,
+            ) {
+                try {
+                    return $property->parserType();
+                } catch (RuntimeException $exception) {
+                    throw new RuntimeException(
+                        sprintf(
+                            'Failed to parse property "%s" in "%s::%s", %s',
+                            $name,
+                            $className,
+                            $methodName,
+                            $exception->getMessage(),
+                        ),
+                        previous: $exception,
+                    );
+                }
+            }),
             new ResourceConfiguration($className, $methodName, null, null, null),
         );
 

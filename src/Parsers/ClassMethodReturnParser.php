@@ -84,6 +84,15 @@ class ClassMethodReturnParser implements ClassMethodReturnParserContract
                     $type = $this->expressionTypeConverter->convert($item->value, $context);
                     $type = $this->expressionContextProcessor->process($type, $context);
 
+                    if ($type instanceof Types\UntypedType) {
+                        throw new RuntimeException(sprintf(
+                            'Cannot determine return type for "%s" in "%s::%s"',
+                            $key->value,
+                            $methodName,
+                            $className,
+                        ));
+                    }
+
                     $arrayProperties->put($key->value, $type);
                 }
 
@@ -92,6 +101,14 @@ class ClassMethodReturnParser implements ClassMethodReturnParserContract
                 $context = ConverterContext::create($resolver);
                 $type = $this->expressionTypeConverter->convert($returnNode->expr, $context);
                 $type = $this->expressionContextProcessor->process($type, $context);
+
+                if ($type instanceof Types\UntypedType) {
+                    throw new RuntimeException(sprintf(
+                        'Cannot determine return type for "%s" in "%s"',
+                        $methodName,
+                        $className,
+                    ));
+                }
             }
 
             $types[] = $this->combineSimilarTypes($type);
@@ -100,7 +117,11 @@ class ClassMethodReturnParser implements ClassMethodReturnParserContract
         $types = $this->combineArrayReturns($types);
 
         if (count($types) === 0) {
-            return new Types\UntypedType();
+            throw new RuntimeException(sprintf(
+                'Cannot determine return type for "%s" in "%s"',
+                $methodName,
+                $className,
+            ));
         }
 
         if (count($types) === 1) {

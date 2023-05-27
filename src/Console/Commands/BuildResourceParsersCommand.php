@@ -70,7 +70,22 @@ class BuildResourceParsersCommand extends Command
         foreach ($parserCollection->splitToFiles() as $fileName => $parsers) {
             $filePath = $outputPath . '/' . $fileName;
 
-            $fileContents = $parserRepository->withLocalContext($parsers, fn() => $parserGenerator->generate($parsers));
+            try {
+                $fileContents = $parserRepository->withLocalContext(
+                    $parsers,
+                    fn() => $parserGenerator->generate($parsers),
+                );
+            } catch (Throwable $error) {
+                $this->components->twoColumnDetail(
+                    $isChecking
+                        ? sprintf('Checking %s', $filePath)
+                        : sprintf('Writing %s', $filePath),
+                    'Error',
+                );
+                $this->components->bulletList([$error->getMessage()]);
+                $returnValue = static::FAILURE;
+                continue;
+            }
 
             if ($isChecking) {
                 $existingContents = File::exists($filePath) ? File::get($filePath) : null;

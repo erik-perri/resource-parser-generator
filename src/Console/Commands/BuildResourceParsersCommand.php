@@ -19,13 +19,13 @@ use Throwable;
 
 class BuildResourceParsersCommand extends Command
 {
-    protected $signature = 'build:resource-parsers';
-    protected $description = 'Generate resource parsers based on "build.resource_parsers" configuration.';
+    protected $signature = 'build:resource-parsers {--config=build.resource_parsers}';
+    protected $description = 'Generate resource parsers based on the specified configuration.';
 
     public function handle(): int
     {
         // Load and validate the configuration.
-        [$configuredResources, $outputPath] = $this->parseConfiguration('build.resource_parsers');
+        [$configuredResources, $outputPath] = $this->parseConfiguration(strval($this->option('config')));
         if ($configuredResources === null) {
             return static::FAILURE;
         }
@@ -83,7 +83,6 @@ class BuildResourceParsersCommand extends Command
     /**
      * @param string $configKey
      * @return array{0: Collection<int, ResourceConfiguration>|null, 1: string|null}
-     * @noinspection PhpSameParameterValueInspection
      */
     private function parseConfiguration(string $configKey): array
     {
@@ -130,8 +129,8 @@ class BuildResourceParsersCommand extends Command
             ],
             [],
             [
-                'output_path' => 'build.resource_parsers.output_path',
-                'parsers' => 'build.resource_parsers.parsers',
+                'output_path' => $configKey . '.output_path',
+                'parsers' => $configKey . '.parsers',
             ],
         );
 

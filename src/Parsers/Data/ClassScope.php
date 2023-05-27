@@ -167,27 +167,23 @@ class ClassScope implements ClassScopeContract
 
     public function method(string $name): ClassMethodScopeContract|null
     {
-        if ($this->docBlock()?->hasMethod($name)) {
-            return VirtualClassMethodScope::create($this->docBlock()->method($name));
-        }
+        $methodLocators = [
+            fn() => $this->docBlock()?->hasMethod($name)
+                ? VirtualClassMethodScope::create($this->docBlock()->method($name))
+                : null,
+            fn() => $this->getMethods()->get($name),
+            fn() => $this->traits->first(fn(ClassScopeContract $trait) => (bool)$trait->method($name))?->method($name),
+            fn() => $this->parent()?->method($name),
+        ];
 
-        $method = $this->getMethods()->get($name);
-
-        if ($method === null && $this->parent()) {
-            $method = $this->parent()->method($name);
-        }
-
-        if ($method === null && count($this->traits)) {
-            foreach ($this->traits as $trait) {
-                $method = $trait->method($name);
-
-                if ($method !== null) {
-                    break;
-                }
+        foreach ($methodLocators as $locator) {
+            $method = $locator();
+            if ($method) {
+                return $method;
             }
         }
 
-        return $method;
+        return null;
     }
 
     public function name(): string

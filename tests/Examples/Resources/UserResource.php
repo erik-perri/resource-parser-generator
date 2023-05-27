@@ -120,6 +120,13 @@ class UserResource extends JsonResource
         ];
     }
 
+    public function usingExplicitProperties(): array
+    {
+        return [
+            'date' => $this->resource->explicitDate?->format('Y-m-d'),
+        ];
+    }
+
     public function usingParameter(Request $request): array
     {
         return [

@@ -33,6 +33,8 @@ class User extends AliasedLaravelModel
     public const CONST_STRING = 'string';
     public const CONST_FLOAT = 1.1;
 
+    public ?CarbonImmutable $explicitDate;
+
     public static function getExplicitStaticValue(): int
     {
         return 1;

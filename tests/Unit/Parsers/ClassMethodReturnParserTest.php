@@ -86,6 +86,12 @@ class ClassMethodReturnParserTest extends TestCase
                     'as_bool_or' => 'bool',
                 ],
             ],
+            'UserResource::usingExplicitProperties' => [
+                'method' => [UserResource::class, 'usingExplicitProperties'],
+                'expectedReturns' => [
+                    'date' => 'null|string',
+                ],
+            ],
             'UserResource::usingParameter' => [
                 'method' => [UserResource::class, 'usingParameter'],
                 'expectedReturns' => [

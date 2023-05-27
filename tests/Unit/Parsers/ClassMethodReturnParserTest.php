@@ -90,6 +90,7 @@ class ClassMethodReturnParserTest extends TestCase
                 'method' => [UserResource::class, 'usingExplicitProperties'],
                 'expectedReturns' => [
                     'date' => 'null|string',
+                    'promoted' => 'string',
                 ],
             ],
             'UserResource::usingParameter' => [

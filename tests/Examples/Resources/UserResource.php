@@ -124,6 +124,7 @@ class UserResource extends JsonResource
     {
         return [
             'date' => $this->resource->explicitDate?->format('Y-m-d'),
+            'promoted' => $this->resource->withPromoted->name,
         ];
     }
 

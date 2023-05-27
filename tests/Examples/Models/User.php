@@ -8,6 +8,7 @@ use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model as AliasedLaravelModel;
 use Illuminate\Support\Collection as BaseCollection;
+use ResourceParserGenerator\Tests\Examples\DataObjects\WithPromotedProperties;
 use ResourceParserGenerator\Tests\Examples\Enums\Permission;
 
 /**
@@ -17,6 +18,7 @@ use ResourceParserGenerator\Tests\Examples\Enums\Permission;
  * @property string $name
  * @property CarbonImmutable|null $created_at
  * @property ?CarbonImmutable $updated_at
+ * @property WithPromotedProperties $withPromoted
  *
  * @property-read User|null $related
  *

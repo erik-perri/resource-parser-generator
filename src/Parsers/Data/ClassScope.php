@@ -13,6 +13,7 @@ use ResourceParserGenerator\Contracts\ClassScopeContract;
 use ResourceParserGenerator\Contracts\Parsers\DocBlockParserContract;
 use ResourceParserGenerator\Contracts\Resolvers\ResolverContract;
 use ResourceParserGenerator\Contracts\Types\TypeContract;
+use RuntimeException;
 
 class ClassScope implements ClassScopeContract
 {
@@ -294,6 +295,20 @@ class ClassScope implements ClassScopeContract
         }
 
         $this->properties = collect();
+
+        $constructor = $this->method('__construct');
+        if ($constructor) {
+            if (!($constructor instanceof ClassMethodScope)) {
+                throw new RuntimeException('Unhandled non-concrete constructor');
+            }
+
+            foreach ($constructor->promotedParameters() as $promotedName => $promotedType) {
+                $this->properties->put(
+                    $promotedName,
+                    VirtualClassProperty::create($promotedType),
+                );
+            }
+        }
 
         foreach ($this->node->getProperties() as $property) {
             foreach ($property->props as $prop) {

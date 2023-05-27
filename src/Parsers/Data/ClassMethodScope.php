@@ -7,6 +7,8 @@ namespace ResourceParserGenerator\Parsers\Data;
 use Illuminate\Support\Collection;
 use PhpParser\Node\Expr;
 use PhpParser\Node\Expr\Variable;
+use PhpParser\Node\Param;
+use PhpParser\Node\Stmt\Class_;
 use PhpParser\Node\Stmt\ClassMethod;
 use ResourceParserGenerator\Contracts\AttributeContract;
 use ResourceParserGenerator\Contracts\ClassMethodScopeContract;
@@ -87,16 +89,55 @@ class ClassMethodScope implements ClassMethodScopeContract
         return $this->parameters ??= $this->buildParameters();
     }
 
+    /**
+     * TODO Refactor this and parameters to not need both
+     *
+     * @return Collection<string, TypeContract>
+     */
+    public function promotedParameters(): Collection
+    {
+        $promoted = collect();
+
+        foreach ($this->node->params as $param) {
+            if (!($param instanceof Param) || !($param->var instanceof Variable) || !is_string($param->var->name)) {
+                continue;
+            }
+
+            $isPublic = ($param->flags & Class_::MODIFIER_PUBLIC) !== 0
+                || ($param->flags & Class_::VISIBILITY_MODIFIER_MASK) === 0;
+            if ($isPublic) {
+                $promoted->put($param->var->name, $this->declaredTypeParser->convert($param->type, $this->resolver));
+            }
+        }
+
+        return $promoted;
+    }
+
     public function returnType(): TypeContract
     {
         return $this->docBlock()?->return()
             ?? ($this->returnType ??= $this->declaredTypeParser->convert($this->node->returnType, $this->resolver));
     }
 
+    public function isPrivate(): bool
+    {
+        return $this->node->isPrivate();
+    }
+
+    public function isProtected(): bool
+    {
+        return $this->node->isProtected();
+    }
+
+    public function isPublic(): bool
+    {
+        return $this->node->isPublic();
+    }
+
     /**
      * @return Collection<string, TypeContract>
      */
-    public function buildParameters(): Collection
+    private function buildParameters(): Collection
     {
         $parameters = collect();
 
@@ -113,20 +154,5 @@ class ClassMethodScope implements ClassMethodScopeContract
         }
 
         return $parameters;
-    }
-
-    public function isPrivate(): bool
-    {
-        return $this->node->isPrivate();
-    }
-
-    public function isProtected(): bool
-    {
-        return $this->node->isProtected();
-    }
-
-    public function isPublic(): bool
-    {
-        return $this->node->isPublic();
     }
 }

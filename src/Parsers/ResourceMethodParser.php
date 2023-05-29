@@ -17,7 +17,7 @@ class ResourceMethodParser implements ResourceParserContract
 {
     public function __construct(
         private readonly ClassMethodReturnParserContract $classMethodReturnParser,
-        private readonly ResourceGeneratorContextContract $resourceParserRepository,
+        private readonly ResourceGeneratorContextContract $generatorContext,
     ) {
         //
     }
@@ -26,7 +26,7 @@ class ResourceMethodParser implements ResourceParserContract
         string $className,
         string $methodName,
     ): ResourceData {
-        if ($alreadyParsed = $this->resourceParserRepository->findGlobal($className, $methodName)) {
+        if ($alreadyParsed = $this->generatorContext->findGlobal($className, $methodName)) {
             return $alreadyParsed;
         }
 
@@ -75,7 +75,7 @@ class ResourceMethodParser implements ResourceParserContract
             new ResourceConfiguration($className, $methodName, null, null, null),
         );
 
-        $this->resourceParserRepository->add($context);
+        $this->generatorContext->add($context);
 
         return $context;
     }

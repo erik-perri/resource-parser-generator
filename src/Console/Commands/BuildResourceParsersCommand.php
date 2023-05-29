@@ -49,11 +49,11 @@ class BuildResourceParsersCommand extends Command
             }
         }
 
-        $parserRepository = $this->resolve(ResourceGeneratorContextContract::class);
+        $generatorContext = $this->resolve(ResourceGeneratorContextContract::class);
         $parserGenerator = $this->resolve(ResourceParserGeneratorContract::class);
 
         // Fill the configuration on any dependencies that were not explicitly configured.
-        $parserCollection = $parserRepository->updateConfiguration(
+        $parserCollection = $generatorContext->updateConfiguration(
             function (ResourceConfiguration $defaultConfig) use ($configuredResources) {
                 $configuredResource = $configuredResources->first(fn(ResourceConfiguration $resource) => $resource->is(
                     $defaultConfig->className,
@@ -71,7 +71,7 @@ class BuildResourceParsersCommand extends Command
             $filePath = $outputPath . '/' . $fileName;
 
             try {
-                $fileContents = $parserRepository->withLocalContext(
+                $fileContents = $generatorContext->withLocalContext(
                     $parsers,
                     fn() => $parserGenerator->generate($parsers),
                 );

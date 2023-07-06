@@ -90,8 +90,8 @@ class ClassMethodReturnParser implements ClassMethodReturnParserContract
                             throw new RuntimeException(sprintf(
                                 'Cannot determine return type for "%s" in "%s::%s"',
                                 $key->value,
-                                $methodName,
                                 $className,
+                                $methodName,
                             ));
                         }
                     } catch (Throwable $exception) {

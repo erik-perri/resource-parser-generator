@@ -19,6 +19,7 @@ use ResourceParserGenerator\Parsers\Data\ClassMethodScope;
 use ResourceParserGenerator\Resolvers\VariableResolver;
 use ResourceParserGenerator\Types;
 use RuntimeException;
+use Throwable;
 
 class ClassMethodReturnParser implements ClassMethodReturnParserContract
 {
@@ -80,17 +81,21 @@ class ClassMethodReturnParser implements ClassMethodReturnParserContract
                         throw new RuntimeException('Unexpected non-string key in resource');
                     }
 
-                    $context = ConverterContext::create($resolver);
-                    $type = $this->expressionTypeConverter->convert($item->value, $context);
-                    $type = $this->expressionContextProcessor->process($type, $context);
+                    try {
+                        $context = ConverterContext::create($resolver);
+                        $type = $this->expressionTypeConverter->convert($item->value, $context);
+                        $type = $this->expressionContextProcessor->process($type, $context);
 
-                    if ($type instanceof Types\UntypedType) {
-                        throw new RuntimeException(sprintf(
-                            'Cannot determine return type for "%s" in "%s::%s"',
-                            $key->value,
-                            $methodName,
-                            $className,
-                        ));
+                        if ($type instanceof Types\UntypedType) {
+                            throw new RuntimeException(sprintf(
+                                'Cannot determine return type for "%s" in "%s::%s"',
+                                $key->value,
+                                $methodName,
+                                $className,
+                            ));
+                        }
+                    } catch (Throwable $exception) {
+                        $type = new Types\ErrorType($exception);
                     }
 
                     $arrayProperties->put($key->value, $type);

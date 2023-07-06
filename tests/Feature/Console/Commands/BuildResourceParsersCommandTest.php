@@ -251,6 +251,32 @@ export type UserResourceChildArrays = output<typeof userResourceChildArraysParse
 TS,
                 ],
             ],
+            'UserResource::unknownComments' => [
+                'config' => fn(string $outputPath) => [
+                    'output_path' => $outputPath,
+                    'parsers' => [
+                        [
+                            'resource' => [UserResource::class, 'unknownComments'],
+                            'output_file' => 'parsers.ts',
+                        ],
+                    ],
+                ],
+                'expectedOutput' => [
+                    'parsers.ts' => <<<TS
+import {object, output, unknown} from 'zod';
+
+export const userResourceUnknownCommentsParser = object({
+  /**
+   * Error: Unknown property "what" in "User"
+   */
+  propertyName: unknown(),
+});
+
+export type UserResourceUnknownComments = output<typeof userResourceUnknownCommentsParser>;
+
+TS,
+                ],
+            ],
             'UserResource::usingWhenLoaded' => [
                 'config' => fn(string $outputPath) => [
                     'output_path' => $outputPath,

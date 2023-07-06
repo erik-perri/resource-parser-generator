@@ -119,6 +119,15 @@ class UserResource extends JsonResource
         ];
     }
 
+    public function unknownComments(): array
+    {
+        /** @noinspection PhpUndefinedFieldInspection */
+        return [
+            // @phpstan-ignore-next-line
+            'propertyName' => $this->resource->what,
+        ];
+    }
+
     public function usingCasts(): array
     {
         return [

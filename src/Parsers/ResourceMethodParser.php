@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace ResourceParserGenerator\Parsers;
 
+use ResourceParserGenerator\Contracts\Converters\ParserTypeConverterContract;
 use ResourceParserGenerator\Contracts\Parsers\ClassMethodReturnParserContract;
 use ResourceParserGenerator\Contracts\Parsers\ResourceParserContract;
 use ResourceParserGenerator\Contracts\ResourceGeneratorContextContract;
@@ -18,6 +19,7 @@ class ResourceMethodParser implements ResourceParserContract
     public function __construct(
         private readonly ClassMethodReturnParserContract $classMethodReturnParser,
         private readonly ResourceGeneratorContextContract $generatorContext,
+        private readonly ParserTypeConverterContract $parserTypeConverter,
     ) {
         //
     }
@@ -50,28 +52,7 @@ class ResourceMethodParser implements ResourceParserContract
         $context = new ResourceData(
             $className,
             $methodName,
-            $returnType->properties()->map(function (
-                TypeContract $property,
-                string $name,
-            ) use (
-                $className,
-                $methodName,
-            ) {
-                try {
-                    return $property->parserType();
-                } catch (RuntimeException $exception) {
-                    throw new RuntimeException(
-                        sprintf(
-                            'Failed to parse property "%s" in "%s::%s", %s',
-                            $name,
-                            $className,
-                            $methodName,
-                            $exception->getMessage(),
-                        ),
-                        previous: $exception,
-                    );
-                }
-            }),
+            $returnType->properties()->map(fn(TypeContract $type) => $this->parserTypeConverter->convert($type)),
             new ResourceConfiguration($className, $methodName, null, null, null),
         );
 

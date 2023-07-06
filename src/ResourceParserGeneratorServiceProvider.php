@@ -16,6 +16,7 @@ use PHPStan\PhpDocParser\Parser\TypeParser;
 use ResourceParserGenerator\Contracts\Converters\DeclaredTypeConverterContract;
 use ResourceParserGenerator\Contracts\Converters\DocBlockTypeConverterContract;
 use ResourceParserGenerator\Contracts\Converters\ExpressionTypeConverterContract;
+use ResourceParserGenerator\Contracts\Converters\ParamTypeConverterContract;
 use ResourceParserGenerator\Contracts\Converters\ReflectionTypeConverterContract;
 use ResourceParserGenerator\Contracts\Converters\VariableTypeConverterContract;
 use ResourceParserGenerator\Contracts\Filesystem\ClassFileLocatorContract;
@@ -31,6 +32,7 @@ use ResourceParserGenerator\Contracts\ResourceGeneratorContextContract;
 use ResourceParserGenerator\Converters\DeclaredTypeConverter;
 use ResourceParserGenerator\Converters\DocBlockTypeConverter;
 use ResourceParserGenerator\Converters\ExpressionTypeConverter;
+use ResourceParserGenerator\Converters\ParamTypeConverter;
 use ResourceParserGenerator\Converters\ReflectionTypeConverter;
 use ResourceParserGenerator\Converters\VariableTypeConverter;
 use ResourceParserGenerator\DataObjects\ResourceGeneratorContext;
@@ -74,6 +76,7 @@ class ResourceParserGeneratorServiceProvider extends ServiceProvider
             $this->app->singleton(DeclaredTypeConverterContract::class, DeclaredTypeConverter::class);
             $this->app->singleton(DocBlockTypeConverterContract::class, DocBlockTypeConverter::class);
             $this->app->singleton(ExpressionTypeConverterContract::class, ExpressionTypeConverter::class);
+            $this->app->singleton(ParamTypeConverterContract::class, ParamTypeConverter::class);
             $this->app->singleton(ReflectionTypeConverterContract::class, ReflectionTypeConverter::class);
             $this->app->singleton(VariableTypeConverterContract::class, VariableTypeConverter::class);
 

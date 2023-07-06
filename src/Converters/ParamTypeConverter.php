@@ -6,11 +6,12 @@ namespace ResourceParserGenerator\Converters;
 
 use PhpParser\Node\Name;
 use PhpParser\Node\Param;
+use ResourceParserGenerator\Contracts\Converters\ParamTypeConverterContract;
 use ResourceParserGenerator\Contracts\Types\TypeContract;
 use ResourceParserGenerator\Converters\Data\ConverterContext;
 use RuntimeException;
 
-class ParamTypeConverter
+class ParamTypeConverter implements ParamTypeConverterContract
 {
     public function __construct(private readonly DeclaredTypeConverter $declaredTypeConverter)
     {

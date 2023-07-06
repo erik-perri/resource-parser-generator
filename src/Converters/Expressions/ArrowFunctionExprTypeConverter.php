@@ -10,10 +10,10 @@ use PhpParser\Node\Expr\Variable;
 use PhpParser\Node\Param;
 use ResourceParserGenerator\Contracts\Converters\Expressions\ExprTypeConverterContract;
 use ResourceParserGenerator\Contracts\Converters\ExpressionTypeConverterContract;
+use ResourceParserGenerator\Contracts\Converters\ParamTypeConverterContract;
 use ResourceParserGenerator\Contracts\Types\TypeContract;
 use ResourceParserGenerator\Converters\Data\ConverterContext;
 use ResourceParserGenerator\Converters\ExpressionContextProcessor;
-use ResourceParserGenerator\Converters\ParamTypeConverter;
 use ResourceParserGenerator\Resolvers\VariableResolver;
 use RuntimeException;
 
@@ -21,8 +21,8 @@ class ArrowFunctionExprTypeConverter implements ExprTypeConverterContract
 {
     public function __construct(
         private readonly ExpressionTypeConverterContract $expressionTypeConverter,
+        private readonly ParamTypeConverterContract $paramTypeConverter,
         private readonly ExpressionContextProcessor $expressionContextProcessor,
-        private readonly ParamTypeConverter $paramTypeConverter,
     ) {
         //
     }

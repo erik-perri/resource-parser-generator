@@ -251,7 +251,7 @@ class ClassScope implements ClassScopeContract
     private function getConstants(): Collection
     {
         if ($this->constants !== null) {
-            return $this->constants->collect();
+            return $this->constants;
         }
 
         $this->constants = collect();
@@ -272,7 +272,7 @@ class ClassScope implements ClassScopeContract
     private function getMethods(): Collection
     {
         if ($this->methods !== null) {
-            return $this->methods->collect();
+            return $this->methods;
         }
 
         $this->methods = collect();
@@ -291,7 +291,7 @@ class ClassScope implements ClassScopeContract
     private function getProperties(): Collection
     {
         if ($this->properties !== null) {
-            return $this->properties->collect();
+            return $this->properties;
         }
 
         $this->properties = collect();

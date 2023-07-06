@@ -356,8 +356,12 @@ class PhpFileParser implements PhpFileParserContract
                 ? $this->declaredTypeConverter->convert($enum->scalarType, $resolver)
                 : new UntypedType();
 
-            $enumScope = EnumScope::create(
+            $enumScope = EnumScope::createEnum(
                 $fullyQualifiedEnumName,
+                $enum,
+                $resolver,
+                null,
+                $this->parseClassTraits($enum, $resolver),
                 $type,
             );
 

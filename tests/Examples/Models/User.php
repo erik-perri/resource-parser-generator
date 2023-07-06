@@ -10,12 +10,14 @@ use Illuminate\Database\Eloquent\Model as AliasedLaravelModel;
 use Illuminate\Support\Collection as BaseCollection;
 use ResourceParserGenerator\Tests\Examples\DataObjects\WithPromotedProperties;
 use ResourceParserGenerator\Tests\Examples\Enums\Permission;
+use ResourceParserGenerator\Tests\Examples\Enums\Role;
 
 /**
  * @property-read int $id
  * @property-read string $ulid
  * @property string $email
  * @property string $name
+ * @property Role $role
  * @property CarbonImmutable|null $created_at
  * @property ?CarbonImmutable $updated_at
  * @property WithPromotedProperties $withPromoted

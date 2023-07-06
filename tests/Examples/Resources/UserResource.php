@@ -64,6 +64,15 @@ class UserResource extends JsonResource
         ];
     }
 
+    public function enumMethods(): array
+    {
+        return [
+            'permissions' => $this->resource->role->permissions()->map(
+                fn(Permission $permission) => $permission->value,
+            ),
+        ];
+    }
+
     public function relatedResource(): array
     {
         return [

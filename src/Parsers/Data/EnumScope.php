@@ -5,95 +5,85 @@ declare(strict_types=1);
 namespace ResourceParserGenerator\Parsers\Data;
 
 use Illuminate\Support\Collection;
-use ResourceParserGenerator\Contracts\ClassConstantContract;
-use ResourceParserGenerator\Contracts\ClassMethodScopeContract;
+use PhpParser\Node\Stmt\ClassLike;
 use ResourceParserGenerator\Contracts\ClassPropertyContract;
 use ResourceParserGenerator\Contracts\ClassScopeContract;
+use ResourceParserGenerator\Contracts\Parsers\DocBlockParserContract;
 use ResourceParserGenerator\Contracts\Resolvers\ResolverContract;
 use ResourceParserGenerator\Contracts\Types\TypeContract;
-use RuntimeException;
 
-class EnumScope implements ClassScopeContract
+class EnumScope extends ClassScope
 {
     /**
      * @param class-string $fullyQualifiedName
-     * @param TypeContract $type
+     * @param ClassLike $node
+     * @param ResolverContract $resolver
+     * @param ClassScopeContract|null $extends
+     * @param Collection<int, ClassScopeContract> $traits
+     * @param DocBlockParserContract $docBlockParser
+     * @param TypeContract $backingType
      */
     public function __construct(
-        private readonly string $fullyQualifiedName,
-        private readonly TypeContract $type,
+        string $fullyQualifiedName,
+        ClassLike $node,
+        ResolverContract $resolver,
+        ClassScopeContract|null $extends,
+        Collection $traits,
+        DocBlockParserContract $docBlockParser,
+        private readonly TypeContract $backingType,
     ) {
-        //
+        parent::__construct(
+            $fullyQualifiedName,
+            $node,
+            $resolver,
+            $extends,
+            $traits,
+            collect(),
+            $docBlockParser,
+        );
     }
 
-    public static function create(string $fullyQualifiedName, TypeContract $type): self
-    {
+    /**
+     * @param class-string $fullyQualifiedName
+     * @param ClassLike $node
+     * @param ResolverContract $resolver
+     * @param ClassScopeContract|null $extends
+     * @param Collection<int, ClassScopeContract> $traits
+     * @param TypeContract $backingType
+     * @return self
+     */
+    public static function createEnum(
+        string $fullyQualifiedName,
+        ClassLike $node,
+        ResolverContract $resolver,
+        ClassScopeContract|null $extends,
+        Collection $traits,
+        TypeContract $backingType,
+    ): self {
         return resolve(self::class, [
             'fullyQualifiedName' => $fullyQualifiedName,
-            'type' => $type,
+            'node' => $node,
+            'resolver' => $resolver,
+            'extends' => $extends,
+            'traits' => $traits,
+            'backingType' => $backingType,
         ]);
     }
 
-    public function fullyQualifiedName(): string
+    /**
+     * @return TypeContract
+     */
+    public function backingType(): TypeContract
     {
-        return $this->fullyQualifiedName;
-    }
-
-    public function constants(): Collection
-    {
-        throw new RuntimeException('Enum constants are not supported');
-    }
-
-    public function constant(string $name): ClassConstantContract|null
-    {
-        throw new RuntimeException('Enum constants are not supported');
-    }
-
-    public function hasParent(string $className): bool
-    {
-        return false;
-    }
-
-    public function methods(): Collection
-    {
-        throw new RuntimeException('Enum methods are not supported');
-    }
-
-    public function method(string $name): ClassMethodScopeContract|null
-    {
-        throw new RuntimeException('Enum methods are not supported');
-    }
-
-    public function name(): string
-    {
-        return class_basename($this->fullyQualifiedName);
-    }
-
-    public function parent(): ClassScopeContract|null
-    {
-        return null;
+        return $this->backingType;
     }
 
     public function property(string $name): ClassPropertyContract|null
     {
         if ($name === 'value') {
-            return VirtualClassProperty::create($this->type);
+            return VirtualClassProperty::create($this->backingType());
         }
 
-        throw new RuntimeException(sprintf('Enum property "%s" is not supported', $name));
-    }
-
-    public function propertyType(string $name): TypeContract|null
-    {
-        if ($name === 'value') {
-            return $this->type;
-        }
-
-        throw new RuntimeException(sprintf('Enum property "%s" is not supported', $name));
-    }
-
-    public function resolver(): ResolverContract
-    {
-        throw new RuntimeException('Enum resolution is not supported');
+        return parent::property($name);
     }
 }

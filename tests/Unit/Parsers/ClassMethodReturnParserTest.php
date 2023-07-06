@@ -132,6 +132,12 @@ class ClassMethodReturnParserTest extends TestCase
                     'with_format_verbose' => RelatedResource::class . '::verbose',
                 ],
             ],
+            'UserResource::enumMethods' => [
+                'method' => [UserResource::class, 'enumMethods'],
+                'expected' => [
+                    'permissions' => 'Illuminate\Support\Collection<int, string>',
+                ],
+            ],
             'UserResource::enumWithoutValue' => [
                 'method' => [UserResource::class, 'enumWithoutValue'],
                 'expected' => [

@@ -147,6 +147,12 @@ class ClassMethodReturnParserTest extends TestCase
                     'permissions' => 'string[]',
                 ],
             ],
+            'UserResource::usingCollectionMap' => [
+                'method' => [UserResource::class, 'usingCollectionMap'],
+                'expected' => [
+                    'permissions' => 'string[]',
+                ],
+            ],
             'UserResource::usingResourceCollection' => [
                 'method' => [UserResource::class, 'usingResourceCollection'],
                 'expected' => [

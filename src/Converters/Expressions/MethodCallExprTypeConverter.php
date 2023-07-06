@@ -6,6 +6,7 @@ namespace ResourceParserGenerator\Converters\Expressions;
 
 use Illuminate\Http\Resources\MissingValue;
 use Illuminate\Support\Collection;
+use PhpParser\Node\Expr\ArrowFunction;
 use PhpParser\Node\Expr\ClassConstFetch;
 use PhpParser\Node\Expr\MethodCall;
 use PhpParser\Node\Expr\NullsafeMethodCall;
@@ -37,6 +38,7 @@ class MethodCallExprTypeConverter implements ExprTypeConverterContract
         private readonly ClassConstFetchValueParserContract $classConstFetchValueParser,
         private readonly ClassParserContract $classParser,
         private readonly ExpressionTypeConverterContract $expressionTypeConverter,
+        private readonly ArrowFunctionExprTypeConverter $arrowFunctionExprTypeConverter,
         private readonly NodeFinder $nodeFinder,
     ) {
         //
@@ -55,6 +57,8 @@ class MethodCallExprTypeConverter implements ExprTypeConverterContract
             switch ($rightSide) {
                 case 'all':
                     return $this->handleCollectionAll($leftSide);
+                case 'map':
+                    return $this->handleCollectionMap($expr, $context, $leftSide);
                 case 'pluck':
                     return $this->handleCollectionPluck($expr, $context, $leftSide);
                 default:
@@ -108,6 +112,30 @@ class MethodCallExprTypeConverter implements ExprTypeConverterContract
         }
 
         return new Types\ArrayType(null, $generics->last());
+    }
+
+    private function handleCollectionMap(
+        MethodCall|NullsafeMethodCall $expr,
+        ConverterContext $context,
+        ClassScopeContract $leftSide
+    ): TypeContract {
+        $arguments = $expr->getArgs();
+        if (!count($arguments)) {
+            throw new RuntimeException('Unhandled missing first argument for map');
+        }
+
+        $callable = $arguments[0]->value;
+        if (!($callable instanceof ArrowFunction)) {
+            throw new RuntimeException('Unhandled non-arrow function for map');
+        }
+
+        $returnType = $this->arrowFunctionExprTypeConverter->convert($callable, $context);
+
+        return new Types\ClassType(
+            $leftSide->fullyQualifiedName(),
+            null,
+            collect([new Types\IntType(), $returnType]),
+        );
     }
 
     private function handleCollectionPluck(

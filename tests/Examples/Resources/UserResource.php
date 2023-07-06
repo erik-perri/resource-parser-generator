@@ -8,6 +8,7 @@ use DateTimeZone;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 use Phar;
+use ResourceParserGenerator\Tests\Examples\Enums\Permission;
 use ResourceParserGenerator\Tests\Examples\Models\User;
 
 /**
@@ -142,6 +143,15 @@ class UserResource extends JsonResource
             'enum_all_without_pluck' => $this->resource->permissions->all(),
             'latest_post_ids' => $this->resource->latestPosts->pluck('id')->all(),
             'permissions' => $this->resource->permissions->pluck('value')->all(),
+        ];
+    }
+
+    public function usingCollectionMap(): array
+    {
+        return [
+            'permissions' => $this->resource->permissions->map(
+                fn(Permission $permission) => $permission->value,
+            )->all(),
         ];
     }
 

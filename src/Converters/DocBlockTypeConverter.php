@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace ResourceParserGenerator\Converters;
 
 use PHPStan\PhpDocParser\Ast\Type\ArrayTypeNode;
+use PHPStan\PhpDocParser\Ast\Type\CallableTypeNode;
 use PHPStan\PhpDocParser\Ast\Type\GenericTypeNode;
 use PHPStan\PhpDocParser\Ast\Type\IdentifierTypeNode;
 use PHPStan\PhpDocParser\Ast\Type\NullableTypeNode;
@@ -29,6 +30,10 @@ class DocBlockTypeConverter implements DocBlockTypeConverterContract
 
         if ($type instanceof NullableTypeNode) {
             return new Types\UnionType($this->convert($type->type, $resolver), new Types\NullType());
+        }
+
+        if ($type instanceof CallableTypeNode) {
+            return new Types\CallableType();
         }
 
         if ($type instanceof GenericTypeNode) {

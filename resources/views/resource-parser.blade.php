@@ -9,7 +9,7 @@
 
 export const {{ $variableName }} = object({
 @foreach($properties as $name => $type)
-@if ($type instanceof ParserTypeWithCommentContract)
+@if ($type instanceof ParserTypeWithCommentContract && $type->comment())
   /**
    * {!! $type->comment() !!}
    */

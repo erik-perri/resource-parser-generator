@@ -28,7 +28,8 @@ class ZodUnknownType implements ParserTypeContract, ParserTypeWithCommentContrac
 
     public function setComment(?string $comment): self
     {
-        $this->comment = $comment;
+        $this->comment = $comment ? trim($comment) : null;
+        $this->comment = $this->comment ?: null;
 
         return $this;
     }

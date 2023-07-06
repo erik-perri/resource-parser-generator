@@ -251,6 +251,29 @@ export type UserResourceChildArrays = output<typeof userResourceChildArraysParse
 TS,
                 ],
             ],
+            'UserResource::enumMethods' => [
+                'config' => fn(string $outputPath) => [
+                    'output_path' => $outputPath,
+                    'parsers' => [
+                        [
+                            'resource' => [UserResource::class, 'enumMethods'],
+                            'output_file' => 'parsers.ts',
+                        ],
+                    ],
+                ],
+                'expectedOutput' => [
+                    'parsers.ts' => <<<TS
+import {array, object, output, string} from 'zod';
+
+export const userResourceEnumMethodsParser = object({
+  permissions: array(string()),
+});
+
+export type UserResourceEnumMethods = output<typeof userResourceEnumMethodsParser>;
+
+TS,
+                ],
+            ],
             'UserResource::unknownComments' => [
                 'config' => fn(string $outputPath) => [
                     'output_path' => $outputPath,

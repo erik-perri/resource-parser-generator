@@ -5,15 +5,32 @@ declare(strict_types=1);
 namespace ResourceParserGenerator\Types\Zod;
 
 use ResourceParserGenerator\Contracts\Types\ParserTypeContract;
+use ResourceParserGenerator\Contracts\Types\ParserTypeWithCommentContract;
+use ResourceParserGenerator\Types\Traits\HasCommentTrait;
 use RuntimeException;
 
-class ZodArrayType implements ParserTypeContract
+class ZodArrayType implements ParserTypeContract, ParserTypeWithCommentContract
 {
+    use HasCommentTrait;
+
     public function __construct(
         public readonly ParserTypeContract|null $keys,
         public readonly ParserTypeContract|null $values,
     ) {
         //
+    }
+
+    public function comment(): ?string
+    {
+        $imploded = collect([
+            $this->comment,
+            $this->keys instanceof ParserTypeWithCommentContract ? $this->keys->comment() : null,
+            $this->values instanceof ParserTypeWithCommentContract ? $this->values->comment() : null,
+        ])
+            ->filter()
+            ->implode(PHP_EOL);
+
+        return trim($imploded) ?: null;
     }
 
     public function constraint(): string

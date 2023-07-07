@@ -6,9 +6,13 @@ namespace ResourceParserGenerator\Types\Zod;
 
 use Illuminate\Support\Collection;
 use ResourceParserGenerator\Contracts\Types\ParserTypeContract;
+use ResourceParserGenerator\Contracts\Types\ParserTypeWithCommentContract;
+use ResourceParserGenerator\Types\Traits\HasCommentTrait;
 
-class ZodIntersectionType implements ParserTypeContract
+class ZodIntersectionType implements ParserTypeContract, ParserTypeWithCommentContract
 {
+    use HasCommentTrait;
+
     /**
      * @var Collection<int|string, ParserTypeContract>
      */
@@ -17,6 +21,20 @@ class ZodIntersectionType implements ParserTypeContract
     public function __construct(ParserTypeContract ...$types)
     {
         $this->types = collect($types);
+    }
+
+    public function comment(): ?string
+    {
+        $imploded = $this->types->map(
+            fn(ParserTypeContract $type) => $type instanceof ParserTypeWithCommentContract
+                ? $type->comment()
+                : null,
+        )
+            ->prepend($this->comment)
+            ->filter()
+            ->implode(PHP_EOL);
+
+        return trim($imploded) ?: null;
     }
 
     public function constraint(): string

@@ -6,15 +6,11 @@ namespace ResourceParserGenerator\Types\Zod;
 
 use ResourceParserGenerator\Contracts\Types\ParserTypeContract;
 use ResourceParserGenerator\Contracts\Types\ParserTypeWithCommentContract;
+use ResourceParserGenerator\Types\Traits\HasCommentTrait;
 
 class ZodUnknownType implements ParserTypeContract, ParserTypeWithCommentContract
 {
-    private ?string $comment = null;
-
-    public function comment(): ?string
-    {
-        return $this->comment;
-    }
+    use HasCommentTrait;
 
     public function constraint(): string
     {
@@ -24,13 +20,5 @@ class ZodUnknownType implements ParserTypeContract, ParserTypeWithCommentContrac
     public function imports(): array
     {
         return ['zod' => ['unknown']];
-    }
-
-    public function setComment(?string $comment): self
-    {
-        $this->comment = $comment ? trim($comment) : null;
-        $this->comment = $this->comment ?: null;
-
-        return $this;
     }
 }

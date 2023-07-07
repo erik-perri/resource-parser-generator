@@ -32,7 +32,7 @@ class ZodIntersectionType implements ParserTypeContract, ParserTypeWithCommentCo
         )
             ->prepend($this->comment)
             ->filter()
-            ->implode(PHP_EOL);
+            ->implode("\n");
 
         return trim($imploded) ?: null;
     }

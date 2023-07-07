@@ -28,7 +28,7 @@ class ZodArrayType implements ParserTypeContract, ParserTypeWithCommentContract
             $this->values instanceof ParserTypeWithCommentContract ? $this->values->comment() : null,
         ])
             ->filter()
-            ->implode(PHP_EOL);
+            ->implode("\n");
 
         return trim($imploded) ?: null;
     }

@@ -32,7 +32,7 @@ class ZodUnionType implements ParserTypeContract, ParserTypeWithCommentContract
         )
             ->prepend($this->comment)
             ->filter()
-            ->implode(PHP_EOL);
+            ->implode("\n");
 
         return trim($imploded) ?: null;
     }

@@ -37,7 +37,7 @@ class ResourceParserGenerator implements ResourceParserGeneratorContract
             'parsers' => $parsers->collect(),
         ])->render();
 
-        return trim($content) . PHP_EOL;
+        return trim($content) . "\n";
     }
 
     private function stripExtension(string $filePath): string

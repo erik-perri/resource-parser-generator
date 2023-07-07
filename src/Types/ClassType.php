@@ -5,9 +5,7 @@ declare(strict_types=1);
 namespace ResourceParserGenerator\Types;
 
 use Illuminate\Support\Collection;
-use ResourceParserGenerator\Contracts\Types\ParserTypeContract;
 use ResourceParserGenerator\Contracts\Types\TypeContract;
-use RuntimeException;
 
 class ClassType implements TypeContract
 {
@@ -59,14 +57,5 @@ class ClassType implements TypeContract
     public function generics(): Collection|null
     {
         return $this->generics?->collect();
-    }
-
-    public function parserType(): ParserTypeContract
-    {
-        throw new RuntimeException(sprintf(
-            '%s of "%s" cannot be converted to parser type.',
-            class_basename(self::class),
-            $this->fullyQualifiedName(),
-        ));
     }
 }

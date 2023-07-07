@@ -7,6 +7,4 @@ namespace ResourceParserGenerator\Contracts\Types;
 interface TypeContract
 {
     public function describe(): string;
-
-    public function parserType(): ParserTypeContract;
 }

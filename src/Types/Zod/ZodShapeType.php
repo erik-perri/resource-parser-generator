@@ -6,19 +6,27 @@ namespace ResourceParserGenerator\Types\Zod;
 
 use ResourceParserGenerator\Contracts\Types\ParserTypeContract;
 use ResourceParserGenerator\Contracts\Types\TypeContract;
+use ResourceParserGenerator\Converters\ParserTypeConverter;
 use ResourceParserGenerator\Types\ArrayWithPropertiesType;
 
 class ZodShapeType implements ParserTypeContract
 {
-    public function __construct(private readonly ArrayWithPropertiesType $properties)
-    {
+    public function __construct(
+        private readonly ArrayWithPropertiesType $properties,
+        private readonly ParserTypeConverter $parserTypeConverter,
+    ) {
         //
+    }
+
+    public static function create(ArrayWithPropertiesType $properties): self
+    {
+        return resolve(self::class, ['properties' => $properties]);
     }
 
     public function constraint(): string
     {
         $properties = $this->properties->properties()->mapWithKeys(fn(TypeContract $type, string $key) => [
-            $key => $type->parserType()->constraint(),
+            $key => $this->parserTypeConverter->convert($type)->constraint(),
         ])->sort();
 
         return sprintf('object({%s})', $properties
@@ -31,7 +39,8 @@ class ZodShapeType implements ParserTypeContract
         $imports = collect(['zod' => ['object']]);
 
         foreach ($this->properties->properties() as $type) {
-            $imports = $imports->mergeRecursive($type->parserType()->imports());
+            $parserType = $this->parserTypeConverter->convert($type);
+            $imports = $imports->mergeRecursive($parserType->imports());
         }
 
         return $imports

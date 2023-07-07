@@ -4,9 +4,6 @@ declare(strict_types=1);
 
 namespace ResourceParserGenerator\Types;
 
-use ResourceParserGenerator\Contracts\Types\ParserTypeContract;
-use ResourceParserGenerator\Types\Zod\ZodShapeReferenceType;
-
 class ClassWithMethodType extends ClassType
 {
     /**
@@ -33,10 +30,5 @@ class ClassWithMethodType extends ClassType
     public function methodName(): string
     {
         return $this->methodName;
-    }
-
-    public function parserType(): ParserTypeContract
-    {
-        return ZodShapeReferenceType::create($this->fullyQualifiedName(), $this->methodName());
     }
 }

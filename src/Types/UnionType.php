@@ -5,11 +5,7 @@ declare(strict_types=1);
 namespace ResourceParserGenerator\Types;
 
 use Illuminate\Support\Collection;
-use ResourceParserGenerator\Contracts\Types\ParserTypeContract;
 use ResourceParserGenerator\Contracts\Types\TypeContract;
-use ResourceParserGenerator\Types\Zod\ZodNullableType;
-use ResourceParserGenerator\Types\Zod\ZodOptionalType;
-use ResourceParserGenerator\Types\Zod\ZodUnionType;
 use RuntimeException;
 
 class UnionType implements TypeContract
@@ -85,35 +81,6 @@ class UnionType implements TypeContract
         }
 
         return new self(...$newTypes->all());
-    }
-
-    public function parserType(): ParserTypeContract
-    {
-        /**
-         * TODO Flatten the union before this point
-         * @var Collection<int, TypeContract> $flatTypes
-         */
-        $flatTypes = $this->types->map(function (TypeContract $type) {
-            return $type instanceof UnionType ? $type->types() : $type;
-        })->flatten();
-
-        if ($flatTypes->count() === 2) {
-            if ($this->hasType(NullType::class)) {
-                return new ZodNullableType($flatTypes
-                    ->filter(fn(TypeContract $type) => !($type instanceof NullType))
-                    ->firstOrFail()
-                    ->parserType());
-            }
-
-            if ($this->hasType(UndefinedType::class)) {
-                return new ZodOptionalType($flatTypes
-                    ->filter(fn(TypeContract $type) => !($type instanceof UndefinedType))
-                    ->firstOrFail()
-                    ->parserType());
-            }
-        }
-
-        return new ZodUnionType(...$flatTypes->map(fn(TypeContract $type) => $type->parserType())->all());
     }
 
     /**

@@ -41,6 +41,9 @@ return [
                 typeName: 'CustomParser',
                 variableName: 'customParser',
             ),
+            
+            // Search for all resources in this path, generate using generated parser and file names
+            new ResourcePath(dirname(__DIR__) . '/app/Http/Resources'),
         ],
     ],
 ];

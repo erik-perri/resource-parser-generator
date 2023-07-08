@@ -10,8 +10,9 @@ use Illuminate\Support\Facades\File;
 use PHPUnit\Framework\Attributes\DataProvider;
 use ResourceParserGenerator\Console\Commands\BuildResourceParsersCommand;
 use ResourceParserGenerator\DataObjects\ResourceConfiguration;
+use ResourceParserGenerator\DataObjects\ResourcePath;
+use ResourceParserGenerator\Tests\Examples\Resources\Nested\RelatedResource;
 use ResourceParserGenerator\Tests\Examples\Resources\PostResource;
-use ResourceParserGenerator\Tests\Examples\Resources\RelatedResource;
 use ResourceParserGenerator\Tests\Examples\Resources\UserResource;
 use ResourceParserGenerator\Tests\TestCase;
 
@@ -226,6 +227,20 @@ class BuildResourceParsersCommandTest extends TestCase
                 ],
                 'expectedOutput' => [
                     'userResourceParsers.ts' => file_get_contents($examples . '/split/userResourceParsers.ts.txt'),
+                    'relatedResourceParsers.ts' => file_get_contents(
+                        $examples . '/split/relatedResourceParsers.ts.txt',
+                    ),
+                ],
+            ],
+            'using path' => [
+                'config' => fn(string $outputPath) => [
+                    'output_path' => $outputPath,
+                    'sources' => [
+                        new ResourcePath(dirname(__DIR__, 3) . '/Examples/Resources'),
+                    ],
+                ],
+                'expectedOutput' => [
+                    'postResourceParsers.ts' => file_get_contents($examples . '/split/postResourceParsers.ts.txt'),
                     'relatedResourceParsers.ts' => file_get_contents(
                         $examples . '/split/relatedResourceParsers.ts.txt',
                     ),

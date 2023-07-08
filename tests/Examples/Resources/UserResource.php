@@ -10,6 +10,7 @@ use Illuminate\Http\Resources\Json\JsonResource;
 use Phar;
 use ResourceParserGenerator\Tests\Examples\Enums\Permission;
 use ResourceParserGenerator\Tests\Examples\Models\User;
+use ResourceParserGenerator\Tests\Examples\Resources\Nested\RelatedResource;
 
 /**
  * @property User $resource

@@ -1,0 +1,13 @@
+import {number, object, output, string} from 'zod';
+
+export const postResourceBaseParser = object({
+  id: number(),
+});
+
+export type PostResourceBase = output<typeof postResourceBaseParser>;
+
+export const postResourceSimpleParser = object({
+  status: string(),
+});
+
+export type PostResourceSimple = output<typeof postResourceSimpleParser>;

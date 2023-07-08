@@ -6,7 +6,6 @@ namespace ResourceParserGenerator\Console\Commands;
 
 use Illuminate\Console\Command;
 use Illuminate\Support\Arr;
-use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Validator;
@@ -16,6 +15,9 @@ use ResourceParserGenerator\Contracts\Parsers\ResourceParserContract;
 use ResourceParserGenerator\Contracts\ResourceGeneratorContextContract;
 use ResourceParserGenerator\DataObjects\ResourceConfiguration;
 use ResourceParserGenerator\DataObjects\ResourceGeneratorConfiguration;
+use ResourceParserGenerator\DataObjects\ResourcePath;
+use ResourceParserGenerator\Filesystem\ResourceFileFormatLocator;
+use ResourceParserGenerator\Filesystem\ResourceFileLocator;
 use Throwable;
 
 class BuildResourceParsersCommand extends Command
@@ -158,6 +160,15 @@ class BuildResourceParsersCommand extends Command
         foreach ($valid['sources'] as $source) {
             if ($source instanceof ResourceConfiguration) {
                 $sources[] = $source;
+            } elseif ($source instanceof ResourcePath) {
+                $files = $this->resolve(ResourceFileLocator::class)->files($source);
+                $formatLocator = $this->resolve(ResourceFileFormatLocator::class);
+                foreach ($files as $file) {
+                    $formats = $formatLocator->formats($file);
+                    foreach ($formats as $format) {
+                        $sources[] = new ResourceConfiguration($format);
+                    }
+                }
             } else {
                 $this->components->error(sprintf('Unhandled source type "%s"', get_class($source)));
                 return null;

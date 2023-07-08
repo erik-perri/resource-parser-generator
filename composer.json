@@ -1,6 +1,6 @@
 {
   "name": "erik-perri/resource-parser-generator",
-  "description": "Read the name",
+  "description": "Generates zod parsers for enhanced-resources",
   "type": "library",
   "license": "MIT",
   "minimum-stability": "stable",

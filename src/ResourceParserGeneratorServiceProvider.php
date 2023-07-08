@@ -49,6 +49,7 @@ use ResourceParserGenerator\Parsers\ClassParser;
 use ResourceParserGenerator\Parsers\DocBlockParser;
 use ResourceParserGenerator\Parsers\PhpFileParser;
 use ResourceParserGenerator\Parsers\ResourceMethodParser;
+use RuntimeException;
 
 class ResourceParserGeneratorServiceProvider extends ServiceProvider
 {
@@ -98,9 +99,16 @@ class ResourceParserGeneratorServiceProvider extends ServiceProvider
             // Locators
             $this->app->singleton(
                 ClassFileLocatorContract::class,
-                fn() => new ClassFileLocator(
-                    strval(Env::get('COMPOSER_VENDOR_DIR')) ?: $this->app->basePath('vendor'),
-                ),
+                function () {
+                    $composerVendorOverride = Env::get('COMPOSER_VENDOR_DIR');
+                    if ($composerVendorOverride && !is_string($composerVendorOverride)) {
+                        throw new RuntimeException(
+                            'The COMPOSER_VENDOR_DIR environment variable must be a string.',
+                        );
+                    }
+
+                    return new ClassFileLocator($composerVendorOverride ?: $this->app->basePath('vendor'));
+                },
             );
             $this->app->singleton(ResourceFileFormatLocatorContract::class, ResourceFileFormatLocator::class);
 

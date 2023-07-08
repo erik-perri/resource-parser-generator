@@ -4,9 +4,12 @@ declare(strict_types=1);
 
 namespace ResourceParserGenerator\Types\Zod;
 
+use ResourceParserGenerator\Contracts\ImportCollectionContract;
 use ResourceParserGenerator\Contracts\Types\ParserTypeContract;
 use ResourceParserGenerator\Contracts\Types\TypeContract;
 use ResourceParserGenerator\Converters\ParserTypeConverter;
+use ResourceParserGenerator\DataObjects\Import;
+use ResourceParserGenerator\DataObjects\ImportCollection;
 use ResourceParserGenerator\Types\ArrayWithPropertiesType;
 
 class ZodShapeType implements ParserTypeContract
@@ -34,17 +37,15 @@ class ZodShapeType implements ParserTypeContract
             ->join(', '));
     }
 
-    public function imports(): array
+    public function imports(): ImportCollectionContract
     {
-        $imports = collect(['zod' => ['object']]);
+        $imports = new ImportCollection(new Import('object', 'zod'));
 
         foreach ($this->properties->properties() as $type) {
             $parserType = $this->parserTypeConverter->convert($type);
-            $imports = $imports->mergeRecursive($parserType->imports());
+            $imports = $imports->merge($parserType->imports());
         }
 
-        return $imports
-            ->map(fn(array $importItems) => collect($importItems)->unique()->sort()->values()->all())
-            ->all();
+        return $imports;
     }
 }

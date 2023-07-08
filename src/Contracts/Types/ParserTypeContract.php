@@ -4,12 +4,14 @@ declare(strict_types=1);
 
 namespace ResourceParserGenerator\Contracts\Types;
 
+use ResourceParserGenerator\Contracts\ImportCollectionContract;
+
 interface ParserTypeContract
 {
     /**
-     * @return array<string, string[]>
+     * @return ImportCollectionContract
      */
-    public function imports(): array;
+    public function imports(): ImportCollectionContract;
 
     public function constraint(): string;
 }

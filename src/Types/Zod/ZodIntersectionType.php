@@ -5,8 +5,11 @@ declare(strict_types=1);
 namespace ResourceParserGenerator\Types\Zod;
 
 use Illuminate\Support\Collection;
+use ResourceParserGenerator\Contracts\ImportCollectionContract;
 use ResourceParserGenerator\Contracts\Types\ParserTypeContract;
 use ResourceParserGenerator\Contracts\Types\ParserTypeWithCommentContract;
+use ResourceParserGenerator\DataObjects\Import;
+use ResourceParserGenerator\DataObjects\ImportCollection;
 use ResourceParserGenerator\Types\Traits\HasCommentTrait;
 
 class ZodIntersectionType implements ParserTypeContract, ParserTypeWithCommentContract
@@ -50,16 +53,14 @@ class ZodIntersectionType implements ParserTypeContract, ParserTypeWithCommentCo
         return sprintf('intersection([%s])', $types->join(', '));
     }
 
-    public function imports(): array
+    public function imports(): ImportCollectionContract
     {
-        $imports = collect(['zod' => ['intersection']]);
+        $imports = new ImportCollection(new Import('intersection', 'zod'));
 
         foreach ($this->types as $type) {
-            $imports = $imports->mergeRecursive($type->imports());
+            $imports = $imports->merge($type->imports());
         }
 
-        return $imports
-            ->map(fn(array $importItems) => collect($importItems)->unique()->sort()->values()->all())
-            ->all();
+        return $imports;
     }
 }

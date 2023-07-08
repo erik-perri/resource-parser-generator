@@ -4,8 +4,11 @@ declare(strict_types=1);
 
 namespace ResourceParserGenerator\Types\Zod;
 
+use ResourceParserGenerator\Contracts\ImportCollectionContract;
 use ResourceParserGenerator\Contracts\Types\ParserTypeContract;
 use ResourceParserGenerator\Contracts\Types\ParserTypeWithCommentContract;
+use ResourceParserGenerator\DataObjects\Import;
+use ResourceParserGenerator\DataObjects\ImportCollection;
 use ResourceParserGenerator\Types\Traits\HasCommentTrait;
 use RuntimeException;
 
@@ -46,24 +49,22 @@ class ZodArrayType implements ParserTypeContract, ParserTypeWithCommentContract
         throw new RuntimeException('Untyped Zod arrays are not supported');
     }
 
-    public function imports(): array
+    public function imports(): ImportCollectionContract
     {
         $constraintType = $this->keys && $this->values
             ? 'record'
             : 'array';
 
-        $imports = collect(['zod' => [$constraintType]]);
+        $imports = new ImportCollection(new Import($constraintType, 'zod'));
 
         if ($this->keys) {
-            $imports = $imports->mergeRecursive($this->keys->imports());
+            $imports = $imports->merge($this->keys->imports());
         }
 
         if ($this->values) {
-            $imports = $imports->mergeRecursive($this->values->imports());
+            $imports = $imports->merge($this->values->imports());
         }
 
-        return $imports
-            ->map(fn(array $importItems) => collect($importItems)->unique()->sort()->values()->all())
-            ->all();
+        return $imports;
     }
 }

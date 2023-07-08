@@ -4,7 +4,10 @@ declare(strict_types=1);
 
 namespace ResourceParserGenerator\Types\Zod;
 
+use ResourceParserGenerator\Contracts\ImportCollectionContract;
 use ResourceParserGenerator\Contracts\Types\ParserTypeContract;
+use ResourceParserGenerator\DataObjects\Import;
+use ResourceParserGenerator\DataObjects\ImportCollection;
 
 class ZodOptionalType implements ParserTypeContract
 {
@@ -14,13 +17,10 @@ class ZodOptionalType implements ParserTypeContract
         //
     }
 
-    public function imports(): array
+    public function imports(): ImportCollectionContract
     {
-        $imports = collect(['zod' => ['optional']])->mergeRecursive($this->type->imports());
-
-        return $imports
-            ->map(fn(array $importItems) => collect($importItems)->unique()->sort()->values()->all())
-            ->all();
+        return (new ImportCollection(new Import('optional', 'zod')))
+            ->merge($this->type->imports());
     }
 
     public function constraint(): string

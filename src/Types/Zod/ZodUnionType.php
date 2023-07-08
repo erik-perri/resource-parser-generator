@@ -5,8 +5,11 @@ declare(strict_types=1);
 namespace ResourceParserGenerator\Types\Zod;
 
 use Illuminate\Support\Collection;
+use ResourceParserGenerator\Contracts\ImportCollectionContract;
 use ResourceParserGenerator\Contracts\Types\ParserTypeContract;
 use ResourceParserGenerator\Contracts\Types\ParserTypeWithCommentContract;
+use ResourceParserGenerator\DataObjects\Import;
+use ResourceParserGenerator\DataObjects\ImportCollection;
 use ResourceParserGenerator\Types\Traits\HasCommentTrait;
 
 class ZodUnionType implements ParserTypeContract, ParserTypeWithCommentContract
@@ -50,23 +53,21 @@ class ZodUnionType implements ParserTypeContract, ParserTypeWithCommentContract
         return sprintf('union([%s])', $types->join(', '));
     }
 
-    public function imports(): array
+    public function imports(): ImportCollectionContract
     {
         $types = $this->types->map(fn(ParserTypeContract $type) => $type->constraint())
             ->unique()
             ->sort();
 
         $imports = $types->count() > 1
-            ? collect(['zod' => ['union']])
-            : collect();
+            ? new ImportCollection(new Import('union', 'zod'))
+            : new ImportCollection();
 
         foreach ($this->types as $type) {
-            $imports = $imports->mergeRecursive($type->imports());
+            $imports = $imports->merge($type->imports());
         }
 
-        return $imports
-            ->map(fn(array $importItems) => collect($importItems)->unique()->sort()->values()->all())
-            ->all();
+        return $imports;
     }
 
     /**

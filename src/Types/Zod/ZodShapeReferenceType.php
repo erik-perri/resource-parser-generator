@@ -4,8 +4,11 @@ declare(strict_types=1);
 
 namespace ResourceParserGenerator\Types\Zod;
 
+use ResourceParserGenerator\Contracts\ImportCollectionContract;
 use ResourceParserGenerator\Contracts\ResourceGeneratorContextContract;
 use ResourceParserGenerator\Contracts\Types\ParserTypeContract;
+use ResourceParserGenerator\DataObjects\Import;
+use ResourceParserGenerator\DataObjects\ImportCollection;
 use RuntimeException;
 
 class ZodShapeReferenceType implements ParserTypeContract
@@ -61,7 +64,7 @@ class ZodShapeReferenceType implements ParserTypeContract
         return $outputVariable;
     }
 
-    public function imports(): array
+    public function imports(): ImportCollectionContract
     {
         if (!$this->generatorContext->findLocal($this->className, $this->methodName)) {
             $context = $this->generatorContext->findGlobal($this->className, $this->methodName);
@@ -91,12 +94,10 @@ class ZodShapeReferenceType implements ParserTypeContract
                 ));
             }
 
-            return [
-                // TODO Move path part to configuration?
-                './' . $fileName => [$variableName],
-            ];
+            // TODO Move path part to configuration?
+            return new ImportCollection(new Import($variableName, './' . $fileName));
         }
 
-        return [];
+        return new ImportCollection();
     }
 }

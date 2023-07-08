@@ -64,8 +64,8 @@ class ResourceMethodParser implements ResourceParserContract
         $context = new ResourceData(
             $className,
             $methodName,
-            $returnType->properties()->map(fn(TypeContract $type) => $this->parserTypeConverter->convert($type)),
             $configuration,
+            $returnType->properties()->map(fn(TypeContract $type) => $this->parserTypeConverter->convert($type)),
         );
 
         $this->generatorContext->add($context);

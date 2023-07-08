@@ -47,14 +47,14 @@ class ResourceGeneratorContext implements ResourceGeneratorContextContract
     public function findGlobal(string $className, string $methodName): ResourceData|null
     {
         return $this->globalParsers->first(
-            fn(ResourceData $context) => $context->className() === $className && $context->methodName() === $methodName,
+            fn(ResourceData $context) => $context->className === $className && $context->methodName === $methodName,
         );
     }
 
     public function findLocal(string $className, string $methodName): ResourceData|null
     {
         return $this->localParsers->first(
-            fn(ResourceData $context) => $context->className() === $className && $context->methodName() === $methodName,
+            fn(ResourceData $context) => $context->className === $className && $context->methodName === $methodName,
         );
     }
 
@@ -95,15 +95,15 @@ class ResourceGeneratorContext implements ResourceGeneratorContextContract
         return $this->globalParsers->groupBy(function (ResourceData $context) {
             $configuration = $this->parserConfigurationGenerator->generate(
                 $this->configuration,
-                $context->className(),
-                $context->methodName(),
+                $context->className,
+                $context->methodName,
             );
 
             if (!$configuration->parserFile) {
                 throw new RuntimeException(sprintf(
                     'Could not find output file path for "%s::%s"',
-                    $context->className(),
-                    $context->methodName(),
+                    $context->className,
+                    $context->methodName,
                 ));
             }
 

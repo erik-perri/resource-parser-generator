@@ -22,9 +22,9 @@ import {{ implode(', ', $line) }} from '{{$module->module()}}';
 
 @foreach($parsers as $parserName => $parser)
 @include('resource-parser-generator::resource-parser', [
-    'properties' => $parser->properties(),
-    'typeName' => $parser->configuration()->typeName,
-    'variableName' => $parser->configuration()->variableName,
+    'properties' => $parser->properties->all(),
+    'typeName' => $parser->configuration->typeName,
+    'variableName' => $parser->configuration->variableName,
 ])
 
 @endforeach

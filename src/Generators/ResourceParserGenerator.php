@@ -25,7 +25,7 @@ class ResourceParserGenerator implements ResourceParserGeneratorContract
         );
 
         foreach ($parsers as $parser) {
-            foreach ($parser->properties() as $property) {
+            foreach ($parser->properties as $property) {
                 $imports = $imports->merge($property->imports());
             }
         }

@@ -4,20 +4,18 @@ declare(strict_types=1);
 
 namespace ResourceParserGenerator\DataObjects;
 
-use Illuminate\Support\Collection;
-
 class ResourceGeneratorConfiguration
 {
     /**
-     * @var Collection<int, ResourceConfiguration>
+     * @var ReadOnlyCollection<int, ResourceConfiguration>
      */
-    private readonly Collection $parsers;
+    public readonly ReadOnlyCollection $parsers;
 
     public function __construct(
         public readonly string $outputPath,
         ResourceConfiguration ...$parsers,
     ) {
-        $this->parsers = collect(array_values($parsers));
+        $this->parsers = new ReadOnlyCollection(array_values($parsers));
     }
 
     /**
@@ -30,13 +28,5 @@ class ResourceGeneratorConfiguration
         return $this->parsers->first(
             fn(ResourceConfiguration $configuration) => $configuration->is($className, $methodName),
         );
-    }
-
-    /**
-     * @return Collection<int, ResourceConfiguration>
-     */
-    public function parsers(): Collection
-    {
-        return $this->parsers->collect();
     }
 }

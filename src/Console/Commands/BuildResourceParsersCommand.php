@@ -40,7 +40,7 @@ class BuildResourceParsersCommand extends Command
         $generatorContext->setConfiguration($configuration);
 
         // Parse the resources and their dependencies
-        foreach ($configuration->parsers() as $parserConfiguration) {
+        foreach ($configuration->parsers as $parserConfiguration) {
             try {
                 $resourceParser->parse($parserConfiguration->method[0], $parserConfiguration->method[1]);
             } catch (Throwable $error) {

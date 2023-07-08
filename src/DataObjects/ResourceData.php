@@ -10,46 +10,22 @@ use ResourceParserGenerator\Contracts\Types\ParserTypeContract;
 class ResourceData
 {
     /**
+     * @var ReadOnlyCollection<string, ParserTypeContract>
+     */
+    public readonly ReadOnlyCollection $properties;
+
+    /**
      * @param class-string $className
      * @param string $methodName
-     * @param Collection<string, ParserTypeContract> $properties
      * @param ResourceConfiguration $configuration
+     * @param Collection<string, ParserTypeContract> $properties
      */
     public function __construct(
-        private readonly string $className,
-        private readonly string $methodName,
-        private readonly Collection $properties,
-        private readonly ResourceConfiguration $configuration,
+        public readonly string $className,
+        public readonly string $methodName,
+        public readonly ResourceConfiguration $configuration,
+        Collection $properties,
     ) {
-        //
-    }
-
-    /**
-     * @return ResourceConfiguration
-     */
-    public function configuration(): ResourceConfiguration
-    {
-        return $this->configuration;
-    }
-
-    /**
-     * @return class-string
-     */
-    public function className(): string
-    {
-        return $this->className;
-    }
-
-    public function methodName(): string
-    {
-        return $this->methodName;
-    }
-
-    /**
-     * @return Collection<string, ParserTypeContract>
-     */
-    public function properties(): Collection
-    {
-        return $this->properties->collect();
+        $this->properties = new ReadOnlyCollection($properties->all());
     }
 }

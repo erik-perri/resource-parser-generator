@@ -21,6 +21,11 @@ use ResourceParserGenerator\Types;
 use RuntimeException;
 use Throwable;
 
+/**
+ * This class parses the specified class and method inspecting the various return calls to determine what is returned
+ * in the arrays. It will then attempt to merge the return arrays into a single array with the non-common properties
+ * marked as optional.
+ */
 class ClassMethodReturnParser implements ClassMethodReturnParserContract
 {
     public function __construct(

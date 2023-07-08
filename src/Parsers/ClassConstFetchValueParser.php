@@ -11,6 +11,16 @@ use ResourceParserGenerator\Contracts\Parsers\ClassParserContract;
 use ResourceParserGenerator\Contracts\Resolvers\ResolverContract;
 use RuntimeException;
 
+/**
+ * This class attempts to determine the value of a class const fetch expression.
+ *
+ * `RelatedResource::FORMAT_VERBOSE` -> 'verbose'
+ *  |             |  |            |     output
+ *  |             |  |            |
+ *  |             |  ClassConstFetch->name
+ *  |             |
+ *  ClassConstFetch->class
+ */
 class ClassConstFetchValueParser implements ClassConstFetchValueParserContract
 {
     public function __construct(

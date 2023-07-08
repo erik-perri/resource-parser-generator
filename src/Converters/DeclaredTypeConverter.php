@@ -17,6 +17,11 @@ use ResourceParserGenerator\Contracts\Types\TypeContract;
 use ResourceParserGenerator\Types;
 use RuntimeException;
 
+/**
+ * This class takes a parsed explicitly declared type and converts it to a TypeContract.
+ *
+ * `fn(string $foo): int => 1` Both `string` and `int` are declared types.
+ */
 class DeclaredTypeConverter implements DeclaredTypeConverterContract
 {
     public function convert(ComplexType|Identifier|Name|null $type, ResolverContract $resolver): TypeContract

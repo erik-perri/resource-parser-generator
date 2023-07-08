@@ -16,7 +16,12 @@ use RuntimeException;
 use Sourcetoad\EnhancedResources\Formatting\Attributes\IsDefault;
 use Sourcetoad\EnhancedResources\Resource;
 
-// TODO Find a better location for this class
+/**
+ * This class takes finalizes a converted TypeContract based on the collected context. Turning enums into their backed
+ * types, and resource classes into references to their specified format method.
+ *
+ * TODO Find a better location for this class
+ */
 class ExpressionContextProcessor
 {
     public function __construct(

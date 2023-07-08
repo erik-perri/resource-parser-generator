@@ -30,6 +30,7 @@ use PhpParser\Node\Scalar\String_;
 use ResourceParserGenerator\Contracts\Converters\ExpressionTypeConverterContract;
 use ResourceParserGenerator\Contracts\Types\TypeContract;
 use ResourceParserGenerator\Converters\Data\ConverterContext;
+use ResourceParserGenerator\Converters\Expressions\ArrayExprTypeConverter;
 use ResourceParserGenerator\Converters\Expressions\ArrowFunctionExprTypeConverter;
 use ResourceParserGenerator\Converters\Expressions\BoolExprTypeConverter;
 use ResourceParserGenerator\Converters\Expressions\ClassConstFetchExprTypeConverter;
@@ -41,8 +42,30 @@ use ResourceParserGenerator\Converters\Expressions\PropertyFetchExprTypeConverte
 use ResourceParserGenerator\Converters\Expressions\StaticCallExprTypeConverter;
 use ResourceParserGenerator\Converters\Expressions\StringExprTypeConverter;
 use ResourceParserGenerator\Converters\Expressions\TernaryExprTypeConverter;
+use ResourceParserGenerator\Converters\Expressions\VariableExprTypeConverter;
 use RuntimeException;
 
+/**
+ * This class takes a parsed generic PHP expression and attempts to determine what type is returned from the expression.
+ *
+ * When encountering a chained expression this will attempt to convert the last chunk, recursively calling this for each
+ * part of the expression encountered until we find the end type.
+ *
+ * `$this->resource->method()`
+ *  |   |  |      |  |    |
+ *  |   |  |      |  MethodCall
+ *  |   |  |      |
+ *  |   |  PropertyFetch
+ *  |   |
+ *  Variable
+ *
+ * ->convert(MethodCall)
+ *   ->convert(PropertyFetch from left side of MethodCall)
+ *     ->convert(Variable from left side of PropertyFetch)
+ *     <-TypeContract of resource class
+ *   <-TypeContract of property from resource class
+ * <-TypeContract of method return type from property class
+ */
 class ExpressionTypeConverter implements ExpressionTypeConverterContract
 {
     /**
@@ -53,7 +76,7 @@ class ExpressionTypeConverter implements ExpressionTypeConverterContract
     public function __construct()
     {
         $this->typeHandlers = [
-            Array_::class => Expressions\ArrayExprTypeConverter::class,
+            Array_::class => ArrayExprTypeConverter::class,
             ArrowFunction::class => ArrowFunctionExprTypeConverter::class,
             CastBool_::class => BoolExprTypeConverter::class,
             BooleanAnd::class => BoolExprTypeConverter::class,
@@ -74,7 +97,7 @@ class ExpressionTypeConverter implements ExpressionTypeConverterContract
             Ternary::class => TernaryExprTypeConverter::class,
             UnaryMinus::class => NumberExprTypeConverter::class,
             UnaryPlus::class => NumberExprTypeConverter::class,
-            Variable::class => Expressions\VariableExprTypeConverter::class,
+            Variable::class => VariableExprTypeConverter::class,
         ];
     }
 

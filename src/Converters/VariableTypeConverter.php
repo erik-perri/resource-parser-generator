@@ -8,6 +8,9 @@ use ResourceParserGenerator\Contracts\Converters\VariableTypeConverterContract;
 use ResourceParserGenerator\Contracts\Types\TypeContract;
 use ResourceParserGenerator\Types;
 
+/**
+ * This class takes a normal variable and converts it to a TypeContract.
+ */
 class VariableTypeConverter implements VariableTypeConverterContract
 {
     public function convert(mixed $variable): TypeContract

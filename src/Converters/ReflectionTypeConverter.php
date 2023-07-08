@@ -11,6 +11,11 @@ use ResourceParserGenerator\Contracts\Types\TypeContract;
 use ResourceParserGenerator\Types;
 use RuntimeException;
 
+/**
+ * This class takes a ReflectionType and converts it to a TypeContract.
+ *
+ * This is used to convert types we cannot infer any other way, like built in PHP method calls.
+ */
 class ReflectionTypeConverter implements ReflectionTypeConverterContract
 {
     public function convert(ReflectionType|null $type): TypeContract

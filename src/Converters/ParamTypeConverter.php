@@ -11,6 +11,11 @@ use ResourceParserGenerator\Contracts\Types\TypeContract;
 use ResourceParserGenerator\Converters\Data\ConverterContext;
 use RuntimeException;
 
+/**
+ * This class takes a parsed function parameter and converts it to a TypeContract.
+ *
+ * `fn(string $foo): int => 1` `$foo` is the parameter.
+ */
 class ParamTypeConverter implements ParamTypeConverterContract
 {
     public function __construct(private readonly DeclaredTypeConverter $declaredTypeConverter)

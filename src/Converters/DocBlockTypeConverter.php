@@ -18,6 +18,11 @@ use ResourceParserGenerator\Contracts\Types\TypeContract;
 use ResourceParserGenerator\Types;
 use RuntimeException;
 
+/**
+ * This class takes a parsed docblock type and converts it to a TypeContract.
+ *
+ * `@param string $foo ` `string` is a docblock type.
+ */
 class DocBlockTypeConverter implements DocBlockTypeConverterContract
 {
     public function convert(TypeNode $type, ResolverContract $resolver): TypeContract

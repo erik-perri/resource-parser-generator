@@ -12,6 +12,9 @@ use ResourceParserGenerator\Types;
 use RuntimeException;
 use Throwable;
 
+/**
+ * This converts a resource's TypeContract into a parser's ParserTypeContract.
+ */
 class ParserTypeConverter implements ParserTypeConverterContract
 {
     public function convert(TypeContract $type): ParserTypeContract

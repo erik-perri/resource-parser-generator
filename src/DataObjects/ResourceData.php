@@ -50,7 +50,6 @@ class ResourceData
      */
     public function properties(): Collection
     {
-        // TODO Make this immutable again
-        return $this->properties;
+        return $this->properties->collect();
     }
 }

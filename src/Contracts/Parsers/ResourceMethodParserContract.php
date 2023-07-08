@@ -7,7 +7,7 @@ namespace ResourceParserGenerator\Contracts\Parsers;
 use ResourceParserGenerator\Contracts\ResourceGeneratorContextContract;
 use ResourceParserGenerator\DataObjects\ResourceData;
 
-interface ResourceParserContract
+interface ResourceMethodParserContract
 {
     /**
      * @param class-string $className

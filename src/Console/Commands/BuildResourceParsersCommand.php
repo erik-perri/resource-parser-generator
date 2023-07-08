@@ -11,7 +11,7 @@ use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Validator;
 use ResourceParserGenerator\Contracts\DataObjects\ParserSourceContract;
 use ResourceParserGenerator\Contracts\Generators\ResourceParserGeneratorContract;
-use ResourceParserGenerator\Contracts\Parsers\ResourceParserContract;
+use ResourceParserGenerator\Contracts\Parsers\ResourceMethodParserContract;
 use ResourceParserGenerator\Contracts\ResourceGeneratorContextContract;
 use ResourceParserGenerator\DataObjects\ResourceConfiguration;
 use ResourceParserGenerator\DataObjects\ResourceGeneratorConfiguration;
@@ -41,7 +41,7 @@ class BuildResourceParsersCommand extends Command
         ]);
         app()->instance(ResourceGeneratorContextContract::class, $generatorContext);
 
-        $resourceParser = $this->resolve(ResourceParserContract::class);
+        $resourceParser = $this->resolve(ResourceMethodParserContract::class);
         $parserGenerator = $this->resolve(ResourceParserGeneratorContract::class);
 
         // Parse the resources and their dependencies

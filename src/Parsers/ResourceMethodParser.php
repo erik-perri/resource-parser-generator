@@ -6,7 +6,7 @@ namespace ResourceParserGenerator\Parsers;
 
 use ResourceParserGenerator\Contracts\Converters\ParserTypeConverterContract;
 use ResourceParserGenerator\Contracts\Parsers\ClassMethodReturnParserContract;
-use ResourceParserGenerator\Contracts\Parsers\ResourceParserContract;
+use ResourceParserGenerator\Contracts\Parsers\ResourceMethodParserContract;
 use ResourceParserGenerator\Contracts\ResourceGeneratorContextContract;
 use ResourceParserGenerator\Contracts\Types\TypeContract;
 use ResourceParserGenerator\DataObjects\ResourceData;
@@ -14,7 +14,7 @@ use ResourceParserGenerator\Generators\ParserConfigurationGenerator;
 use ResourceParserGenerator\Types;
 use RuntimeException;
 
-class ResourceMethodParser implements ResourceParserContract
+class ResourceMethodParser implements ResourceMethodParserContract
 {
     public function __construct(
         private readonly ClassMethodReturnParserContract $classMethodReturnParser,

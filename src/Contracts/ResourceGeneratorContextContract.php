@@ -6,8 +6,8 @@ namespace ResourceParserGenerator\Contracts;
 
 use Closure;
 use Illuminate\Support\Collection;
-use ResourceParserGenerator\DataObjects\ResourceConfiguration;
 use ResourceParserGenerator\DataObjects\ResourceData;
+use ResourceParserGenerator\DataObjects\ResourceGeneratorConfiguration;
 
 interface ResourceGeneratorContextContract
 {
@@ -27,6 +27,10 @@ interface ResourceGeneratorContextContract
      */
     public function findLocal(string $className, string $methodName): ResourceData|null;
 
+    public function configuration(): ResourceGeneratorConfiguration;
+
+    public function setConfiguration(ResourceGeneratorConfiguration $configuration): self;
+
     /**
      * @param Collection<int, ResourceData> $localParsers
      * @return self
@@ -45,10 +49,4 @@ interface ResourceGeneratorContextContract
      * @return Collection<string, Collection<int, ResourceData>>
      */
     public function splitToFiles(): Collection;
-
-    /**
-     * @param Closure(ResourceConfiguration $config): ResourceConfiguration $updater
-     * @return self
-     */
-    public function updateConfiguration(Closure $updater): self;
 }

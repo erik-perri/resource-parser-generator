@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\File;
 use PHPUnit\Framework\Attributes\DataProvider;
 use ResourceParserGenerator\Console\Commands\BuildResourceParsersCommand;
+use ResourceParserGenerator\DataObjects\ResourceConfiguration;
 use ResourceParserGenerator\Tests\Examples\Resources\PostResource;
 use ResourceParserGenerator\Tests\Examples\Resources\RelatedResource;
 use ResourceParserGenerator\Tests\Examples\Resources\UserResource;
@@ -44,14 +45,14 @@ class BuildResourceParsersCommandTest extends TestCase
     {
         Config::set('build.resource_parsers', [
             'output_path' => dirname(__DIR__, 3) . '/Output',
-            'parsers' => [
-                [UserResource::class, 'base'],
-                ['ResourceParserGenerator\MissingClass', 'base'],
+            'sources' => [
+                new ResourceConfiguration([UserResource::class, 'base']),
+                new ResourceConfiguration(['ResourceParserGenerator\MissingClass', 'base']),
             ],
         ]);
 
         $this->artisan(BuildResourceParsersCommand::class)
-            ->expectsOutputToContain('The parsers.1 field references unknown class ')
+            ->expectsOutputToContain('Could not find file for class ')
             ->assertExitCode(1)
             ->execute();
     }
@@ -60,14 +61,14 @@ class BuildResourceParsersCommandTest extends TestCase
     {
         Config::set('build.resource_parsers', [
             'output_path' => dirname(__DIR__, 3) . '/Output',
-            'parsers' => [
-                [UserResource::class, 'base'],
-                [UserResource::class, 'notARealMethod'],
+            'sources' => [
+                new ResourceConfiguration([UserResource::class, 'base']),
+                new ResourceConfiguration([UserResource::class, 'notARealMethod']),
             ],
         ]);
 
         $this->artisan(BuildResourceParsersCommand::class)
-            ->expectsOutputToContain('The parsers.1 field references unknown method ')
+            ->expectsOutputToContain('Unknown method "notARealMethod" in class ')
             ->assertExitCode(1)
             ->execute();
     }
@@ -76,8 +77,8 @@ class BuildResourceParsersCommandTest extends TestCase
     {
         Config::set('build.resource_parsers', [
             'output_path' => '/where/is/this/file',
-            'parsers' => [
-                [UserResource::class, 'base'],
+            'sources' => [
+                new ResourceConfiguration([UserResource::class, 'base']),
             ],
         ]);
 
@@ -92,8 +93,8 @@ class BuildResourceParsersCommandTest extends TestCase
         $outputPath = dirname(__DIR__, 3) . '/Output';
         $config = [
             'output_path' => $outputPath,
-            'parsers' => [
-                [UserResource::class, 'base'],
+            'sources' => [
+                new ResourceConfiguration([UserResource::class, 'base']),
             ],
         ];
 
@@ -144,8 +145,8 @@ class BuildResourceParsersCommandTest extends TestCase
             'UserResource::base not configured' => [
                 'config' => fn(string $outputPath) => [
                     'output_path' => $outputPath,
-                    'parsers' => [
-                        [UserResource::class, 'base'],
+                    'sources' => [
+                        new ResourceConfiguration([UserResource::class, 'base']),
                     ],
                 ],
                 'expectedOutput' => [
@@ -157,13 +158,13 @@ class BuildResourceParsersCommandTest extends TestCase
             'UserResource::base configured' => [
                 'config' => fn(string $outputPath) => [
                     'output_path' => $outputPath,
-                    'parsers' => [
-                        [
-                            'resource' => [UserResource::class, 'base'],
-                            'output_file' => 'custom.ts',
-                            'type' => 'CustomParser',
-                            'variable' => 'customParser',
-                        ],
+                    'sources' => [
+                        new ResourceConfiguration(
+                            [UserResource::class, 'base'],
+                            'custom.ts',
+                            'CustomParser',
+                            'customParser',
+                        ),
                     ],
                 ],
                 'expectedOutput' => [
@@ -175,35 +176,35 @@ class BuildResourceParsersCommandTest extends TestCase
             'combined' => [
                 'config' => fn(string $outputPath) => [
                     'output_path' => $outputPath,
-                    'parsers' => [
-                        [
-                            'resource' => [UserResource::class, 'base'],
-                            'output_file' => 'parsers.ts',
-                        ],
-                        [
-                            'resource' => [UserResource::class, 'combined'],
-                            'output_file' => 'parsers.ts',
-                        ],
-                        [
-                            'resource' => [UserResource::class, 'ternaries'],
-                            'output_file' => 'parsers.ts',
-                        ],
-                        [
-                            'resource' => [UserResource::class, 'relatedResource'],
-                            'output_file' => 'parsers.ts',
-                        ],
-                        [
-                            'resource' => [RelatedResource::class, 'base'],
-                            'output_file' => 'parsers.ts',
-                        ],
-                        [
-                            'resource' => [RelatedResource::class, 'shortFormatNotNamedLikeFormatName'],
-                            'output_file' => 'parsers.ts',
-                        ],
-                        [
-                            'resource' => [RelatedResource::class, 'verbose'],
-                            'output_file' => 'parsers.ts',
-                        ],
+                    'sources' => [
+                        new ResourceConfiguration(
+                            [UserResource::class, 'base'],
+                            'parsers.ts',
+                        ),
+                        new ResourceConfiguration(
+                            [UserResource::class, 'combined'],
+                            'parsers.ts',
+                        ),
+                        new ResourceConfiguration(
+                            [UserResource::class, 'ternaries'],
+                            'parsers.ts',
+                        ),
+                        new ResourceConfiguration(
+                            [UserResource::class, 'relatedResource'],
+                            'parsers.ts',
+                        ),
+                        new ResourceConfiguration(
+                            [RelatedResource::class, 'base'],
+                            'parsers.ts',
+                        ),
+                        new ResourceConfiguration(
+                            [RelatedResource::class, 'shortFormatNotNamedLikeFormatName'],
+                            'parsers.ts',
+                        ),
+                        new ResourceConfiguration(
+                            [RelatedResource::class, 'verbose'],
+                            'parsers.ts',
+                        ),
                     ],
                 ],
                 'expectedOutput' => [
@@ -213,14 +214,14 @@ class BuildResourceParsersCommandTest extends TestCase
             'split' => [
                 'config' => fn(string $outputPath) => [
                     'output_path' => $outputPath,
-                    'parsers' => [
-                        [UserResource::class, 'base'],
-                        [UserResource::class, 'combined'],
-                        [UserResource::class, 'ternaries'],
-                        [UserResource::class, 'relatedResource'],
-                        [RelatedResource::class, 'base'],
-                        [RelatedResource::class, 'shortFormatNotNamedLikeFormatName'],
-                        [RelatedResource::class, 'verbose'],
+                    'sources' => [
+                        new ResourceConfiguration([UserResource::class, 'base']),
+                        new ResourceConfiguration([UserResource::class, 'combined']),
+                        new ResourceConfiguration([UserResource::class, 'ternaries']),
+                        new ResourceConfiguration([UserResource::class, 'relatedResource']),
+                        new ResourceConfiguration([RelatedResource::class, 'base']),
+                        new ResourceConfiguration([RelatedResource::class, 'shortFormatNotNamedLikeFormatName']),
+                        new ResourceConfiguration([RelatedResource::class, 'verbose']),
                     ],
                 ],
                 'expectedOutput' => [
@@ -233,8 +234,8 @@ class BuildResourceParsersCommandTest extends TestCase
             'UserResource::childArrays' => [
                 'config' => fn(string $outputPath) => [
                     'output_path' => $outputPath,
-                    'parsers' => [
-                        [UserResource::class, 'childArrays'],
+                    'sources' => [
+                        new ResourceConfiguration([UserResource::class, 'childArrays']),
                     ],
                 ],
                 'expectedOutput' => [
@@ -254,11 +255,11 @@ TS,
             'UserResource::enumMethods' => [
                 'config' => fn(string $outputPath) => [
                     'output_path' => $outputPath,
-                    'parsers' => [
-                        [
-                            'resource' => [UserResource::class, 'enumMethods'],
-                            'output_file' => 'parsers.ts',
-                        ],
+                    'sources' => [
+                        new ResourceConfiguration(
+                            [UserResource::class, 'enumMethods'],
+                            'parsers.ts',
+                        ),
                     ],
                 ],
                 'expectedOutput' => [
@@ -277,11 +278,11 @@ TS,
             'UserResource::unknownComments' => [
                 'config' => fn(string $outputPath) => [
                     'output_path' => $outputPath,
-                    'parsers' => [
-                        [
-                            'resource' => [UserResource::class, 'unknownComments'],
-                            'output_file' => 'parsers.ts',
-                        ],
+                    'sources' => [
+                        new ResourceConfiguration(
+                            [UserResource::class, 'unknownComments'],
+                            'parsers.ts',
+                        ),
                     ],
                 ],
                 'expectedOutput' => [
@@ -303,15 +304,15 @@ TS,
             'UserResource::usingWhenLoaded' => [
                 'config' => fn(string $outputPath) => [
                     'output_path' => $outputPath,
-                    'parsers' => [
-                        [
-                            'resource' => [UserResource::class, 'usingWhenLoaded'],
-                            'output_file' => 'parsers.ts',
-                        ],
-                        [
-                            'resource' => [PostResource::class, 'simple'],
-                            'output_file' => 'parsers.ts',
-                        ],
+                    'sources' => [
+                        new ResourceConfiguration(
+                            [UserResource::class, 'usingWhenLoaded'],
+                            'parsers.ts',
+                        ),
+                        new ResourceConfiguration(
+                            [PostResource::class, 'simple'],
+                            'parsers.ts',
+                        ),
                     ],
                 ],
                 'expectedOutput' => [
@@ -337,15 +338,15 @@ TS,
             'UserResource::usingResourceCollection' => [
                 'config' => fn(string $outputPath) => [
                     'output_path' => $outputPath,
-                    'parsers' => [
-                        [
-                            'resource' => [UserResource::class, 'usingResourceCollection'],
-                            'output_file' => 'parsers.ts',
-                        ],
-                        [
-                            'resource' => [PostResource::class, 'simple'],
-                            'output_file' => 'parsers.ts',
-                        ],
+                    'sources' => [
+                        new ResourceConfiguration(
+                            [UserResource::class, 'usingResourceCollection'],
+                            'parsers.ts',
+                        ),
+                        new ResourceConfiguration(
+                            [PostResource::class, 'simple'],
+                            'parsers.ts',
+                        ),
                     ],
                 ],
                 'expectedOutput' => [

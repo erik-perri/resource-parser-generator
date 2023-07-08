@@ -11,6 +11,8 @@ use RuntimeException;
 
 class ResourceGeneratorContext implements ResourceGeneratorContextContract
 {
+    private ResourceGeneratorConfiguration $configuration;
+
     /**
      * @var Collection<int, ResourceData>
      */
@@ -48,6 +50,21 @@ class ResourceGeneratorContext implements ResourceGeneratorContextContract
         );
     }
 
+    /**
+     * @return ResourceGeneratorConfiguration
+     */
+    public function configuration(): ResourceGeneratorConfiguration
+    {
+        return $this->configuration;
+    }
+
+    public function setConfiguration(ResourceGeneratorConfiguration $configuration): self
+    {
+        $this->configuration = $configuration;
+
+        return $this;
+    }
+
     public function setLocalContext(Collection $localParsers): self
     {
         $this->localParsers = $localParsers->collect();
@@ -75,23 +92,17 @@ class ResourceGeneratorContext implements ResourceGeneratorContextContract
          * @var Collection<string, Collection<int, ResourceData>>
          */
         return $this->globalParsers->groupBy(function (ResourceData $context) {
-            if (!$context->configuration->outputFilePath) {
+            $configuration = $this->configuration->parserConfiguration($context->className(), $context->methodName());
+
+            if (!$configuration->parserFile) {
                 throw new RuntimeException(sprintf(
                     'Could not find output file path for "%s::%s"',
                     $context->className(),
                     $context->methodName(),
                 ));
             }
-            return $context->configuration->outputFilePath;
+
+            return $configuration->parserFile;
         });
-    }
-
-    public function updateConfiguration(Closure $updater): self
-    {
-        $this->globalParsers = $this->globalParsers->map(
-            fn(ResourceData $resource) => $resource->updateConfiguration($updater($resource->configuration)),
-        );
-
-        return $this;
     }
 }

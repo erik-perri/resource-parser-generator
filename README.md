@@ -30,17 +30,17 @@ return [
         // Where to put the generated files. (Required)
         'output_path' => dirname(__DIR__) . '/resources/scripts/generated',
         // The parsers to include. (Required)
-        'parsers' => [
+        'sources' => [
             // No overrides, parser name and file name generated from class and method names
-            [\App\Http\Resources\UserResource::class, 'base'],
+            new ResourceConfiguration([\App\Http\Resources\UserResource::class, 'base']),
 
-            // Overriding options, all options but resource are optional and generated if not specified
-            [
-                'resource' => [\App\Http\Resources\AnotherResource::class, 'base'],
-                'output_file' => 'custom.ts',
-                'type' => 'CustomParser',
-                'variable' => 'customParser',
-            ],
+            // Overriding options, all options but class and method are optional and generated if not specified
+            new ResourceConfiguration(
+                [\App\Http\Resources\AnotherResource::class, 'base'],
+                parserFile: 'custom.ts',
+                typeName: 'CustomParser',
+                variableName: 'customParser',
+            ),
         ],
     ],
 ];

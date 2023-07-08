@@ -4,32 +4,27 @@ declare(strict_types=1);
 
 namespace ResourceParserGenerator\DataObjects;
 
-class ResourceConfiguration
+use ResourceParserGenerator\Contracts\DataObjects\ParserSourceContract;
+
+class ResourceConfiguration implements ParserSourceContract
 {
     /**
-     * @param class-string $className
-     * @param string $methodName
-     * @param string|null $outputType
-     * @param string|null $outputVariable
-     * @param string|null $outputFilePath
+     * @param array{class-string, string} $method
+     * @param string|null $parserFile
+     * @param string|null $typeName
+     * @param string|null $variableName
      */
     public function __construct(
-        public readonly string $className,
-        public readonly string $methodName,
-        public readonly string|null $outputType,
-        public readonly string|null $outputVariable,
-        public readonly string|null $outputFilePath,
+        public readonly array $method,
+        public readonly ?string $parserFile = null,
+        public readonly ?string $typeName = null,
+        public readonly ?string $variableName = null,
     ) {
         //
     }
 
-    /**
-     * @param class-string $className
-     * @param string $methodName
-     * @return bool
-     */
     public function is(string $className, string $methodName): bool
     {
-        return $this->className === $className && $this->methodName === $methodName;
+        return $this->method[0] === $className && $this->method[1] === $methodName;
     }
 }

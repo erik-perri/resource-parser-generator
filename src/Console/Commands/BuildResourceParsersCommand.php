@@ -10,11 +10,12 @@ use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Validator;
-use ResourceParserGenerator\Contracts\Generators\ParserNameGeneratorContract;
+use ResourceParserGenerator\Contracts\DataObjects\ParserSourceContract;
 use ResourceParserGenerator\Contracts\Generators\ResourceParserGeneratorContract;
 use ResourceParserGenerator\Contracts\Parsers\ResourceParserContract;
 use ResourceParserGenerator\Contracts\ResourceGeneratorContextContract;
 use ResourceParserGenerator\DataObjects\ResourceConfiguration;
+use ResourceParserGenerator\DataObjects\ResourceGeneratorConfiguration;
 use Throwable;
 
 class BuildResourceParsersCommand extends Command
@@ -24,51 +25,38 @@ class BuildResourceParsersCommand extends Command
 
     public function handle(): int
     {
+        $generatorContext = $this->resolve(ResourceGeneratorContextContract::class);
+        $parserGenerator = $this->resolve(ResourceParserGeneratorContract::class);
+        $resourceParser = $this->resolve(ResourceParserContract::class);
+
         // Load and validate the configuration.
-        [$configuredResources, $outputPath] = $this->parseConfiguration(strval($this->option('config')));
-        if ($configuredResources === null) {
+        $configuration = $this->parseConfiguration(strval($this->option('config')));
+        if (!$configuration) {
             return static::FAILURE;
         }
 
-        // Fill any unspecified values in the configuration using the name generator.
-        $configuredResources = $configuredResources->map($this->fillUnspecifiedConfiguration(...));
+        $generatorContext->setConfiguration($configuration);
 
         // Parse the resources and their dependencies
-        $resourceParser = $this->resolve(ResourceParserContract::class);
-        foreach ($configuredResources as $config) {
+        foreach ($configuration->parsers as $parserConfiguration) {
             try {
-                $resourceParser->parse($config->className, $config->methodName);
+                $resourceParser->parse($parserConfiguration->method[0], $parserConfiguration->method[1]);
             } catch (Throwable $error) {
                 $this->components->error(sprintf(
                     'Failed to generate parser for "%s::%s"',
-                    $config->className,
-                    $config->methodName,
+                    $parserConfiguration->method[0],
+                    $parserConfiguration->method[1],
                 ));
                 $this->components->bulletList([$error->getMessage()]);
                 return static::FAILURE;
             }
         }
 
-        $generatorContext = $this->resolve(ResourceGeneratorContextContract::class);
-        $parserGenerator = $this->resolve(ResourceParserGeneratorContract::class);
-
-        // Fill the configuration on any dependencies that were not explicitly configured.
-        $parserCollection = $generatorContext->updateConfiguration(
-            function (ResourceConfiguration $defaultConfig) use ($configuredResources) {
-                $configuredResource = $configuredResources->first(fn(ResourceConfiguration $resource) => $resource->is(
-                    $defaultConfig->className,
-                    $defaultConfig->methodName,
-                ));
-
-                return $this->fillUnspecifiedConfiguration($configuredResource ?? $defaultConfig);
-            },
-        );
-
         $isChecking = (bool)$this->option('check');
         $returnValue = static::SUCCESS;
 
-        foreach ($parserCollection->splitToFiles() as $fileName => $parsers) {
-            $filePath = $outputPath . '/' . $fileName;
+        foreach ($generatorContext->splitToFiles() as $fileName => $parsers) {
+            $filePath = $configuration->outputPath . '/' . $fileName;
 
             try {
                 $fileContents = $generatorContext->withLocalContext(
@@ -112,57 +100,37 @@ class BuildResourceParsersCommand extends Command
         return $returnValue;
     }
 
-    /**
-     * @param string $configKey
-     * @return array{0: Collection<int, ResourceConfiguration>|null, 1: string|null}
-     */
-    private function parseConfiguration(string $configKey): array
+    private function parseConfiguration(string $configKey): ?ResourceGeneratorConfiguration
     {
         $config = Config::get($configKey);
         if (!$config) {
             $this->components->error(
                 sprintf('No configuration found at "%s" for resource parser generation.', $configKey),
             );
-            return [null, null];
+            return null;
         }
-
-        $validateCallableArray = function ($key, $value, $fail) {
-            if (!is_array($value) || (array_is_list($value) && count($value) !== 2)) {
-                $fail(sprintf('The %s field must be a callable array of exactly two items.', $key));
-            } elseif (array_is_list($value)) {
-                if (!class_exists($value[0])) {
-                    $fail(sprintf('The %s field references unknown class "%s".', $key, $value[0]));
-                } elseif (!method_exists($value[0], $value[1])) {
-                    $fail(sprintf('The %s field references unknown method "%s::%s".', $key, $value[0], $value[1]));
-                }
-            }
-        };
 
         $validator = Validator::make(
             Arr::wrap($config),
             [
                 'output_path' => ['required', 'string'],
-                'parsers' => ['required', 'array'],
-                'parsers.*' => [
-                    'array',
-                    $validateCallableArray,
+                'sources' => ['array'],
+                'sources.*' => [
+                    function ($key, $value, $fail) {
+                        if (!($value instanceof ParserSourceContract)) {
+                            $fail(sprintf(
+                                'The %s field must be an instance of %s.',
+                                $key,
+                                ParserSourceContract::class,
+                            ));
+                        }
+                    },
                 ],
-                'parsers.*.output_file' => [
-                    'doesnt_start_with:/',
-                    'string',
-                ],
-                'parsers.*.resource' => [
-                    'required_with:parsers.*.output_file',
-                    'array',
-                    $validateCallableArray,
-                ],
-                'parsers.*.type' => ['string', 'ascii'],
-                'parsers.*.variable' => ['string', 'ascii'],
             ],
             [],
             [
                 'output_path' => $configKey . '.output_path',
-                'parsers' => $configKey . '.parsers',
+                'sources' => $configKey . '.sources',
             ],
         );
 
@@ -171,7 +139,7 @@ class BuildResourceParsersCommand extends Command
         if (count($errors)) {
             $this->components->error('Errors found in configuration:');
             $this->components->bulletList($errors->all());
-            return [null, null];
+            return null;
         }
 
         $valid = $validator->valid();
@@ -179,47 +147,24 @@ class BuildResourceParsersCommand extends Command
         $outputPath = $valid['output_path'];
         if (!File::exists($outputPath)) {
             $this->components->error(sprintf('Output path "%s" does not exist.', $outputPath));
-            return [null, null];
+            return null;
         }
 
-        return [
-            // @phpstan-ignore-next-line -- The validation rule was a big enough pain, not worth typing this for PHPStan
-            collect($valid['parsers'])->map(function ($parser) {
-                if (array_is_list($parser)) {
-                    return new ResourceConfiguration($parser[0], $parser[1], null, null, null);
-                }
+        /**
+         * @var ResourceConfiguration[] $sources
+         */
+        $sources = [];
 
-                return new ResourceConfiguration(
-                    $parser['resource'][0],
-                    $parser['resource'][1],
-                    $parser['type'] ?? null,
-                    $parser['variable'] ?? null,
-                    $parser['output_file'] ?? null,
-                );
-            }),
-            $outputPath,
-        ];
-    }
+        foreach ($valid['sources'] as $source) {
+            if ($source instanceof ResourceConfiguration) {
+                $sources[] = $source;
+            } else {
+                $this->components->error(sprintf('Unhandled source type "%s"', get_class($source)));
+                return null;
+            }
+        }
 
-    private function fillUnspecifiedConfiguration(
-        ResourceConfiguration $configuration,
-    ): ResourceConfiguration {
-        $generator = $this->resolve(ParserNameGeneratorContract::class);
-
-        $file = $configuration->outputFilePath
-            ?? $generator->generateFileName($configuration->className);
-        $type = $configuration->outputType
-            ?? $generator->generateTypeName($configuration->className, $configuration->methodName);
-        $variable = $configuration->outputVariable
-            ?? $generator->generateVariableName($configuration->className, $configuration->methodName);
-
-        return new ResourceConfiguration(
-            $configuration->className,
-            $configuration->methodName,
-            $type,
-            $variable,
-            $file,
-        );
+        return new ResourceGeneratorConfiguration($outputPath, ...$sources);
     }
 
     /**

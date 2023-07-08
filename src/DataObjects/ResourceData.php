@@ -19,9 +19,17 @@ class ResourceData
         private readonly string $className,
         private readonly string $methodName,
         private readonly Collection $properties,
-        public readonly ResourceConfiguration $configuration,
+        private readonly ResourceConfiguration $configuration,
     ) {
         //
+    }
+
+    /**
+     * @return ResourceConfiguration
+     */
+    public function configuration(): ResourceConfiguration
+    {
+        return $this->configuration;
     }
 
     /**
@@ -44,15 +52,5 @@ class ResourceData
     {
         // TODO Make this immutable again
         return $this->properties;
-    }
-
-    public function updateConfiguration(ResourceConfiguration $configuration): self
-    {
-        return resolve(self::class, [
-            'className' => $this->className,
-            'methodName' => $this->methodName,
-            'properties' => $this->properties,
-            'configuration' => $configuration,
-        ]);
     }
 }

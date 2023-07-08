@@ -52,7 +52,7 @@ class ZodShapeReferenceType implements ParserTypeContract
             ));
         }
 
-        $outputVariable = $context->configuration->outputVariable;
+        $outputVariable = $context->configuration()->variableName;
         if (!$outputVariable) {
             throw new RuntimeException(sprintf(
                 'Unable to find output variable name for "%s::%s"',
@@ -76,7 +76,7 @@ class ZodShapeReferenceType implements ParserTypeContract
                 ));
             }
 
-            $fileName = $context->configuration->outputFilePath;
+            $fileName = $context->configuration()->parserFile;
             if (!$fileName) {
                 throw new RuntimeException(sprintf(
                     'Unable to find output file path for "%s::%s"',
@@ -85,7 +85,7 @@ class ZodShapeReferenceType implements ParserTypeContract
                 ));
             }
 
-            $variableName = $context->configuration->outputVariable;
+            $variableName = $context->configuration()->variableName;
             if (!$variableName) {
                 throw new RuntimeException(sprintf(
                     'Unable to find output variable name for "%s::%s"',

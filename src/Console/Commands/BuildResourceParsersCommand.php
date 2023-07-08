@@ -34,8 +34,8 @@ class BuildResourceParsersCommand extends Command
         }
 
         // Resolve the generator context with our configuration and store it in the container. This is a workaround to
-        // avoid needing to pass the local and global context down to each of the type `imports()` methods when it is
-        // only needed for ZodShapeReferenceType. TODO Pass this down anyway to avoid the global singleton?
+        // avoid needing to pass the local and global context down to each of the type `imports` and `constraint`
+        // methods when it is only needed for ZodShapeReferenceType. TODO Pass this down anyway to avoid the global?
         $generatorContext = $this->resolve(ResourceGeneratorContextContract::class, [
             'configuration' => $configuration,
         ]);

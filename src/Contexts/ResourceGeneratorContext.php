@@ -19,8 +19,6 @@ use RuntimeException;
  */
 class ResourceGeneratorContext implements ResourceGeneratorContextContract
 {
-    private ResourceGeneratorConfiguration $configuration;
-
     /**
      * @var Collection<int, ResourceData>
      */
@@ -31,8 +29,10 @@ class ResourceGeneratorContext implements ResourceGeneratorContextContract
      */
     private Collection $localParsers;
 
-    public function __construct(private readonly ParserConfigurationGenerator $parserConfigurationGenerator)
-    {
+    public function __construct(
+        private readonly ResourceGeneratorConfiguration $configuration,
+        private readonly ParserConfigurationGenerator $parserConfigurationGenerator,
+    ) {
         $this->globalParsers = collect();
         $this->localParsers = collect();
     }
@@ -64,13 +64,6 @@ class ResourceGeneratorContext implements ResourceGeneratorContextContract
     public function configuration(): ResourceGeneratorConfiguration
     {
         return $this->configuration;
-    }
-
-    public function setConfiguration(ResourceGeneratorConfiguration $configuration): self
-    {
-        $this->configuration = $configuration;
-
-        return $this;
     }
 
     /**

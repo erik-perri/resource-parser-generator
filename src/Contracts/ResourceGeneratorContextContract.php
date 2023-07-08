@@ -29,8 +29,6 @@ interface ResourceGeneratorContextContract
 
     public function configuration(): ResourceGeneratorConfiguration;
 
-    public function setConfiguration(ResourceGeneratorConfiguration $configuration): self;
-
     /**
      * @template T
      * @param Collection<int, ResourceData> $localParsers

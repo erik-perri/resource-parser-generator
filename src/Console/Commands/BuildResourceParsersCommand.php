@@ -27,17 +27,22 @@ class BuildResourceParsersCommand extends Command
 
     public function handle(): int
     {
-        $generatorContext = $this->resolve(ResourceGeneratorContextContract::class);
-        $parserGenerator = $this->resolve(ResourceParserGeneratorContract::class);
-        $resourceParser = $this->resolve(ResourceParserContract::class);
-
         // Load and validate the configuration.
         $configuration = $this->parseConfiguration(strval($this->option('config')));
         if (!$configuration) {
             return static::FAILURE;
         }
 
-        $generatorContext->setConfiguration($configuration);
+        // Resolve the generator context with our configuration and store it in the container. This is a workaround to
+        // avoid needing to pass the local and global context down to each of the type `imports()` methods when it is
+        // only needed for ZodShapeReferenceType. TODO Pass this down anyway to avoid the global singleton?
+        $generatorContext = $this->resolve(ResourceGeneratorContextContract::class, [
+            'configuration' => $configuration,
+        ]);
+        app()->instance(ResourceGeneratorContextContract::class, $generatorContext);
+
+        $resourceParser = $this->resolve(ResourceParserContract::class);
+        $parserGenerator = $this->resolve(ResourceParserGeneratorContract::class);
 
         // Parse the resources and their dependencies
         foreach ($configuration->parsers as $parserConfiguration) {

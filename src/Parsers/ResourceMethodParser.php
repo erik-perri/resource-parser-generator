@@ -23,6 +23,11 @@ class ResourceMethodParser implements ResourceParserContract
         //
     }
 
+    /**
+     * @param class-string $className
+     * @param string $methodName
+     * @return ResourceData
+     */
     public function parse(
         string $className,
         string $methodName,

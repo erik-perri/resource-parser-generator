@@ -23,6 +23,11 @@ class ResourceConfiguration implements ParserSourceContract
         //
     }
 
+    /**
+     * @param class-string $className
+     * @param string $methodName
+     * @return bool
+     */
     public function is(string $className, string $methodName): bool
     {
         return $this->method[0] === $className && $this->method[1] === $methodName;

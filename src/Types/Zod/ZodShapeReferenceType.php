@@ -66,38 +66,31 @@ class ZodShapeReferenceType implements ParserTypeContract
 
     public function imports(): ImportCollectionContract
     {
-        if (!$this->generatorContext->findLocal($this->className, $this->methodName)) {
-            $context = $this->generatorContext->findGlobal($this->className, $this->methodName);
-            if (!$context) {
-                throw new RuntimeException(sprintf(
-                    'Unable to find local resource context for "%s::%s"',
-                    $this->className,
-                    $this->methodName,
-                ));
-            }
-
-            $fileName = $context->configuration()->parserFile;
-            if (!$fileName) {
-                throw new RuntimeException(sprintf(
-                    'Unable to find output file path for "%s::%s"',
-                    $this->className,
-                    $this->methodName,
-                ));
-            }
-
-            $variableName = $context->configuration()->variableName;
-            if (!$variableName) {
-                throw new RuntimeException(sprintf(
-                    'Unable to find output variable name for "%s::%s"',
-                    $this->className,
-                    $this->methodName,
-                ));
-            }
-
-            // TODO Move path part to configuration?
-            return new ImportCollection(new Import($variableName, './' . $fileName));
+        // If this resource is available in the local context, then we don't need to import it.
+        if ($this->generatorContext->findLocal($this->className, $this->methodName)) {
+            return new ImportCollection();
         }
 
-        return new ImportCollection();
+        $resourceData = $this->generatorContext->findGlobal($this->className, $this->methodName);
+        if (!$resourceData) {
+            throw new RuntimeException(sprintf(
+                'Unable to find local resource data for "%s::%s"',
+                $this->className,
+                $this->methodName,
+            ));
+        }
+
+        $fileName = $resourceData->configuration()->parserFile;
+        $variableName = $resourceData->configuration()->variableName;
+        if (!$fileName || !$variableName) {
+            throw new RuntimeException(sprintf(
+                'Unable to determine output configuration for "%s::%s"',
+                $this->className,
+                $this->methodName,
+            ));
+        }
+
+        // TODO Move path part to configuration?
+        return new ImportCollection(new Import($variableName, './' . $fileName));
     }
 }

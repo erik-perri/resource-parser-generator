@@ -22,6 +22,7 @@ use ResourceParserGenerator\Contracts\Converters\ParserTypeConverterContract;
 use ResourceParserGenerator\Contracts\Converters\ReflectionTypeConverterContract;
 use ResourceParserGenerator\Contracts\Converters\VariableTypeConverterContract;
 use ResourceParserGenerator\Contracts\Filesystem\ClassFileLocatorContract;
+use ResourceParserGenerator\Contracts\Filesystem\ResourceFileFormatLocatorContract;
 use ResourceParserGenerator\Contracts\Generators\ParserNameGeneratorContract;
 use ResourceParserGenerator\Contracts\Generators\ResourceParserGeneratorContract;
 use ResourceParserGenerator\Contracts\Parsers\ClassConstFetchValueParserContract;
@@ -39,6 +40,7 @@ use ResourceParserGenerator\Converters\ParserTypeConverter;
 use ResourceParserGenerator\Converters\ReflectionTypeConverter;
 use ResourceParserGenerator\Converters\VariableTypeConverter;
 use ResourceParserGenerator\Filesystem\ClassFileLocator;
+use ResourceParserGenerator\Filesystem\ResourceFileFormatLocator;
 use ResourceParserGenerator\Generators\ParserNameGenerator;
 use ResourceParserGenerator\Generators\ResourceParserGenerator;
 use ResourceParserGenerator\Parsers\ClassConstFetchValueParser;
@@ -100,6 +102,7 @@ class ResourceParserGeneratorServiceProvider extends ServiceProvider
                     strval(Env::get('COMPOSER_VENDOR_DIR')) ?: $this->app->basePath('vendor'),
                 ),
             );
+            $this->app->singleton(ResourceFileFormatLocatorContract::class, ResourceFileFormatLocator::class);
 
             // Parsers
             $this->app->singleton(ClassParserContract::class, ClassParser::class);

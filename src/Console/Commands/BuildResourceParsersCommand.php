@@ -10,13 +10,13 @@ use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Validator;
 use ResourceParserGenerator\Contracts\DataObjects\ParserSourceContract;
+use ResourceParserGenerator\Contracts\Filesystem\ResourceFileFormatLocatorContract;
 use ResourceParserGenerator\Contracts\Generators\ResourceParserGeneratorContract;
 use ResourceParserGenerator\Contracts\Parsers\ResourceMethodParserContract;
 use ResourceParserGenerator\Contracts\ResourceGeneratorContextContract;
 use ResourceParserGenerator\DataObjects\ResourceConfiguration;
 use ResourceParserGenerator\DataObjects\ResourceGeneratorConfiguration;
 use ResourceParserGenerator\DataObjects\ResourcePath;
-use ResourceParserGenerator\Filesystem\ResourceFileFormatLocator;
 use ResourceParserGenerator\Filesystem\ResourceFileLocator;
 use Throwable;
 
@@ -171,7 +171,7 @@ class BuildResourceParsersCommand extends Command
                 $sources[] = $source;
             } elseif ($source instanceof ResourcePath) {
                 $files = $this->resolve(ResourceFileLocator::class)->files($source);
-                $formatLocator = $this->resolve(ResourceFileFormatLocator::class);
+                $formatLocator = $this->resolve(ResourceFileFormatLocatorContract::class);
                 foreach ($files as $file) {
                     $formats = $formatLocator->formats($file);
                     foreach ($formats as $format) {

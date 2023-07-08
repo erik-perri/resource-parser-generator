@@ -5,16 +5,17 @@ declare(strict_types=1);
 namespace ResourceParserGenerator\Filesystem;
 
 use Illuminate\Support\Facades\File;
-use ResourceParserGenerator\Parsers\PhpFileParser;
+use ResourceParserGenerator\Contracts\Filesystem\ResourceFileFormatLocatorContract;
+use ResourceParserGenerator\Contracts\Parsers\PhpFileParserContract;
 use RuntimeException;
 use Sourcetoad\EnhancedResources\Formatting\Attributes\Format;
 use Sourcetoad\EnhancedResources\Formatting\Attributes\IsDefault;
 use Sourcetoad\EnhancedResources\Resource;
 
-class ResourceFileFormatLocator
+class ResourceFileFormatLocator implements ResourceFileFormatLocatorContract
 {
     public function __construct(
-        private readonly PhpFileParser $fileParser,
+        private readonly PhpFileParserContract $fileParser,
     ) {
         //
     }

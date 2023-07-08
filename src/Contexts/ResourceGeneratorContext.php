@@ -73,13 +73,6 @@ class ResourceGeneratorContext implements ResourceGeneratorContextContract
         return $this;
     }
 
-    public function setLocalContext(Collection $localParsers): self
-    {
-        $this->localParsers = $localParsers->collect();
-
-        return $this;
-    }
-
     /**
      * @param Collection<int, ResourceData> $localParsers
      * @param Closure $callback

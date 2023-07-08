@@ -32,12 +32,6 @@ interface ResourceGeneratorContextContract
     public function setConfiguration(ResourceGeneratorConfiguration $configuration): self;
 
     /**
-     * @param Collection<int, ResourceData> $localParsers
-     * @return self
-     */
-    public function setLocalContext(Collection $localParsers): self;
-
-    /**
      * @template T
      * @param Collection<int, ResourceData> $localParsers
      * @param Closure(): T $callback

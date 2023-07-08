@@ -12,6 +12,11 @@ use ResourceParserGenerator\DataObjects\ResourceGeneratorConfiguration;
 use ResourceParserGenerator\Generators\ParserConfigurationGenerator;
 use RuntimeException;
 
+/**
+ * This is a singleton containing the information about the parsed resources. It allows switching of the local context
+ * so when we're rendering individual files we can determine which parsers need to be imported and which are available
+ * in the local scope.
+ */
 class ResourceGeneratorContext implements ResourceGeneratorContextContract
 {
     private ResourceGeneratorConfiguration $configuration;

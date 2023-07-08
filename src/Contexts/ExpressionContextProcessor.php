@@ -16,8 +16,8 @@ use Sourcetoad\EnhancedResources\Formatting\Attributes\IsDefault;
 use Sourcetoad\EnhancedResources\Resource;
 
 /**
- * This class takes finalizes a converted TypeContract based on the collected context. Turning enums into their backed
- * types, and resource classes into references to their specified format method.
+ * This class finalizes a converted TypeContract based on the collected context. Turning enums into their backed types,
+ * and resource classes into references to their specified format method.
  */
 class ExpressionContextProcessor
 {

@@ -7,6 +7,20 @@ namespace ResourceParserGenerator\Contexts;
 use Illuminate\Support\Collection;
 use ResourceParserGenerator\Contracts\Resolvers\ResolverContract;
 
+/**
+ * This contains information known about the current context of the converter. For example when parsing a chain of a
+ * resource we may encounter a format method for a resource, this is where we store that to process once the chain is
+ * completely processed.
+ *
+ * Ideally we would have the returned type data contain that instead, but it is not structured in a way to easily
+ * support that yet.
+ *
+ * TODO Restructure to not need this in favor of a custom ClassType with additional data?
+ * TODO Adjust non-null properties to support nested properties so we can support un-nulling a chain of fetches.
+ *          Right now we un-null by individual property names but that could un-null a property that is not actually
+ *          non-null. `->when('property', fn($m) => $m->property->property)` would un-null both properties when only the
+ *          first is expected.
+ */
 class ConverterContext
 {
     private string|null $formatMethod = null;
@@ -18,7 +32,6 @@ class ConverterContext
      */
     public function __construct(
         private readonly ResolverContract $resolver,
-        // TODO Adjust non-null properties to support nested properties so we can support un-nulling a chain of fetches.
         private readonly Collection $nonNullProperties,
     ) {
         //

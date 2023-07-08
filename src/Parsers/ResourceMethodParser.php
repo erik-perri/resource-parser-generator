@@ -10,6 +10,7 @@ use ResourceParserGenerator\Contracts\Parsers\ResourceParserContract;
 use ResourceParserGenerator\Contracts\ResourceGeneratorContextContract;
 use ResourceParserGenerator\Contracts\Types\TypeContract;
 use ResourceParserGenerator\DataObjects\ResourceData;
+use ResourceParserGenerator\Generators\ParserConfigurationGenerator;
 use ResourceParserGenerator\Types;
 use RuntimeException;
 
@@ -19,6 +20,7 @@ class ResourceMethodParser implements ResourceParserContract
         private readonly ClassMethodReturnParserContract $classMethodReturnParser,
         private readonly ResourceGeneratorContextContract $generatorContext,
         private readonly ParserTypeConverterContract $parserTypeConverter,
+        private readonly ParserConfigurationGenerator $parserConfigurationGenerator,
     ) {
         //
     }
@@ -53,11 +55,17 @@ class ResourceMethodParser implements ResourceParserContract
             $this->parseDependentResources($type);
         }
 
+        $configuration = $this->parserConfigurationGenerator->generate(
+            $this->generatorContext->configuration(),
+            $className,
+            $methodName,
+        );
+
         $context = new ResourceData(
             $className,
             $methodName,
             $returnType->properties()->map(fn(TypeContract $type) => $this->parserTypeConverter->convert($type)),
-            $this->generatorContext->configuration()->parserConfiguration($className, $methodName)
+            $configuration,
         );
 
         $this->generatorContext->add($context);

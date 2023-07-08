@@ -9,6 +9,7 @@ use Illuminate\Support\Collection;
 use ResourceParserGenerator\Contracts\ResourceGeneratorContextContract;
 use ResourceParserGenerator\DataObjects\ResourceData;
 use ResourceParserGenerator\DataObjects\ResourceGeneratorConfiguration;
+use ResourceParserGenerator\Generators\ParserConfigurationGenerator;
 use RuntimeException;
 
 class ResourceGeneratorContext implements ResourceGeneratorContextContract
@@ -25,7 +26,7 @@ class ResourceGeneratorContext implements ResourceGeneratorContextContract
      */
     private Collection $localParsers;
 
-    public function __construct()
+    public function __construct(private readonly ParserConfigurationGenerator $parserConfigurationGenerator)
     {
         $this->globalParsers = collect();
         $this->localParsers = collect();
@@ -94,7 +95,11 @@ class ResourceGeneratorContext implements ResourceGeneratorContextContract
          * @var Collection<string, Collection<int, ResourceData>>
          */
         return $this->globalParsers->groupBy(function (ResourceData $context) {
-            $configuration = $this->configuration->parserConfiguration($context->className(), $context->methodName());
+            $configuration = $this->parserConfigurationGenerator->generate(
+                $this->configuration,
+                $context->className(),
+                $context->methodName(),
+            );
 
             if (!$configuration->parserFile) {
                 throw new RuntimeException(sprintf(

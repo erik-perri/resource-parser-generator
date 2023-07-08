@@ -67,10 +67,7 @@ class ParserTypeConverter implements ParserTypeConverterContract
         }
 
         if ($type instanceof Types\ClassWithMethodType) {
-            return Types\Zod\ZodShapeReferenceType::create(
-                $type->fullyQualifiedName(),
-                $type->methodName(),
-            );
+            return Types\Zod\ZodShapeReferenceType::create($type->fullyQualifiedName(), $type->methodName());
         }
 
         if ($type instanceof Types\ClassType && $type->fullyQualifiedName() === Collection::class) {
@@ -78,10 +75,7 @@ class ParserTypeConverter implements ParserTypeConverterContract
         }
 
         if ($type instanceof Types\EmptyArrayType) {
-            return new Types\Zod\ZodArrayType(
-                null,
-                new Types\Zod\ZodNeverType(),
-            );
+            return new Types\Zod\ZodArrayType(null, new Types\Zod\ZodNeverType());
         }
 
         if ($type instanceof Types\ErrorType) {

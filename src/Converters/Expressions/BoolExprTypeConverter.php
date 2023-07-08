@@ -8,9 +8,9 @@ use PhpParser\Node\Expr\BinaryOp\BooleanAnd;
 use PhpParser\Node\Expr\BinaryOp\BooleanOr;
 use PhpParser\Node\Expr\BooleanNot;
 use PhpParser\Node\Expr\Cast\Bool_ as CastBool_;
+use ResourceParserGenerator\Contexts\ConverterContext;
 use ResourceParserGenerator\Contracts\Converters\Expressions\ExprTypeConverterContract;
 use ResourceParserGenerator\Contracts\Types\TypeContract;
-use ResourceParserGenerator\Converters\Data\ConverterContext;
 use ResourceParserGenerator\Types;
 
 class BoolExprTypeConverter implements ExprTypeConverterContract

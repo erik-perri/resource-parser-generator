@@ -8,12 +8,12 @@ use PhpParser\Node\Expr;
 use PhpParser\Node\Expr\ArrowFunction;
 use PhpParser\Node\Expr\Variable;
 use PhpParser\Node\Param;
+use ResourceParserGenerator\Contexts\ConverterContext;
+use ResourceParserGenerator\Contexts\ExpressionContextProcessor;
 use ResourceParserGenerator\Contracts\Converters\Expressions\ExprTypeConverterContract;
 use ResourceParserGenerator\Contracts\Converters\ExpressionTypeConverterContract;
 use ResourceParserGenerator\Contracts\Converters\ParamTypeConverterContract;
 use ResourceParserGenerator\Contracts\Types\TypeContract;
-use ResourceParserGenerator\Converters\Data\ConverterContext;
-use ResourceParserGenerator\Converters\ExpressionContextProcessor;
 use ResourceParserGenerator\Resolvers\VariableResolver;
 use RuntimeException;
 

@@ -2,11 +2,13 @@
 
 declare(strict_types=1);
 
-namespace ResourceParserGenerator\DataObjects;
+namespace ResourceParserGenerator\Contexts;
 
 use Closure;
 use Illuminate\Support\Collection;
 use ResourceParserGenerator\Contracts\ResourceGeneratorContextContract;
+use ResourceParserGenerator\DataObjects\ResourceData;
+use ResourceParserGenerator\DataObjects\ResourceGeneratorConfiguration;
 use RuntimeException;
 
 class ResourceGeneratorContext implements ResourceGeneratorContextContract

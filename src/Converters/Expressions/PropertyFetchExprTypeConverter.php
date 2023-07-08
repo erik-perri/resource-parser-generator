@@ -6,11 +6,11 @@ namespace ResourceParserGenerator\Converters\Expressions;
 
 use PhpParser\Node\Expr\NullsafePropertyFetch;
 use PhpParser\Node\Expr\PropertyFetch;
+use ResourceParserGenerator\Contexts\ConverterContext;
 use ResourceParserGenerator\Contracts\Converters\Expressions\ExprTypeConverterContract;
 use ResourceParserGenerator\Contracts\Converters\ExpressionTypeConverterContract;
 use ResourceParserGenerator\Contracts\Parsers\ClassParserContract;
 use ResourceParserGenerator\Contracts\Types\TypeContract;
-use ResourceParserGenerator\Converters\Data\ConverterContext;
 use ResourceParserGenerator\Converters\Traits\ParsesFetchSides;
 use ResourceParserGenerator\Types\NullType;
 use ResourceParserGenerator\Types\UnionType;

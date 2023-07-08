@@ -8,9 +8,9 @@ use PhpParser\Node\Expr\Cast\Int_ as CastInt_;
 use PhpParser\Node\Expr\UnaryMinus;
 use PhpParser\Node\Expr\UnaryPlus;
 use PhpParser\Node\Scalar\LNumber;
+use ResourceParserGenerator\Contexts\ConverterContext;
 use ResourceParserGenerator\Contracts\Converters\Expressions\ExprTypeConverterContract;
 use ResourceParserGenerator\Contracts\Types\TypeContract;
-use ResourceParserGenerator\Converters\Data\ConverterContext;
 use ResourceParserGenerator\Types;
 
 class NumberExprTypeConverter implements ExprTypeConverterContract

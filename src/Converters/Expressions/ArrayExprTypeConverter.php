@@ -7,11 +7,11 @@ namespace ResourceParserGenerator\Converters\Expressions;
 use PhpParser\Node\Expr\Array_;
 use PhpParser\Node\Expr\ArrayItem;
 use PhpParser\Node\Scalar\String_;
+use ResourceParserGenerator\Contexts\ConverterContext;
+use ResourceParserGenerator\Contexts\ExpressionContextProcessor;
 use ResourceParserGenerator\Contracts\Converters\Expressions\ExprTypeConverterContract;
 use ResourceParserGenerator\Contracts\Converters\ExpressionTypeConverterContract;
 use ResourceParserGenerator\Contracts\Types\TypeContract;
-use ResourceParserGenerator\Converters\Data\ConverterContext;
-use ResourceParserGenerator\Converters\ExpressionContextProcessor;
 use ResourceParserGenerator\Types;
 use RuntimeException;
 

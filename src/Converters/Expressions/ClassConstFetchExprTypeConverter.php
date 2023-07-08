@@ -6,11 +6,11 @@ namespace ResourceParserGenerator\Converters\Expressions;
 
 use PhpParser\Node\Expr;
 use PhpParser\Node\Expr\ClassConstFetch;
+use ResourceParserGenerator\Contexts\ConverterContext;
 use ResourceParserGenerator\Contracts\Converters\DeclaredTypeConverterContract;
 use ResourceParserGenerator\Contracts\Converters\Expressions\ExprTypeConverterContract;
 use ResourceParserGenerator\Contracts\Parsers\ClassParserContract;
 use ResourceParserGenerator\Contracts\Types\TypeContract;
-use ResourceParserGenerator\Converters\Data\ConverterContext;
 use ResourceParserGenerator\Types\ClassType;
 use RuntimeException;
 

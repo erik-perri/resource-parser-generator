@@ -2,14 +2,13 @@
 
 declare(strict_types=1);
 
-namespace ResourceParserGenerator\Converters;
+namespace ResourceParserGenerator\Contexts;
 
 use BenSampo\Enum\Enum;
 use Closure;
 use ResourceParserGenerator\Contracts\ClassScopeContract;
 use ResourceParserGenerator\Contracts\Parsers\ClassParserContract;
 use ResourceParserGenerator\Contracts\Types\TypeContract;
-use ResourceParserGenerator\Converters\Data\ConverterContext;
 use ResourceParserGenerator\Parsers\Data\EnumScope;
 use ResourceParserGenerator\Types;
 use RuntimeException;
@@ -19,8 +18,6 @@ use Sourcetoad\EnhancedResources\Resource;
 /**
  * This class takes finalizes a converted TypeContract based on the collected context. Turning enums into their backed
  * types, and resource classes into references to their specified format method.
- *
- * TODO Find a better location for this class
  */
 class ExpressionContextProcessor
 {

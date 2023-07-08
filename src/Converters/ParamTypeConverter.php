@@ -6,9 +6,9 @@ namespace ResourceParserGenerator\Converters;
 
 use PhpParser\Node\Name;
 use PhpParser\Node\Param;
+use ResourceParserGenerator\Contexts\ConverterContext;
 use ResourceParserGenerator\Contracts\Converters\ParamTypeConverterContract;
 use ResourceParserGenerator\Contracts\Types\TypeContract;
-use ResourceParserGenerator\Converters\Data\ConverterContext;
 use RuntimeException;
 
 /**

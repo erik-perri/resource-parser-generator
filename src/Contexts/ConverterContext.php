@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace ResourceParserGenerator\Converters\Data;
+namespace ResourceParserGenerator\Contexts;
 
 use Illuminate\Support\Collection;
 use ResourceParserGenerator\Contracts\Resolvers\ResolverContract;

@@ -6,9 +6,9 @@ namespace ResourceParserGenerator\Converters\Expressions;
 
 use PhpParser\Node\Expr\Cast\String_ as CastString_;
 use PhpParser\Node\Scalar\String_;
+use ResourceParserGenerator\Contexts\ConverterContext;
 use ResourceParserGenerator\Contracts\Converters\Expressions\ExprTypeConverterContract;
 use ResourceParserGenerator\Contracts\Types\TypeContract;
-use ResourceParserGenerator\Converters\Data\ConverterContext;
 use ResourceParserGenerator\Types;
 
 class StringExprTypeConverter implements ExprTypeConverterContract

@@ -21,7 +21,7 @@ class ParserFileLocatorTest extends TestCase
         $result = $locator->files(new ResourcePath(dirname(__DIR__, 2) . '/Examples/Resources'));
 
         // Assert
-        $this->assertEquals([
+        $this->assertEqualsCanonicalizing([
             dirname(__DIR__, 2) . '/Examples/Resources/Nested/RelatedResource.php',
             dirname(__DIR__, 2) . '/Examples/Resources/PostResource.php',
             dirname(__DIR__, 2) . '/Examples/Resources/UserResource.php',

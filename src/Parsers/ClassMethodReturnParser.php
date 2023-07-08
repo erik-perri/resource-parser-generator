@@ -10,7 +10,7 @@ use PhpParser\Node\Scalar\String_;
 use PhpParser\Node\Stmt\Return_;
 use PhpParser\NodeFinder;
 use ResourceParserGenerator\Contexts\ConverterContext;
-use ResourceParserGenerator\Contexts\ExpressionContextProcessor;
+use ResourceParserGenerator\Contexts\ConverterContextProcessor;
 use ResourceParserGenerator\Contracts\Converters\ExpressionTypeConverterContract;
 use ResourceParserGenerator\Contracts\Parsers\ClassMethodReturnParserContract;
 use ResourceParserGenerator\Contracts\Parsers\ClassParserContract;
@@ -30,7 +30,7 @@ class ClassMethodReturnParser implements ClassMethodReturnParserContract
 {
     public function __construct(
         private readonly ExpressionTypeConverterContract $expressionTypeConverter,
-        private readonly ExpressionContextProcessor $expressionContextProcessor,
+        private readonly ConverterContextProcessor $contextProcessor,
         private readonly ClassParserContract $classParser,
     ) {
         //
@@ -89,7 +89,7 @@ class ClassMethodReturnParser implements ClassMethodReturnParserContract
                     try {
                         $context = ConverterContext::create($resolver);
                         $type = $this->expressionTypeConverter->convert($item->value, $context);
-                        $type = $this->expressionContextProcessor->process($type, $context);
+                        $type = $this->contextProcessor->process($type, $context);
 
                         if ($type instanceof Types\UntypedType) {
                             throw new RuntimeException(sprintf(
@@ -110,7 +110,7 @@ class ClassMethodReturnParser implements ClassMethodReturnParserContract
             } else {
                 $context = ConverterContext::create($resolver);
                 $type = $this->expressionTypeConverter->convert($returnNode->expr, $context);
-                $type = $this->expressionContextProcessor->process($type, $context);
+                $type = $this->contextProcessor->process($type, $context);
 
                 if ($type instanceof Types\UntypedType) {
                     throw new RuntimeException(sprintf(

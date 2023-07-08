@@ -19,7 +19,7 @@ use Sourcetoad\EnhancedResources\Resource;
  * This class finalizes a converted TypeContract based on the collected context. Turning enums into their backed types,
  * and resource classes into references to their specified format method.
  */
-class ExpressionContextProcessor
+class ConverterContextProcessor
 {
     public function __construct(
         private readonly ClassParserContract $classParser,

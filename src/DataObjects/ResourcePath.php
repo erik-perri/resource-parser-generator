@@ -14,4 +14,18 @@ class ResourcePath implements ParserSourceContract
     ) {
         //
     }
+
+    /**
+     * TODO Go back to pure array config to avoid this?
+     *
+     * @param array{path: string, fileMatch: string} $data
+     * @return self
+     */
+    public static function __set_state(array $data): self
+    {
+        return new self(
+            $data['path'],
+            $data['fileMatch'],
+        );
+    }
 }

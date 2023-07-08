@@ -27,4 +27,25 @@ class ResourceConfiguration implements ParserSourceContract
     {
         return $this->method[0] === $className && $this->method[1] === $methodName;
     }
+
+    /**
+     * TODO Go back to pure array config to avoid this?
+     *
+     * @param array{
+     *     method: array{class-string, string},
+     *     parserFile: string,
+     *     typeName: string,
+     *     variableName: string
+     * } $data
+     * @return self
+     */
+    public static function __set_state(array $data): self
+    {
+        return new self(
+            $data['method'],
+            $data['parserFile'],
+            $data['typeName'],
+            $data['variableName'],
+        );
+    }
 }

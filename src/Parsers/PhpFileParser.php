@@ -70,13 +70,11 @@ class PhpFileParser implements PhpFileParserContract
     private function buildImportClassName(string|null $namespace, string $className): string
     {
         /**
-         * @var class-string $fullName
+         * @var class-string
          */
-        $fullName = $namespace
+        return $namespace
             ? sprintf('%s\\%s', $namespace, $className)
             : $className;
-
-        return $fullName;
     }
 
     /**

@@ -14,15 +14,9 @@ class IntersectionType implements TypeContract
      */
     private readonly Collection $types;
 
-    public function __construct(
-        TypeContract ...$type,
-    ) {
-        /**
-         * @var Collection<int, TypeContract> $types
-         */
-        $types = collect($type);
-
-        $this->types = $types;
+    public function __construct(TypeContract ...$type)
+    {
+        $this->types = collect(array_values($type));
     }
 
     public function describe(): string

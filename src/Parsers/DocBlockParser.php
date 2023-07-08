@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace ResourceParserGenerator\Parsers;
 
-use Illuminate\Support\Collection;
 use PHPStan\PhpDocParser\Ast\PhpDoc\MethodTagValueNode;
 use PHPStan\PhpDocParser\Ast\PhpDoc\ParamTagValueNode;
 use PHPStan\PhpDocParser\Ast\PhpDoc\PhpDocNode;
@@ -87,9 +86,6 @@ class DocBlockParser implements DocBlockParserContract
 
     private function parseProperties(PhpDocNode $docNode, ResolverContract $resolver, DocBlock $docBlock): void
     {
-        /**
-         * @var Collection<int, PhpDocTagNode> $propertyNodes
-         */
         $propertyNodes = collect([
             ...$docNode->getTagsByName('@property'),
             ...$docNode->getTagsByName('@property-read'),

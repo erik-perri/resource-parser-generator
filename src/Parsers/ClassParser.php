@@ -37,7 +37,7 @@ class ClassParser implements ClassParserContract
         );
     }
 
-    public function parseType(ClassType $type, ?string $staticContext = null,): ClassScopeContract
+    public function parseType(ClassType $type, ?string $staticContext = null): ClassScopeContract
     {
         $classScope = $this->parse($type->fullyQualifiedName(), $staticContext);
         if (!($classScope instanceof ClassScope)) {

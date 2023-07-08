@@ -28,11 +28,9 @@ class ClassNameResolver implements ClassNameResolverContract
     {
         if (str_starts_with($name, '\\')) {
             /**
-             * @var class-string $className
+             * @var class-string
              */
-            $className = $name;
-
-            return $className;
+            return $name;
         }
 
         if (str_contains($name, '\\')) {

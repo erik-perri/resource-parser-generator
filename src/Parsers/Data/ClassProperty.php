@@ -21,7 +21,7 @@ class ClassProperty implements ClassPropertyContract
         private readonly Property $property,
         private readonly PropertyProperty $propertyProperty,
         private readonly ResolverContract $resolver,
-        private readonly DeclaredTypeConverterContract $declaredTypeParser,
+        private readonly DeclaredTypeConverterContract $declaredTypeConverter,
         private readonly DocBlockParserContract $docBlockParser,
     ) {
         //
@@ -65,7 +65,7 @@ class ClassProperty implements ClassPropertyContract
         if ($docBlock?->hasVar($this->name())) {
             return $docBlock->var($this->name());
         }
-        return $this->type ??= $this->declaredTypeParser->convert($this->property->type, $this->resolver);
+        return $this->type ??= $this->declaredTypeConverter->convert($this->property->type, $this->resolver);
     }
 
     public function isPrivate(): bool

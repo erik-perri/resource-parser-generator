@@ -23,7 +23,7 @@ class ClassParser implements ClassParserContract
     private readonly RepositoryContract $cache;
 
     public function __construct(
-        private readonly ClassFileLocatorContract $classLocator,
+        private readonly ClassFileLocatorContract $classFileLocator,
         private readonly PhpFileParserContract $fileParser,
     ) {
         $this->cache = new Repository(new ArrayStore());
@@ -63,11 +63,11 @@ class ClassParser implements ClassParserContract
      */
     private function parseClass(string $className, string|null $staticContext = null): ClassScopeContract
     {
-        if (class_exists($className) && !$this->classLocator->exists($className)) {
+        if (class_exists($className) && !$this->classFileLocator->exists($className)) {
             return ReflectedClassScope::create(new ReflectionClass($className));
         }
 
-        $classFile = $this->classLocator->get($className);
+        $classFile = $this->classFileLocator->get($className);
 
         $contents = File::get($classFile);
         $fileScope = $this->fileParser->parse($contents, $staticContext);

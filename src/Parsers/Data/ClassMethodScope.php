@@ -31,7 +31,7 @@ class ClassMethodScope implements ClassMethodScopeContract
     public function __construct(
         private readonly ClassMethod $node,
         private readonly ResolverContract $resolver,
-        private readonly DeclaredTypeConverterContract $declaredTypeParser,
+        private readonly DeclaredTypeConverterContract $declaredTypeConverter,
         private readonly DocBlockParserContract $docBlockParser,
     ) {
         //
@@ -106,7 +106,7 @@ class ClassMethodScope implements ClassMethodScopeContract
             $isPublic = ($param->flags & Class_::MODIFIER_PUBLIC) !== 0
                 || ($param->flags & Class_::VISIBILITY_MODIFIER_MASK) === 0;
             if ($isPublic) {
-                $promoted->put($param->var->name, $this->declaredTypeParser->convert($param->type, $this->resolver));
+                $promoted->put($param->var->name, $this->declaredTypeConverter->convert($param->type, $this->resolver));
             }
         }
 
@@ -116,7 +116,7 @@ class ClassMethodScope implements ClassMethodScopeContract
     public function returnType(): TypeContract
     {
         return $this->docBlock()?->return()
-            ?? ($this->returnType ??= $this->declaredTypeParser->convert($this->node->returnType, $this->resolver));
+            ?? ($this->returnType ??= $this->declaredTypeConverter->convert($this->node->returnType, $this->resolver));
     }
 
     public function isPrivate(): bool
@@ -146,7 +146,7 @@ class ClassMethodScope implements ClassMethodScopeContract
             if ($name instanceof Variable) {
                 $name = $name->name;
                 if (!($name instanceof Expr)) {
-                    $parameters->put($name, $this->declaredTypeParser->convert($param->type, $this->resolver));
+                    $parameters->put($name, $this->declaredTypeConverter->convert($param->type, $this->resolver));
                 } else {
                     throw new RuntimeException('Unexpected expression in variable name');
                 }

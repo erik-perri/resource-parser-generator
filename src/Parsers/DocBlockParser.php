@@ -24,7 +24,7 @@ use RuntimeException;
 class DocBlockParser implements DocBlockParserContract
 {
     public function __construct(
-        private readonly DocBlockTypeConverterContract $typeParser,
+        private readonly DocBlockTypeConverterContract $docBlockTypeConverter,
         private readonly Lexer $phpDocLexer,
         private readonly PhpDocParser $phpDocParser,
     ) {
@@ -66,7 +66,7 @@ class DocBlockParser implements DocBlockParserContract
                 $docBlock->setMethod(
                     $node->value->methodName,
                     $node->value->returnType
-                        ? $this->typeParser->convert($node->value->returnType, $resolver)
+                        ? $this->docBlockTypeConverter->convert($node->value->returnType, $resolver)
                         : new Types\UntypedType(),
                 );
             }
@@ -79,7 +79,7 @@ class DocBlockParser implements DocBlockParserContract
         foreach ($paramNodes as $node) {
             if ($node->value instanceof ParamTagValueNode) {
                 $name = ltrim($node->value->parameterName, '$');
-                $docBlock->setParam($name, $this->typeParser->convert($node->value->type, $resolver));
+                $docBlock->setParam($name, $this->docBlockTypeConverter->convert($node->value->type, $resolver));
             }
         }
     }
@@ -93,7 +93,7 @@ class DocBlockParser implements DocBlockParserContract
         foreach ($propertyNodes as $node) {
             if ($node->value instanceof PropertyTagValueNode) {
                 $name = ltrim($node->value->propertyName, '$');
-                $docBlock->setProperty($name, $this->typeParser->convert($node->value->type, $resolver));
+                $docBlock->setProperty($name, $this->docBlockTypeConverter->convert($node->value->type, $resolver));
             }
         }
     }
@@ -112,7 +112,7 @@ class DocBlockParser implements DocBlockParserContract
              */
             $returnNode = reset($returnNodes);
             if ($returnNode->value instanceof ReturnTagValueNode) {
-                $docBlock->setReturn($this->typeParser->convert($returnNode->value->type, $resolver));
+                $docBlock->setReturn($this->docBlockTypeConverter->convert($returnNode->value->type, $resolver));
             }
         }
     }
@@ -127,7 +127,7 @@ class DocBlockParser implements DocBlockParserContract
                     $name = ltrim($node->value->variableName, '$');
                 }
 
-                $docBlock->setVar($name, $this->typeParser->convert($node->value->type, $resolver));
+                $docBlock->setVar($name, $this->docBlockTypeConverter->convert($node->value->type, $resolver));
             }
         }
     }

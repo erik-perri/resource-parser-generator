@@ -18,7 +18,6 @@ class ResourceMethodParser implements ResourceParserContract
 {
     public function __construct(
         private readonly ClassMethodReturnParserContract $classMethodReturnParser,
-        private readonly ResourceGeneratorContextContract $generatorContext,
         private readonly ParserTypeConverterContract $parserTypeConverter,
         private readonly ParserConfigurationGenerator $parserConfigurationGenerator,
     ) {
@@ -28,13 +27,15 @@ class ResourceMethodParser implements ResourceParserContract
     /**
      * @param class-string $className
      * @param string $methodName
+     * @param ResourceGeneratorContextContract $context
      * @return ResourceData
      */
     public function parse(
         string $className,
         string $methodName,
+        ResourceGeneratorContextContract $context,
     ): ResourceData {
-        if ($alreadyParsed = $this->generatorContext->findGlobal($className, $methodName)) {
+        if ($alreadyParsed = $context->findGlobal($className, $methodName)) {
             return $alreadyParsed;
         }
 
@@ -52,41 +53,41 @@ class ResourceMethodParser implements ResourceParserContract
         }
 
         foreach ($returnType->properties() as $type) {
-            $this->parseDependentResources($type);
+            $this->parseDependentResources($type, $context);
         }
 
         $configuration = $this->parserConfigurationGenerator->generate(
-            $this->generatorContext->configuration(),
+            $context->configuration(),
             $className,
             $methodName,
         );
 
-        $context = new ResourceData(
+        $data = new ResourceData(
             $className,
             $methodName,
             $configuration,
             $returnType->properties()->map(fn(TypeContract $type) => $this->parserTypeConverter->convert($type)),
         );
 
-        $this->generatorContext->add($context);
+        $context->add($data);
 
-        return $context;
+        return $data;
     }
 
-    private function parseDependentResources(TypeContract $type): void
+    private function parseDependentResources(TypeContract $type, ResourceGeneratorContextContract $context): void
     {
         if ($type instanceof Types\ClassWithMethodType) {
-            $this->parse($type->fullyQualifiedName(), $type->methodName());
+            $this->parse($type->fullyQualifiedName(), $type->methodName(), $context);
         } elseif ($type instanceof Types\UnionType) {
-            $type->types()->each(fn(TypeContract $type) => $this->parseDependentResources($type));
+            $type->types()->each(fn(TypeContract $type) => $this->parseDependentResources($type, $context));
         } elseif ($type instanceof Types\ArrayWithPropertiesType) {
-            $type->properties()->each(fn(TypeContract $type) => $this->parseDependentResources($type));
+            $type->properties()->each(fn(TypeContract $type) => $this->parseDependentResources($type, $context));
         } elseif ($type instanceof Types\ArrayType) {
             if ($type->keys) {
-                $this->parseDependentResources($type->keys);
+                $this->parseDependentResources($type->keys, $context);
             }
             if ($type->values) {
-                $this->parseDependentResources($type->values);
+                $this->parseDependentResources($type->values, $context);
             }
         }
     }

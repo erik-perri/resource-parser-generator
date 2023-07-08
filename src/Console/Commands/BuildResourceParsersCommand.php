@@ -47,7 +47,11 @@ class BuildResourceParsersCommand extends Command
         // Parse the resources and their dependencies
         foreach ($configuration->parsers as $parserConfiguration) {
             try {
-                $resourceParser->parse($parserConfiguration->method[0], $parserConfiguration->method[1]);
+                $resourceParser->parse(
+                    $parserConfiguration->method[0],
+                    $parserConfiguration->method[1],
+                    $generatorContext,
+                );
             } catch (Throwable $error) {
                 $this->components->error(sprintf(
                     'Failed to generate parser for "%s::%s"',

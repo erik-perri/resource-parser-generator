@@ -7,9 +7,10 @@ namespace ResourceParserGenerator\Parsers;
 use ResourceParserGenerator\Contracts\Converters\ParserTypeConverterContract;
 use ResourceParserGenerator\Contracts\Parsers\ClassMethodReturnParserContract;
 use ResourceParserGenerator\Contracts\Parsers\ResourceMethodParserContract;
-use ResourceParserGenerator\Contracts\ResourceGeneratorContextContract;
 use ResourceParserGenerator\Contracts\Types\TypeContract;
 use ResourceParserGenerator\DataObjects\ResourceData;
+use ResourceParserGenerator\DataObjects\ResourceDataCollection;
+use ResourceParserGenerator\DataObjects\ResourceGeneratorConfiguration;
 use ResourceParserGenerator\Generators\ParserConfigurationGenerator;
 use ResourceParserGenerator\Types;
 use RuntimeException;
@@ -24,19 +25,14 @@ class ResourceMethodParser implements ResourceMethodParserContract
         //
     }
 
-    /**
-     * @param class-string $className
-     * @param string $methodName
-     * @param ResourceGeneratorContextContract $context
-     * @return ResourceData
-     */
     public function parse(
         string $className,
         string $methodName,
-        ResourceGeneratorContextContract $context,
-    ): ResourceData {
-        if ($alreadyParsed = $context->findGlobal($className, $methodName)) {
-            return $alreadyParsed;
+        ResourceDataCollection $resources,
+        ResourceGeneratorConfiguration $configuration,
+    ): void {
+        if ($resources->find($className, $methodName)) {
+            return;
         }
 
         $returnType = $this->classMethodReturnParser->parse($className, $methodName);
@@ -53,41 +49,38 @@ class ResourceMethodParser implements ResourceMethodParserContract
         }
 
         foreach ($returnType->properties() as $type) {
-            $this->parseDependentResources($type, $context);
+            $this->parseDependentResources($type, $resources, $configuration);
         }
 
-        $configuration = $this->parserConfigurationGenerator->generate(
-            $context->configuration(),
+        $resources->add(new ResourceData(
             $className,
             $methodName,
-        );
-
-        $data = new ResourceData(
-            $className,
-            $methodName,
-            $configuration,
+            $this->parserConfigurationGenerator->generate($configuration, $className, $methodName),
             $returnType->properties()->map(fn(TypeContract $type) => $this->parserTypeConverter->convert($type)),
-        );
-
-        $context->add($data);
-
-        return $data;
+        ));
     }
 
-    private function parseDependentResources(TypeContract $type, ResourceGeneratorContextContract $context): void
-    {
+    private function parseDependentResources(
+        TypeContract $type,
+        ResourceDataCollection $resources,
+        ResourceGeneratorConfiguration $configuration,
+    ): void {
         if ($type instanceof Types\ClassWithMethodType) {
-            $this->parse($type->fullyQualifiedName(), $type->methodName(), $context);
+            $this->parse($type->fullyQualifiedName(), $type->methodName(), $resources, $configuration);
         } elseif ($type instanceof Types\UnionType) {
-            $type->types()->each(fn(TypeContract $type) => $this->parseDependentResources($type, $context));
+            $type->types()->each(
+                fn(TypeContract $type) => $this->parseDependentResources($type, $resources, $configuration),
+            );
         } elseif ($type instanceof Types\ArrayWithPropertiesType) {
-            $type->properties()->each(fn(TypeContract $type) => $this->parseDependentResources($type, $context));
+            $type->properties()->each(
+                fn(TypeContract $type) => $this->parseDependentResources($type, $resources, $configuration),
+            );
         } elseif ($type instanceof Types\ArrayType) {
             if ($type->keys) {
-                $this->parseDependentResources($type->keys, $context);
+                $this->parseDependentResources($type->keys, $resources, $configuration);
             }
             if ($type->values) {
-                $this->parseDependentResources($type->values, $context);
+                $this->parseDependentResources($type->values, $resources, $configuration);
             }
         }
     }

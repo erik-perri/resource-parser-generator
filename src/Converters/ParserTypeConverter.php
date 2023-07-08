@@ -67,7 +67,7 @@ class ParserTypeConverter implements ParserTypeConverterContract
         }
 
         if ($type instanceof Types\ClassWithMethodType) {
-            return Types\Zod\ZodShapeReferenceType::create($type->fullyQualifiedName(), $type->methodName());
+            return new Types\Zod\ZodShapeReferenceType($type->fullyQualifiedName(), $type->methodName());
         }
 
         if ($type instanceof Types\ClassType && $type->fullyQualifiedName() === Collection::class) {

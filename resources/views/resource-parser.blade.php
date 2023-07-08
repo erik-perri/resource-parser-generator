@@ -1,7 +1,9 @@
 @php
+    use ResourceParserGenerator\Contexts\ResourceGeneratorContext;
     use ResourceParserGenerator\Contracts\Types\ParserTypeContract;
     use ResourceParserGenerator\Contracts\Types\ParserTypeWithCommentContract;
 
+    /** @var ResourceGeneratorContext $context */
     /** @var array<string, ParserTypeContract> $properties */
     /** @var string $variableName */
     /** @var string $typeName */
@@ -14,7 +16,7 @@ export const {{ $variableName }} = object({
    * {!! $type->comment() !!}
    */
 @endif
-  {{ $name }}: {{ $type->constraint() }},
+  {{ $name }}: {{ $type->constraint($context) }},
 @endforeach
 });
 

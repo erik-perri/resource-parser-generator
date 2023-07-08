@@ -87,10 +87,7 @@ class ResourceParserGeneratorServiceProvider extends ServiceProvider
             $this->app->singleton(VariableTypeConverterContract::class, VariableTypeConverter::class);
 
             // Data Objects
-            $this->app->singleton(
-                ResourceGeneratorContextContract::class,
-                ResourceGeneratorContext::class,
-            );
+            $this->app->bind(ResourceGeneratorContextContract::class, ResourceGeneratorContext::class);
 
             // Generators
             $this->app->singleton(ParserNameGeneratorContract::class, ParserNameGenerator::class);

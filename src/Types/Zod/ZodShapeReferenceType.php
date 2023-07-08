@@ -16,35 +16,18 @@ class ZodShapeReferenceType implements ParserTypeContract
     /**
      * @param class-string $className
      * @param string $methodName
-     * @param ResourceGeneratorContextContract $context
      */
     public function __construct(
         public readonly string $className,
         public readonly string $methodName,
-        private readonly ResourceGeneratorContextContract $context,
     ) {
         //
     }
 
-    /**
-     * @param class-string $className
-     * @param string $methodName
-     * @return ZodShapeReferenceType
-     */
-    public static function create(
-        string $className,
-        string $methodName,
-    ): self {
-        return resolve(self::class, [
-            'className' => $className,
-            'methodName' => $methodName,
-        ]);
-    }
-
-    public function constraint(): string
+    public function constraint(ResourceGeneratorContextContract $context): string
     {
-        $context = $this->context->findGlobal($this->className, $this->methodName);
-        if (!$context) {
+        $resourceData = $context->find($this->className, $this->methodName);
+        if (!$resourceData) {
             throw new RuntimeException(sprintf(
                 'Unable to find global resource context for "%s::%s"',
                 $this->className,
@@ -52,7 +35,7 @@ class ZodShapeReferenceType implements ParserTypeContract
             ));
         }
 
-        $outputVariable = $context->configuration->variableName;
+        $outputVariable = $resourceData->configuration->variableName;
         if (!$outputVariable) {
             throw new RuntimeException(sprintf(
                 'Unable to find output variable name for "%s::%s"',
@@ -64,14 +47,14 @@ class ZodShapeReferenceType implements ParserTypeContract
         return $outputVariable;
     }
 
-    public function imports(): ImportCollectionContract
+    public function imports(ResourceGeneratorContextContract $context): ImportCollectionContract
     {
         // If this resource is available in the local context, then we don't need to import it.
-        if ($this->context->findLocal($this->className, $this->methodName)) {
+        if ($context->findLocal($this->className, $this->methodName)) {
             return new ImportCollection();
         }
 
-        $resourceData = $this->context->findGlobal($this->className, $this->methodName);
+        $resourceData = $context->find($this->className, $this->methodName);
         if (!$resourceData) {
             throw new RuntimeException(sprintf(
                 'Unable to find local resource data for "%s::%s"',

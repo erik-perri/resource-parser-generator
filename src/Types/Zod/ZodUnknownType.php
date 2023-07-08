@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace ResourceParserGenerator\Types\Zod;
 
 use ResourceParserGenerator\Contracts\ImportCollectionContract;
+use ResourceParserGenerator\Contracts\ResourceGeneratorContextContract;
 use ResourceParserGenerator\Contracts\Types\ParserTypeContract;
 use ResourceParserGenerator\Contracts\Types\ParserTypeWithCommentContract;
 use ResourceParserGenerator\DataObjects\Import;
@@ -15,12 +16,12 @@ class ZodUnknownType implements ParserTypeContract, ParserTypeWithCommentContrac
 {
     use HasCommentTrait;
 
-    public function constraint(): string
+    public function constraint(ResourceGeneratorContextContract $context): string
     {
         return 'unknown()';
     }
 
-    public function imports(): ImportCollectionContract
+    public function imports(ResourceGeneratorContextContract $context): ImportCollectionContract
     {
         return new ImportCollection(new Import('unknown', 'zod'));
     }

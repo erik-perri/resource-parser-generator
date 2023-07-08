@@ -6,6 +6,7 @@ namespace ResourceParserGenerator\Types\Zod;
 
 use ResourceParserGenerator\Contracts\Converters\ParserTypeConverterContract;
 use ResourceParserGenerator\Contracts\ImportCollectionContract;
+use ResourceParserGenerator\Contracts\ResourceGeneratorContextContract;
 use ResourceParserGenerator\Contracts\Types\ParserTypeContract;
 use ResourceParserGenerator\Contracts\Types\TypeContract;
 use ResourceParserGenerator\DataObjects\Import;
@@ -26,10 +27,10 @@ class ZodShapeType implements ParserTypeContract
         return resolve(self::class, ['properties' => $properties]);
     }
 
-    public function constraint(): string
+    public function constraint(ResourceGeneratorContextContract $context): string
     {
         $properties = $this->properties->properties()->mapWithKeys(fn(TypeContract $type, string $key) => [
-            $key => $this->parserTypeConverter->convert($type)->constraint(),
+            $key => $this->parserTypeConverter->convert($type)->constraint($context),
         ])->sort();
 
         return sprintf('object({%s})', $properties
@@ -37,13 +38,13 @@ class ZodShapeType implements ParserTypeContract
             ->join(', '));
     }
 
-    public function imports(): ImportCollectionContract
+    public function imports(ResourceGeneratorContextContract $context): ImportCollectionContract
     {
         $imports = new ImportCollection(new Import('object', 'zod'));
 
         foreach ($this->properties->properties() as $type) {
             $parserType = $this->parserTypeConverter->convert($type);
-            $imports = $imports->merge($parserType->imports());
+            $imports = $imports->merge($parserType->imports($context));
         }
 
         return $imports;

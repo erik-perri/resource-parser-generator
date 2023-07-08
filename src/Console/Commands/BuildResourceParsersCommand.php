@@ -15,6 +15,7 @@ use ResourceParserGenerator\Contracts\Generators\ResourceParserGeneratorContract
 use ResourceParserGenerator\Contracts\Parsers\ResourceMethodParserContract;
 use ResourceParserGenerator\Contracts\ResourceGeneratorContextContract;
 use ResourceParserGenerator\DataObjects\ResourceConfiguration;
+use ResourceParserGenerator\DataObjects\ResourceDataCollection;
 use ResourceParserGenerator\DataObjects\ResourceGeneratorConfiguration;
 use ResourceParserGenerator\DataObjects\ResourcePath;
 use ResourceParserGenerator\Filesystem\ResourceFileLocator;
@@ -33,13 +34,7 @@ class BuildResourceParsersCommand extends Command
             return static::FAILURE;
         }
 
-        // Resolve the generator context with our configuration and store it in the container. This is a workaround to
-        // avoid needing to pass the local and global context down to each of the type `imports` and `constraint`
-        // methods when it is only needed for ZodShapeReferenceType. TODO Pass this down anyway to avoid the global?
-        $generatorContext = $this->resolve(ResourceGeneratorContextContract::class, [
-            'configuration' => $configuration,
-        ]);
-        app()->instance(ResourceGeneratorContextContract::class, $generatorContext);
+        $resourceCollection = new ResourceDataCollection();
 
         $resourceParser = $this->resolve(ResourceMethodParserContract::class);
         $parserGenerator = $this->resolve(ResourceParserGeneratorContract::class);
@@ -50,7 +45,8 @@ class BuildResourceParsersCommand extends Command
                 $resourceParser->parse(
                     $parserConfiguration->method[0],
                     $parserConfiguration->method[1],
-                    $generatorContext,
+                    $resourceCollection,
+                    $configuration,
                 );
             } catch (Throwable $error) {
                 $this->components->error(sprintf(
@@ -66,13 +62,17 @@ class BuildResourceParsersCommand extends Command
         $isChecking = (bool)$this->option('check');
         $returnValue = static::SUCCESS;
 
-        foreach ($generatorContext->splitToFiles() as $fileName => $parsers) {
+        $generatorContext = $this->resolve(ResourceGeneratorContextContract::class, [
+            'resources' => $resourceCollection,
+        ]);
+
+        foreach ($resourceCollection->splitToFiles() as $fileName => $localResources) {
             $filePath = $configuration->outputPath . '/' . $fileName;
 
             try {
                 $fileContents = $generatorContext->withLocalContext(
-                    $parsers,
-                    fn() => $parserGenerator->generate($parsers),
+                    $localResources,
+                    fn() => $parserGenerator->generate($localResources, $generatorContext),
                 );
             } catch (Throwable $error) {
                 $this->components->twoColumnDetail(

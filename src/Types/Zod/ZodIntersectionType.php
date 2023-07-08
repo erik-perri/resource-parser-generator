@@ -6,6 +6,7 @@ namespace ResourceParserGenerator\Types\Zod;
 
 use Illuminate\Support\Collection;
 use ResourceParserGenerator\Contracts\ImportCollectionContract;
+use ResourceParserGenerator\Contracts\ResourceGeneratorContextContract;
 use ResourceParserGenerator\Contracts\Types\ParserTypeContract;
 use ResourceParserGenerator\Contracts\Types\ParserTypeWithCommentContract;
 use ResourceParserGenerator\DataObjects\Import;
@@ -40,9 +41,9 @@ class ZodIntersectionType implements ParserTypeContract, ParserTypeWithCommentCo
         return trim($imploded) ?: null;
     }
 
-    public function constraint(): string
+    public function constraint(ResourceGeneratorContextContract $context): string
     {
-        $types = $this->types->map(fn(ParserTypeContract $type) => $type->constraint())
+        $types = $this->types->map(fn(ParserTypeContract $type) => $type->constraint($context))
             ->unique()
             ->sort();
 
@@ -53,12 +54,12 @@ class ZodIntersectionType implements ParserTypeContract, ParserTypeWithCommentCo
         return sprintf('intersection([%s])', $types->join(', '));
     }
 
-    public function imports(): ImportCollectionContract
+    public function imports(ResourceGeneratorContextContract $context): ImportCollectionContract
     {
         $imports = new ImportCollection(new Import('intersection', 'zod'));
 
         foreach ($this->types as $type) {
-            $imports = $imports->merge($type->imports());
+            $imports = $imports->merge($type->imports($context));
         }
 
         return $imports;

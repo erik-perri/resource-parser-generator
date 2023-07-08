@@ -7,18 +7,15 @@ namespace ResourceParserGenerator\Contracts;
 use Closure;
 use Illuminate\Support\Collection;
 use ResourceParserGenerator\DataObjects\ResourceData;
-use ResourceParserGenerator\DataObjects\ResourceGeneratorConfiguration;
 
 interface ResourceGeneratorContextContract
 {
-    public function add(ResourceData $resourceContext): self;
-
     /**
      * @param class-string $className
      * @param string $methodName
      * @return ResourceData|null
      */
-    public function findGlobal(string $className, string $methodName): ResourceData|null;
+    public function find(string $className, string $methodName): ResourceData|null;
 
     /**
      * @param class-string $className
@@ -27,8 +24,6 @@ interface ResourceGeneratorContextContract
      */
     public function findLocal(string $className, string $methodName): ResourceData|null;
 
-    public function configuration(): ResourceGeneratorConfiguration;
-
     /**
      * @template T
      * @param Collection<int, ResourceData> $localParsers
@@ -36,9 +31,4 @@ interface ResourceGeneratorContextContract
      * @return T
      */
     public function withLocalContext(Collection $localParsers, Closure $callback): mixed;
-
-    /**
-     * @return Collection<string, Collection<int, ResourceData>>
-     */
-    public function splitToFiles(): Collection;
 }

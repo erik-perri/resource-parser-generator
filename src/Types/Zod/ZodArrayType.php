@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace ResourceParserGenerator\Types\Zod;
 
 use ResourceParserGenerator\Contracts\ImportCollectionContract;
+use ResourceParserGenerator\Contracts\ResourceGeneratorContextContract;
 use ResourceParserGenerator\Contracts\Types\ParserTypeContract;
 use ResourceParserGenerator\Contracts\Types\ParserTypeWithCommentContract;
 use ResourceParserGenerator\DataObjects\Import;
@@ -36,20 +37,20 @@ class ZodArrayType implements ParserTypeContract, ParserTypeWithCommentContract
         return trim($imploded) ?: null;
     }
 
-    public function constraint(): string
+    public function constraint(ResourceGeneratorContextContract $context): string
     {
         if ($this->keys && $this->values) {
-            return sprintf('record(%s, %s)', $this->keys->constraint(), $this->values->constraint());
+            return sprintf('record(%s, %s)', $this->keys->constraint($context), $this->values->constraint($context));
         }
 
         if ($this->values) {
-            return sprintf('array(%s)', $this->values->constraint());
+            return sprintf('array(%s)', $this->values->constraint($context));
         }
 
         throw new RuntimeException('Untyped Zod arrays are not supported');
     }
 
-    public function imports(): ImportCollectionContract
+    public function imports(ResourceGeneratorContextContract $context): ImportCollectionContract
     {
         $constraintType = $this->keys && $this->values
             ? 'record'
@@ -58,11 +59,11 @@ class ZodArrayType implements ParserTypeContract, ParserTypeWithCommentContract
         $imports = new ImportCollection(new Import($constraintType, 'zod'));
 
         if ($this->keys) {
-            $imports = $imports->merge($this->keys->imports());
+            $imports = $imports->merge($this->keys->imports($context));
         }
 
         if ($this->values) {
-            $imports = $imports->merge($this->values->imports());
+            $imports = $imports->merge($this->values->imports($context));
         }
 
         return $imports;

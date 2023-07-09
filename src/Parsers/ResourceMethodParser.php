@@ -16,6 +16,7 @@ class ResourceMethodParser implements ResourceMethodParserContract
 {
     public function __construct(
         private readonly ClassMethodReturnParserContract $classMethodReturnParser,
+        private readonly ResourceTypeProcessor $resourceTypeProcessor,
     ) {
         //
     }
@@ -48,7 +49,11 @@ class ResourceMethodParser implements ResourceMethodParserContract
         }
 
         foreach ($returnType->properties() as $type) {
-            $parsedResources = $this->parseDependentResources($type, $parsedResources);
+            $this->resourceTypeProcessor->process($type, function (TypeContract $type) use (&$parsedResources) {
+                if ($type instanceof Types\ClassWithMethodType) {
+                    $parsedResources = $this->parse($type->fullyQualifiedName(), $type->methodName(), $parsedResources);
+                }
+            });
         }
 
         return $parsedResources->add(new ResourceData(
@@ -56,43 +61,5 @@ class ResourceMethodParser implements ResourceMethodParserContract
             $methodName,
             $returnType->properties(),
         ));
-    }
-
-    /**
-     * @param TypeContract $type
-     * @param Collection<int, ResourceData> $parsedResources
-     * @return Collection<int, ResourceData>
-     */
-    private function parseDependentResources(TypeContract $type, Collection $parsedResources): Collection
-    {
-        if ($type instanceof Types\ClassWithMethodType) {
-            return $this->parse($type->fullyQualifiedName(), $type->methodName(), $parsedResources);
-        }
-
-        if ($type instanceof Types\UnionType) {
-            foreach ($type->types() as $type) {
-                $parsedResources = $this->parseDependentResources($type, $parsedResources);
-            }
-            return $parsedResources;
-        }
-
-        if ($type instanceof Types\ArrayWithPropertiesType) {
-            foreach ($type->properties() as $type) {
-                $parsedResources = $this->parseDependentResources($type, $parsedResources);
-            }
-            return $parsedResources;
-        }
-
-        if ($type instanceof Types\ArrayType) {
-            if ($type->keys) {
-                $parsedResources = $this->parseDependentResources($type->keys, $parsedResources);
-            }
-            if ($type->values) {
-                $parsedResources = $this->parseDependentResources($type->values, $parsedResources);
-            }
-            return $parsedResources;
-        }
-
-        return $parsedResources;
     }
 }

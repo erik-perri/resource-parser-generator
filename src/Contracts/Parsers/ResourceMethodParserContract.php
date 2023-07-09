@@ -4,22 +4,16 @@ declare(strict_types=1);
 
 namespace ResourceParserGenerator\Contracts\Parsers;
 
-use ResourceParserGenerator\DataObjects\ResourceDataCollection;
-use ResourceParserGenerator\DataObjects\ResourceGeneratorConfiguration;
+use Illuminate\Support\Collection;
+use ResourceParserGenerator\DataObjects\ResourceData;
 
 interface ResourceMethodParserContract
 {
     /**
      * @param class-string $className
      * @param string $methodName
-     * @param ResourceDataCollection $resources
-     * @param ResourceGeneratorConfiguration $configuration
-     * @return void
+     * @param Collection<int, ResourceData> $parsedResources
+     * @return Collection<int, ResourceData>
      */
-    public function parse(
-        string $className,
-        string $methodName,
-        ResourceDataCollection $resources,
-        ResourceGeneratorConfiguration $configuration,
-    ): void;
+    public function parse(string $className, string $methodName, Collection $parsedResources): Collection;
 }

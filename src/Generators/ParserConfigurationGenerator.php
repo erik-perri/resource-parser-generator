@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace ResourceParserGenerator\Generators;
 
 use ResourceParserGenerator\Contracts\Generators\ParserNameGeneratorContract;
-use ResourceParserGenerator\DataObjects\ResourceConfiguration;
-use ResourceParserGenerator\DataObjects\ResourceGeneratorConfiguration;
+use ResourceParserGenerator\DataObjects\ParserConfiguration;
+use ResourceParserGenerator\DataObjects\ParserGeneratorConfiguration;
 
 class ParserConfigurationGenerator
 {
@@ -17,18 +17,18 @@ class ParserConfigurationGenerator
     }
 
     /**
-     * @param ResourceGeneratorConfiguration $configuration
+     * @param ParserGeneratorConfiguration $configuration
      * @param class-string $className
      * @param string $methodName
-     * @return ResourceConfiguration
+     * @return ParserConfiguration
      */
     public function generate(
-        ResourceGeneratorConfiguration $configuration,
+        ParserGeneratorConfiguration $configuration,
         string $className,
         string $methodName,
-    ): ResourceConfiguration {
+    ): ParserConfiguration {
         $configuration = $configuration->parser($className, $methodName)
-            ?? new ResourceConfiguration([$className, $methodName]);
+            ?? new ParserConfiguration([$className, $methodName]);
 
         $parserFile = $configuration->parserFile
             ?? $this->nameGenerator->generateFileName($configuration->method[0]);
@@ -37,6 +37,6 @@ class ParserConfigurationGenerator
         $variableName = $configuration->variableName
             ?? $this->nameGenerator->generateVariableName($configuration->method[0], $configuration->method[1]);
 
-        return new ResourceConfiguration($configuration->method, $parserFile, $typeName, $variableName);
+        return new ParserConfiguration($configuration->method, $parserFile, $typeName, $variableName);
     }
 }

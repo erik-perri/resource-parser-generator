@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace ResourceParserGenerator\Types\Zod;
 
 use ResourceParserGenerator\Contracts\ImportCollectionContract;
-use ResourceParserGenerator\Contracts\ResourceGeneratorContextContract;
+use ResourceParserGenerator\Contracts\ParserGeneratorContextContract;
 use ResourceParserGenerator\Contracts\Types\ParserTypeContract;
 use ResourceParserGenerator\DataObjects\Import;
 use ResourceParserGenerator\DataObjects\ImportCollection;
@@ -24,10 +24,10 @@ class ZodShapeReferenceType implements ParserTypeContract
         //
     }
 
-    public function constraint(ResourceGeneratorContextContract $context): string
+    public function constraint(ParserGeneratorContextContract $context): string
     {
-        $resourceData = $context->find($this->className, $this->methodName);
-        if (!$resourceData) {
+        $parserData = $context->find($this->className, $this->methodName);
+        if (!$parserData) {
             throw new RuntimeException(sprintf(
                 'Unable to find global resource context for "%s::%s"',
                 $this->className,
@@ -35,7 +35,7 @@ class ZodShapeReferenceType implements ParserTypeContract
             ));
         }
 
-        $outputVariable = $resourceData->configuration->variableName;
+        $outputVariable = $parserData->configuration->variableName;
         if (!$outputVariable) {
             throw new RuntimeException(sprintf(
                 'Unable to find output variable name for "%s::%s"',
@@ -47,15 +47,15 @@ class ZodShapeReferenceType implements ParserTypeContract
         return $outputVariable;
     }
 
-    public function imports(ResourceGeneratorContextContract $context): ImportCollectionContract
+    public function imports(ParserGeneratorContextContract $context): ImportCollectionContract
     {
         // If this resource is available in the local context, then we don't need to import it.
         if ($context->findLocal($this->className, $this->methodName)) {
             return new ImportCollection();
         }
 
-        $resourceData = $context->find($this->className, $this->methodName);
-        if (!$resourceData) {
+        $parserData = $context->find($this->className, $this->methodName);
+        if (!$parserData) {
             throw new RuntimeException(sprintf(
                 'Unable to find local resource data for "%s::%s"',
                 $this->className,
@@ -63,8 +63,8 @@ class ZodShapeReferenceType implements ParserTypeContract
             ));
         }
 
-        $fileName = $resourceData->configuration->parserFile;
-        $variableName = $resourceData->configuration->variableName;
+        $fileName = $parserData->configuration->parserFile;
+        $variableName = $parserData->configuration->variableName;
         if (!$fileName || !$variableName) {
             throw new RuntimeException(sprintf(
                 'Unable to determine output configuration for "%s::%s"',

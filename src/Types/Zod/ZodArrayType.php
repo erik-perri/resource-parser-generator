@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace ResourceParserGenerator\Types\Zod;
 
 use ResourceParserGenerator\Contracts\ImportCollectionContract;
-use ResourceParserGenerator\Contracts\ResourceGeneratorContextContract;
+use ResourceParserGenerator\Contracts\ParserGeneratorContextContract;
 use ResourceParserGenerator\Contracts\Types\ParserTypeContract;
 use ResourceParserGenerator\Contracts\Types\ParserTypeWithCommentContract;
 use ResourceParserGenerator\DataObjects\Import;
@@ -37,7 +37,7 @@ class ZodArrayType implements ParserTypeContract, ParserTypeWithCommentContract
         return trim($imploded) ?: null;
     }
 
-    public function constraint(ResourceGeneratorContextContract $context): string
+    public function constraint(ParserGeneratorContextContract $context): string
     {
         if ($this->keys && $this->values) {
             return sprintf('record(%s, %s)', $this->keys->constraint($context), $this->values->constraint($context));
@@ -50,7 +50,7 @@ class ZodArrayType implements ParserTypeContract, ParserTypeWithCommentContract
         throw new RuntimeException('Untyped Zod arrays are not supported');
     }
 
-    public function imports(ResourceGeneratorContextContract $context): ImportCollectionContract
+    public function imports(ParserGeneratorContextContract $context): ImportCollectionContract
     {
         $constraintType = $this->keys && $this->values
             ? 'record'

@@ -4,16 +4,16 @@ declare(strict_types=1);
 
 namespace ResourceParserGenerator\DataObjects;
 
-class ResourceGeneratorConfiguration
+class ParserGeneratorConfiguration
 {
     /**
-     * @var ReadOnlyCollection<int, ResourceConfiguration>
+     * @var ReadOnlyCollection<int, ParserConfiguration>
      */
     public readonly ReadOnlyCollection $parsers;
 
     public function __construct(
         public readonly string $outputPath,
-        ResourceConfiguration ...$parsers,
+        ParserConfiguration ...$parsers,
     ) {
         $this->parsers = new ReadOnlyCollection(array_values($parsers));
     }
@@ -21,12 +21,12 @@ class ResourceGeneratorConfiguration
     /**
      * @param class-string $className
      * @param string $methodName
-     * @return ResourceConfiguration|null
+     * @return ParserConfiguration|null
      */
-    public function parser(string $className, string $methodName): ?ResourceConfiguration
+    public function parser(string $className, string $methodName): ?ParserConfiguration
     {
         return $this->parsers->first(
-            fn(ResourceConfiguration $configuration) => $configuration->is($className, $methodName),
+            fn(ParserConfiguration $configuration) => $configuration->is($className, $methodName),
         );
     }
 }

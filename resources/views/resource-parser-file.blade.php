@@ -1,12 +1,12 @@
 @php
     use Illuminate\Support\Collection;
-    use ResourceParserGenerator\Contexts\ResourceGeneratorContext;
+    use ResourceParserGenerator\Contexts\ParserGeneratorContext;
     use ResourceParserGenerator\Contracts\ImportGroupContract;
-    use ResourceParserGenerator\DataObjects\ResourceData;
+    use ResourceParserGenerator\DataObjects\ParserData;
 
-    /** @var ResourceGeneratorContext $context */
+    /** @var ParserGeneratorContext $context */
     /** @var Collection<int, ImportGroupContract> $imports */
-    /** @var Collection<string, ResourceData> $parsers */
+    /** @var Collection<string, ParserData> $parsers */
 @endphp
 
 @foreach($imports as $module)

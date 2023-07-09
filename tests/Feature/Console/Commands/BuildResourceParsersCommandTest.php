@@ -9,7 +9,7 @@ use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\File;
 use PHPUnit\Framework\Attributes\DataProvider;
 use ResourceParserGenerator\Console\Commands\BuildResourceParsersCommand;
-use ResourceParserGenerator\DataObjects\ResourceConfiguration;
+use ResourceParserGenerator\DataObjects\ParserConfiguration;
 use ResourceParserGenerator\DataObjects\ResourcePath;
 use ResourceParserGenerator\Tests\Examples\Resources\Nested\RelatedResource;
 use ResourceParserGenerator\Tests\Examples\Resources\PostResource;
@@ -47,8 +47,8 @@ class BuildResourceParsersCommandTest extends TestCase
         Config::set('build.resource_parsers', [
             'output_path' => dirname(__DIR__, 3) . '/Output',
             'sources' => [
-                new ResourceConfiguration([UserResource::class, 'base']),
-                new ResourceConfiguration(['ResourceParserGenerator\MissingClass', 'base']),
+                new ParserConfiguration([UserResource::class, 'base']),
+                new ParserConfiguration(['ResourceParserGenerator\MissingClass', 'base']),
             ],
         ]);
 
@@ -63,8 +63,8 @@ class BuildResourceParsersCommandTest extends TestCase
         Config::set('build.resource_parsers', [
             'output_path' => dirname(__DIR__, 3) . '/Output',
             'sources' => [
-                new ResourceConfiguration([UserResource::class, 'base']),
-                new ResourceConfiguration([UserResource::class, 'notARealMethod']),
+                new ParserConfiguration([UserResource::class, 'base']),
+                new ParserConfiguration([UserResource::class, 'notARealMethod']),
             ],
         ]);
 
@@ -79,7 +79,7 @@ class BuildResourceParsersCommandTest extends TestCase
         Config::set('build.resource_parsers', [
             'output_path' => '/where/is/this/file',
             'sources' => [
-                new ResourceConfiguration([UserResource::class, 'base']),
+                new ParserConfiguration([UserResource::class, 'base']),
             ],
         ]);
 
@@ -95,7 +95,7 @@ class BuildResourceParsersCommandTest extends TestCase
         $config = [
             'output_path' => $outputPath,
             'sources' => [
-                new ResourceConfiguration([UserResource::class, 'base']),
+                new ParserConfiguration([UserResource::class, 'base']),
             ],
         ];
 
@@ -147,7 +147,7 @@ class BuildResourceParsersCommandTest extends TestCase
                 'config' => fn(string $outputPath) => [
                     'output_path' => $outputPath,
                     'sources' => [
-                        new ResourceConfiguration([UserResource::class, 'base']),
+                        new ParserConfiguration([UserResource::class, 'base']),
                     ],
                 ],
                 'expectedOutput' => [
@@ -160,7 +160,7 @@ class BuildResourceParsersCommandTest extends TestCase
                 'config' => fn(string $outputPath) => [
                     'output_path' => $outputPath,
                     'sources' => [
-                        new ResourceConfiguration(
+                        new ParserConfiguration(
                             [UserResource::class, 'base'],
                             'custom.ts',
                             'CustomParser',
@@ -178,31 +178,31 @@ class BuildResourceParsersCommandTest extends TestCase
                 'config' => fn(string $outputPath) => [
                     'output_path' => $outputPath,
                     'sources' => [
-                        new ResourceConfiguration(
+                        new ParserConfiguration(
                             [UserResource::class, 'base'],
                             'parsers.ts',
                         ),
-                        new ResourceConfiguration(
+                        new ParserConfiguration(
                             [UserResource::class, 'combined'],
                             'parsers.ts',
                         ),
-                        new ResourceConfiguration(
+                        new ParserConfiguration(
                             [UserResource::class, 'ternaries'],
                             'parsers.ts',
                         ),
-                        new ResourceConfiguration(
+                        new ParserConfiguration(
                             [UserResource::class, 'relatedResource'],
                             'parsers.ts',
                         ),
-                        new ResourceConfiguration(
+                        new ParserConfiguration(
                             [RelatedResource::class, 'base'],
                             'parsers.ts',
                         ),
-                        new ResourceConfiguration(
+                        new ParserConfiguration(
                             [RelatedResource::class, 'shortFormatNotNamedLikeFormatName'],
                             'parsers.ts',
                         ),
-                        new ResourceConfiguration(
+                        new ParserConfiguration(
                             [RelatedResource::class, 'verbose'],
                             'parsers.ts',
                         ),
@@ -216,13 +216,13 @@ class BuildResourceParsersCommandTest extends TestCase
                 'config' => fn(string $outputPath) => [
                     'output_path' => $outputPath,
                     'sources' => [
-                        new ResourceConfiguration([UserResource::class, 'base']),
-                        new ResourceConfiguration([UserResource::class, 'combined']),
-                        new ResourceConfiguration([UserResource::class, 'ternaries']),
-                        new ResourceConfiguration([UserResource::class, 'relatedResource']),
-                        new ResourceConfiguration([RelatedResource::class, 'base']),
-                        new ResourceConfiguration([RelatedResource::class, 'shortFormatNotNamedLikeFormatName']),
-                        new ResourceConfiguration([RelatedResource::class, 'verbose']),
+                        new ParserConfiguration([UserResource::class, 'base']),
+                        new ParserConfiguration([UserResource::class, 'combined']),
+                        new ParserConfiguration([UserResource::class, 'ternaries']),
+                        new ParserConfiguration([UserResource::class, 'relatedResource']),
+                        new ParserConfiguration([RelatedResource::class, 'base']),
+                        new ParserConfiguration([RelatedResource::class, 'shortFormatNotNamedLikeFormatName']),
+                        new ParserConfiguration([RelatedResource::class, 'verbose']),
                     ],
                 ],
                 'expectedOutput' => [
@@ -250,7 +250,7 @@ class BuildResourceParsersCommandTest extends TestCase
                 'config' => fn(string $outputPath) => [
                     'output_path' => $outputPath,
                     'sources' => [
-                        new ResourceConfiguration([UserResource::class, 'childArrays']),
+                        new ParserConfiguration([UserResource::class, 'childArrays']),
                     ],
                 ],
                 'expectedOutput' => [
@@ -271,7 +271,7 @@ TS,
                 'config' => fn(string $outputPath) => [
                     'output_path' => $outputPath,
                     'sources' => [
-                        new ResourceConfiguration(
+                        new ParserConfiguration(
                             [UserResource::class, 'enumMethods'],
                             'parsers.ts',
                         ),
@@ -294,7 +294,7 @@ TS,
                 'config' => fn(string $outputPath) => [
                     'output_path' => $outputPath,
                     'sources' => [
-                        new ResourceConfiguration(
+                        new ParserConfiguration(
                             [UserResource::class, 'unknownComments'],
                             'parsers.ts',
                         ),
@@ -320,11 +320,11 @@ TS,
                 'config' => fn(string $outputPath) => [
                     'output_path' => $outputPath,
                     'sources' => [
-                        new ResourceConfiguration(
+                        new ParserConfiguration(
                             [UserResource::class, 'usingWhenLoaded'],
                             'parsers.ts',
                         ),
-                        new ResourceConfiguration(
+                        new ParserConfiguration(
                             [PostResource::class, 'simple'],
                             'parsers.ts',
                         ),
@@ -354,11 +354,11 @@ TS,
                 'config' => fn(string $outputPath) => [
                     'output_path' => $outputPath,
                     'sources' => [
-                        new ResourceConfiguration(
+                        new ParserConfiguration(
                             [UserResource::class, 'usingResourceCollection'],
                             'parsers.ts',
                         ),
-                        new ResourceConfiguration(
+                        new ParserConfiguration(
                             [PostResource::class, 'simple'],
                             'parsers.ts',
                         ),

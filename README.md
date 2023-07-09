@@ -32,10 +32,10 @@ return [
         // The parsers to include. (Required)
         'sources' => [
             // No overrides, parser name and file name generated from class and method names
-            new ResourceConfiguration([\App\Http\Resources\UserResource::class, 'base']),
+            new ParserConfiguration([\App\Http\Resources\UserResource::class, 'base']),
 
             // Overriding options, all options but class and method are optional and generated if not specified
-            new ResourceConfiguration(
+            new ParserConfiguration(
                 [\App\Http\Resources\AnotherResource::class, 'base'],
                 parserFile: 'custom.ts',
                 typeName: 'CustomParser',

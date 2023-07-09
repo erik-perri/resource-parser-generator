@@ -13,7 +13,7 @@ use PHPStan\PhpDocParser\Lexer\Lexer;
 use PHPStan\PhpDocParser\Parser\ConstExprParser;
 use PHPStan\PhpDocParser\Parser\PhpDocParser;
 use PHPStan\PhpDocParser\Parser\TypeParser;
-use ResourceParserGenerator\Contexts\ResourceGeneratorContext;
+use ResourceParserGenerator\Contexts\ParserGeneratorContext;
 use ResourceParserGenerator\Contracts\Converters\DeclaredTypeConverterContract;
 use ResourceParserGenerator\Contracts\Converters\DocBlockTypeConverterContract;
 use ResourceParserGenerator\Contracts\Converters\ExpressionTypeConverterContract;
@@ -23,15 +23,15 @@ use ResourceParserGenerator\Contracts\Converters\ReflectionTypeConverterContract
 use ResourceParserGenerator\Contracts\Converters\VariableTypeConverterContract;
 use ResourceParserGenerator\Contracts\Filesystem\ClassFileLocatorContract;
 use ResourceParserGenerator\Contracts\Filesystem\ResourceFileFormatLocatorContract;
+use ResourceParserGenerator\Contracts\Generators\ParserGeneratorContract;
 use ResourceParserGenerator\Contracts\Generators\ParserNameGeneratorContract;
-use ResourceParserGenerator\Contracts\Generators\ResourceParserGeneratorContract;
+use ResourceParserGenerator\Contracts\ParserGeneratorContextContract;
 use ResourceParserGenerator\Contracts\Parsers\ClassConstFetchValueParserContract;
 use ResourceParserGenerator\Contracts\Parsers\ClassMethodReturnParserContract;
 use ResourceParserGenerator\Contracts\Parsers\ClassParserContract;
 use ResourceParserGenerator\Contracts\Parsers\DocBlockParserContract;
 use ResourceParserGenerator\Contracts\Parsers\PhpFileParserContract;
 use ResourceParserGenerator\Contracts\Parsers\ResourceMethodParserContract;
-use ResourceParserGenerator\Contracts\ResourceGeneratorContextContract;
 use ResourceParserGenerator\Converters\DeclaredTypeConverter;
 use ResourceParserGenerator\Converters\DocBlockTypeConverter;
 use ResourceParserGenerator\Converters\ExpressionTypeConverter;
@@ -41,8 +41,8 @@ use ResourceParserGenerator\Converters\ReflectionTypeConverter;
 use ResourceParserGenerator\Converters\VariableTypeConverter;
 use ResourceParserGenerator\Filesystem\ClassFileLocator;
 use ResourceParserGenerator\Filesystem\ResourceFileFormatLocator;
+use ResourceParserGenerator\Generators\ParserGenerator;
 use ResourceParserGenerator\Generators\ParserNameGenerator;
-use ResourceParserGenerator\Generators\ResourceParserGenerator;
 use ResourceParserGenerator\Parsers\ClassConstFetchValueParser;
 use ResourceParserGenerator\Parsers\ClassMethodReturnParser;
 use ResourceParserGenerator\Parsers\ClassParser;
@@ -87,11 +87,11 @@ class ResourceParserGeneratorServiceProvider extends ServiceProvider
             $this->app->singleton(VariableTypeConverterContract::class, VariableTypeConverter::class);
 
             // Data Objects
-            $this->app->bind(ResourceGeneratorContextContract::class, ResourceGeneratorContext::class);
+            $this->app->bind(ParserGeneratorContextContract::class, ParserGeneratorContext::class);
 
             // Generators
             $this->app->singleton(ParserNameGeneratorContract::class, ParserNameGenerator::class);
-            $this->app->singleton(ResourceParserGeneratorContract::class, ResourceParserGenerator::class);
+            $this->app->singleton(ParserGeneratorContract::class, ParserGenerator::class);
 
             // Locators
             $this->app->singleton(

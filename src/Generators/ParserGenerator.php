@@ -5,20 +5,20 @@ declare(strict_types=1);
 namespace ResourceParserGenerator\Generators;
 
 use Illuminate\Support\Collection;
-use ResourceParserGenerator\Contracts\Generators\ResourceParserGeneratorContract;
-use ResourceParserGenerator\Contracts\ResourceGeneratorContextContract;
+use ResourceParserGenerator\Contracts\Generators\ParserGeneratorContract;
+use ResourceParserGenerator\Contracts\ParserGeneratorContextContract;
 use ResourceParserGenerator\DataObjects\Import;
 use ResourceParserGenerator\DataObjects\ImportCollection;
-use ResourceParserGenerator\DataObjects\ResourceData;
+use ResourceParserGenerator\DataObjects\ParserData;
 
-class ResourceParserGenerator implements ResourceParserGeneratorContract
+class ParserGenerator implements ParserGeneratorContract
 {
     /**
-     * @param Collection<int, ResourceData> $parsers
-     * @param ResourceGeneratorContextContract $context
+     * @param Collection<int, ParserData> $parsers
+     * @param ParserGeneratorContextContract $context
      * @return string
      */
-    public function generate(Collection $parsers, ResourceGeneratorContextContract $context): string
+    public function generate(Collection $parsers, ParserGeneratorContextContract $context): string
     {
         // TODO Make these imports configurable.
         $imports = new ImportCollection(

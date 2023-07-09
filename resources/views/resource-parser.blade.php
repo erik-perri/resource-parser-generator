@@ -1,9 +1,9 @@
 @php
-    use ResourceParserGenerator\Contexts\ResourceGeneratorContext;
+    use ResourceParserGenerator\Contexts\ParserGeneratorContext;
     use ResourceParserGenerator\Contracts\Types\ParserTypeContract;
     use ResourceParserGenerator\Contracts\Types\ParserTypeWithCommentContract;
 
-    /** @var ResourceGeneratorContext $context */
+    /** @var ParserGeneratorContext $context */
     /** @var array<string, ParserTypeContract> $properties */
     /** @var string $variableName */
     /** @var string $typeName */

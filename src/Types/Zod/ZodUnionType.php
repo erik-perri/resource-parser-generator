@@ -6,7 +6,7 @@ namespace ResourceParserGenerator\Types\Zod;
 
 use Illuminate\Support\Collection;
 use ResourceParserGenerator\Contracts\ImportCollectionContract;
-use ResourceParserGenerator\Contracts\ResourceGeneratorContextContract;
+use ResourceParserGenerator\Contracts\ParserGeneratorContextContract;
 use ResourceParserGenerator\Contracts\Types\ParserTypeContract;
 use ResourceParserGenerator\Contracts\Types\ParserTypeWithCommentContract;
 use ResourceParserGenerator\DataObjects\Import;
@@ -41,7 +41,7 @@ class ZodUnionType implements ParserTypeContract, ParserTypeWithCommentContract
         return trim($imploded) ?: null;
     }
 
-    public function constraint(ResourceGeneratorContextContract $context): string
+    public function constraint(ParserGeneratorContextContract $context): string
     {
         $types = $this->types->map(fn(ParserTypeContract $type) => $type->constraint($context))
             ->unique()
@@ -54,7 +54,7 @@ class ZodUnionType implements ParserTypeContract, ParserTypeWithCommentContract
         return sprintf('union([%s])', $types->join(', '));
     }
 
-    public function imports(ResourceGeneratorContextContract $context): ImportCollectionContract
+    public function imports(ParserGeneratorContextContract $context): ImportCollectionContract
     {
         $types = $this->types->map(fn(ParserTypeContract $type) => $type->constraint($context))
             ->unique()

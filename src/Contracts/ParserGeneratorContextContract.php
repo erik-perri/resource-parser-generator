@@ -6,27 +6,27 @@ namespace ResourceParserGenerator\Contracts;
 
 use Closure;
 use Illuminate\Support\Collection;
-use ResourceParserGenerator\DataObjects\ResourceData;
+use ResourceParserGenerator\DataObjects\ParserData;
 
-interface ResourceGeneratorContextContract
+interface ParserGeneratorContextContract
 {
     /**
      * @param class-string $className
      * @param string $methodName
-     * @return ResourceData|null
+     * @return ParserData|null
      */
-    public function find(string $className, string $methodName): ResourceData|null;
+    public function find(string $className, string $methodName): ParserData|null;
 
     /**
      * @param class-string $className
      * @param string $methodName
-     * @return ResourceData|null
+     * @return ParserData|null
      */
-    public function findLocal(string $className, string $methodName): ResourceData|null;
+    public function findLocal(string $className, string $methodName): ParserData|null;
 
     /**
      * @template T
-     * @param Collection<int, ResourceData> $localParsers
+     * @param Collection<int, ParserData> $localParsers
      * @param Closure(): T $callback
      * @return T
      */

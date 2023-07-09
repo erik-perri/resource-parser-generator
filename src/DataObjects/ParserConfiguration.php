@@ -6,7 +6,7 @@ namespace ResourceParserGenerator\DataObjects;
 
 use ResourceParserGenerator\Contracts\DataObjects\ParserSourceContract;
 
-class ResourceConfiguration implements ParserSourceContract
+class ParserConfiguration implements ParserSourceContract
 {
     /**
      * @param array{class-string, string} $method

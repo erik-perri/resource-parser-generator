@@ -37,7 +37,7 @@ class ConverterContextProcessor
 
             $returnScope = $this->classParser->parseType($type);
 
-            // Convert any enums into their backed types
+            // Convert any enums into enum types containing their backed types
             if ($returnScope instanceof EnumScope) {
                 $type = $returnScope->propertyType('value');
                 if (!$type) {
@@ -46,14 +46,14 @@ class ConverterContextProcessor
                     );
                 }
 
-                return $type;
+                return new Types\EnumType($returnScope->fullyQualifiedName(), $type);
             } elseif ($returnScope->hasParent(Enum::class)) {
                 $constants = $returnScope->constants();
                 if ($constants->isEmpty()) {
                     throw new RuntimeException('Unexpected legacy enum without constants');
                 }
 
-                return $constants->firstOrFail()->type();
+                return new Types\EnumType($returnScope->fullyQualifiedName(), $constants->firstOrFail()->type());
             }
 
             // Convert any resource classes into a ClassWithMethodType containing their format

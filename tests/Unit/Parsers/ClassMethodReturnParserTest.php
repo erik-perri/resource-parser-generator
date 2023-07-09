@@ -7,6 +7,9 @@ namespace ResourceParserGenerator\Tests\Unit\Parsers;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\DataProvider;
 use ResourceParserGenerator\Parsers\ClassMethodReturnParser;
+use ResourceParserGenerator\Tests\Examples\Enums\LegacyPostStatus;
+use ResourceParserGenerator\Tests\Examples\Enums\Permission;
+use ResourceParserGenerator\Tests\Examples\Enums\PostStatus;
 use ResourceParserGenerator\Tests\Examples\Resources\Nested\RelatedResource;
 use ResourceParserGenerator\Tests\Examples\Resources\PostResource;
 use ResourceParserGenerator\Tests\Examples\Resources\UserResource;
@@ -141,14 +144,14 @@ class ClassMethodReturnParserTest extends TestCase
             'UserResource::enumWithoutValue' => [
                 'method' => [UserResource::class, 'enumWithoutValue'],
                 'expected' => [
-                    'latestStatus' => 'string|undefined',
-                    'legacyStatus' => 'string|undefined',
+                    'latestStatus' => 'enum<' . PostStatus::class . ', string>|undefined',
+                    'legacyStatus' => 'enum<' . LegacyPostStatus::class . ', string>|undefined',
                 ],
             ],
             'UserResource::usingCollectionPluck' => [
                 'method' => [UserResource::class, 'usingCollectionPluck'],
                 'expected' => [
-                    'enum_all_without_pluck' => 'string[]',
+                    'enum_all_without_pluck' => 'enum<' . Permission::class . ', string>[]',
                     'latest_post_ids' => 'int[]',
                     'permissions' => 'string[]',
                 ],

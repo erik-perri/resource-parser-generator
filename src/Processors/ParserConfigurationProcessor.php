@@ -25,6 +25,8 @@ class ParserConfigurationProcessor
     }
 
     /**
+     * Convert the resource types into parser types and return a collection of the data for the parsers.
+     *
      * @param ParserGeneratorConfiguration $configuration
      * @param Collection<int, ResourceData> $resources
      * @param Collection<int, EnumData> $enums

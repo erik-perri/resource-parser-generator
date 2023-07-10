@@ -23,12 +23,17 @@ class EnumConfigurationProcessor
     }
 
     /**
+     * Parse any enums specified in the configuration or used in any resources and return a collection of the parsed
+     * enums.
+     *
      * @param ParserGeneratorConfiguration $configuration
      * @param Collection<int, ResourceData> $resources
      * @return Collection<int, EnumData>
      */
     public function process(ParserGeneratorConfiguration $configuration, Collection $resources): Collection
     {
+        // TODO Collect enums from configuration and resources and parse all at once.
+
         $enums = collect();
 
         foreach ($resources as $resource) {

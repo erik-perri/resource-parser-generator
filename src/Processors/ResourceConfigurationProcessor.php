@@ -19,6 +19,9 @@ class ResourceConfigurationProcessor
     }
 
     /**
+     * Parse any resources specified in the configuration and return a collection of the parsed resources. This will
+     * recursively parse any dependent resources found during the parsing.
+     *
      * @param ParserGeneratorConfiguration $configuration
      * @return Collection<int, ResourceData>
      */

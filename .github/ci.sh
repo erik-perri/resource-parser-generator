@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+# This script runs all of the `COMMANDS` in the background then waits for all of the processes to finish. Once they are
+# complete, the script will output all of the logs and exit with a failure status code if any failed.
 
 COMMANDS=(
   "composer check-style"

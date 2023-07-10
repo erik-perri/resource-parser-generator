@@ -49,6 +49,7 @@ class EnumConfigurationProcessor
                         ));
                     }
                 } catch (Throwable $error) {
+                    // TODO Don't throw and let type transformation fail at the Type->ParserType level instead?
                     throw new RuntimeException(sprintf(
                         'Failed to parse enum "%s" for "%s::%s"',
                         $name,

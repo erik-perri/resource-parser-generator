@@ -9,21 +9,19 @@ use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Validator;
-use ResourceParserGenerator\Contracts\Converters\ParserTypeConverterContract;
 use ResourceParserGenerator\Contracts\DataObjects\ParserSourceContract;
 use ResourceParserGenerator\Contracts\Filesystem\ResourceFileFormatLocatorContract;
 use ResourceParserGenerator\Contracts\Generators\ParserGeneratorContract;
 use ResourceParserGenerator\Contracts\ParserGeneratorContextContract;
-use ResourceParserGenerator\Contracts\Parsers\ResourceMethodParserContract;
-use ResourceParserGenerator\Contracts\Types\TypeContract;
 use ResourceParserGenerator\DataObjects\ParserConfiguration;
 use ResourceParserGenerator\DataObjects\ParserData;
-use ResourceParserGenerator\DataObjects\ParserDataCollection;
 use ResourceParserGenerator\DataObjects\ParserGeneratorConfiguration;
-use ResourceParserGenerator\DataObjects\ResourceData;
 use ResourceParserGenerator\DataObjects\ResourcePath;
 use ResourceParserGenerator\Filesystem\ResourceFileLocator;
-use ResourceParserGenerator\Generators\ParserConfigurationGenerator;
+use ResourceParserGenerator\Processors\EnumConfigurationProcessor;
+use ResourceParserGenerator\Processors\ParserConfigurationProcessor;
+use ResourceParserGenerator\Processors\ResourceConfigurationProcessor;
+use RuntimeException;
 use Throwable;
 
 class BuildResourceParsersCommand extends Command
@@ -33,57 +31,41 @@ class BuildResourceParsersCommand extends Command
 
     public function handle(): int
     {
-        // Load and validate the configuration.
         $configuration = $this->parseConfiguration(strval($this->option('config')));
         if (!$configuration) {
             return static::FAILURE;
         }
 
-        $resourceParser = $this->resolve(ResourceMethodParserContract::class);
-        $parsedResources = collect();
+        try {
+            $resources = $this->resolve(ResourceConfigurationProcessor::class)->process($configuration);
+            $enums = $this->resolve(EnumConfigurationProcessor::class)->process($configuration, $resources);
+            $parsers = $this->resolve(ParserConfigurationProcessor::class)
+                ->process($configuration, $resources, $enums);
 
-        // Parse the resources and their dependencies
-        foreach ($configuration->parsers as $parserConfiguration) {
-            try {
-                $parsedResources = $resourceParser->parse(
-                    $parserConfiguration->method[0],
-                    $parserConfiguration->method[1],
-                    $parsedResources,
-                );
-            } catch (Throwable $error) {
-                $this->components->error(sprintf(
-                    'Failed to generate parser for "%s::%s"',
-                    $parserConfiguration->method[0],
-                    $parserConfiguration->method[1],
-                ));
-                $this->components->bulletList([$error->getMessage()]);
-                return static::FAILURE;
-            }
+            $parsersByFile = $parsers->groupBy(function (ParserData $data) {
+                if (!$data->configuration->parserFile) {
+                    throw new RuntimeException(sprintf(
+                        'Could not find output file path for "%s::%s"',
+                        $data->configuration->method[0],
+                        $data->configuration->method[1],
+                    ));
+                }
+
+                return $data->configuration->parserFile;
+            });
+        } catch (Throwable $error) {
+            $this->components->error('Failed to parse resources.');
+            $this->components->bulletList(array_filter([$error->getMessage(), $error->getPrevious()?->getMessage()]));
+            return static::FAILURE;
         }
-
-        $isChecking = (bool)$this->option('check');
-        $returnValue = static::SUCCESS;
-
-        $parserConfigurationGenerator = $this->resolve(ParserConfigurationGenerator::class);
-        $parserTypeConverter = $this->resolve(ParserTypeConverterContract::class);
-        $parserGenerator = $this->resolve(ParserGeneratorContract::class);
-
-        // Convert the found resource types into parser types
-        $parserCollection = $this->resolve(ParserDataCollection::class, [
-            'parsers' => $parsedResources->map(fn(ResourceData $resource) => new ParserData(
-                $resource,
-                $parserConfigurationGenerator->generate($configuration, $resource->className, $resource->methodName),
-                $resource->properties->map(fn(TypeContract $type) => $parserTypeConverter->convert($type)),
-            ))
-        ]);
 
         // Create a new context for the generation to control which parsers are being generated per file, then split up
         // the parsers by file and loop over generating each file after updating the local context.
-        $generatorContext = $this->resolve(ParserGeneratorContextContract::class, [
-            'parsers' => $parserCollection,
-        ]);
+        $generatorContext = $this->resolve(ParserGeneratorContextContract::class, ['parsers' => $parsers]);
+        $parserGenerator = $this->resolve(ParserGeneratorContract::class);
+        $returnValue = static::SUCCESS;
 
-        foreach ($parserCollection->splitToFiles() as $fileName => $localParsers) {
+        foreach ($parsersByFile as $fileName => $localParsers) {
             $filePath = $configuration->outputPath . '/' . $fileName;
 
             try {
@@ -93,7 +75,7 @@ class BuildResourceParsersCommand extends Command
                 );
             } catch (Throwable $error) {
                 $this->components->twoColumnDetail(
-                    $isChecking
+                    $this->isChecking()
                         ? sprintf('Checking %s', $filePath)
                         : sprintf('Writing %s', $filePath),
                     'Error',
@@ -103,7 +85,7 @@ class BuildResourceParsersCommand extends Command
                 continue;
             }
 
-            if ($isChecking) {
+            if ($this->isChecking()) {
                 $existingContents = File::exists($filePath) ? File::get($filePath) : null;
                 $isMatch = $existingContents === $fileContents;
 
@@ -126,6 +108,11 @@ class BuildResourceParsersCommand extends Command
         }
 
         return $returnValue;
+    }
+
+    private function isChecking(): bool
+    {
+        return (bool)$this->option('check');
     }
 
     private function parseConfiguration(string $configKey): ?ParserGeneratorConfiguration

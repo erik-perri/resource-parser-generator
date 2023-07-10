@@ -6,8 +6,9 @@ namespace ResourceParserGenerator\Types;
 
 use Illuminate\Support\Collection;
 use ResourceParserGenerator\Contracts\Types\TypeContract;
+use ResourceParserGenerator\Contracts\Types\TypeWithChildrenContract;
 
-class ArrayWithPropertiesType implements TypeContract
+class ArrayWithPropertiesType implements TypeContract, TypeWithChildrenContract
 {
     /**
      * @param Collection<string, TypeContract> $properties
@@ -16,6 +17,22 @@ class ArrayWithPropertiesType implements TypeContract
         private readonly Collection $properties,
     ) {
         //
+    }
+
+    /**
+     * @return Collection<int, TypeContract>
+     */
+    public function children(): Collection
+    {
+        /**
+         * @var Collection<int, TypeContract>
+         */
+        return $this->properties
+            ->collect()
+            ->map(fn(TypeContract $type) => $type instanceof TypeWithChildrenContract
+                ? $type->children()
+                : [$type])
+            ->flatten();
     }
 
     public function describe(): string

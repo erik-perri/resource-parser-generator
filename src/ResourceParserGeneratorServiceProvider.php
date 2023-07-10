@@ -23,6 +23,7 @@ use ResourceParserGenerator\Contracts\Converters\ReflectionTypeConverterContract
 use ResourceParserGenerator\Contracts\Converters\VariableTypeConverterContract;
 use ResourceParserGenerator\Contracts\Filesystem\ClassFileLocatorContract;
 use ResourceParserGenerator\Contracts\Filesystem\ResourceFileFormatLocatorContract;
+use ResourceParserGenerator\Contracts\Generators\EnumNameGeneratorContract;
 use ResourceParserGenerator\Contracts\Generators\ParserGeneratorContract;
 use ResourceParserGenerator\Contracts\Generators\ParserNameGeneratorContract;
 use ResourceParserGenerator\Contracts\ParserGeneratorContextContract;
@@ -41,6 +42,7 @@ use ResourceParserGenerator\Converters\ReflectionTypeConverter;
 use ResourceParserGenerator\Converters\VariableTypeConverter;
 use ResourceParserGenerator\Filesystem\ClassFileLocator;
 use ResourceParserGenerator\Filesystem\ResourceFileFormatLocator;
+use ResourceParserGenerator\Generators\EnumNameGenerator;
 use ResourceParserGenerator\Generators\ParserGenerator;
 use ResourceParserGenerator\Generators\ParserNameGenerator;
 use ResourceParserGenerator\Parsers\ClassConstFetchValueParser;
@@ -90,6 +92,7 @@ class ResourceParserGeneratorServiceProvider extends ServiceProvider
             $this->app->bind(ParserGeneratorContextContract::class, ParserGeneratorContext::class);
 
             // Generators
+            $this->app->singleton(EnumNameGeneratorContract::class, EnumNameGenerator::class);
             $this->app->singleton(ParserNameGeneratorContract::class, ParserNameGenerator::class);
             $this->app->singleton(ParserGeneratorContract::class, ParserGenerator::class);
 

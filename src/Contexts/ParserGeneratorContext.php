@@ -8,7 +8,6 @@ use Closure;
 use Illuminate\Support\Collection;
 use ResourceParserGenerator\Contracts\ParserGeneratorContextContract;
 use ResourceParserGenerator\DataObjects\ParserData;
-use ResourceParserGenerator\DataObjects\ParserDataCollection;
 
 /**
  * This class is used to track the local scope when generating the parser files.
@@ -20,14 +19,20 @@ class ParserGeneratorContext implements ParserGeneratorContextContract
      */
     private Collection $localParsers;
 
-    public function __construct(private readonly ParserDataCollection $parsers)
+    /**
+     * @param Collection<int, ParserData> $parsers
+     */
+    public function __construct(private readonly Collection $parsers)
     {
         $this->localParsers = collect();
     }
 
     public function find(string $className, string $methodName): ParserData|null
     {
-        return $this->parsers->find($className, $methodName);
+        return $this->parsers->first(
+            fn(ParserData $context) => $context->resource->className === $className
+                && $context->resource->methodName === $methodName,
+        );
     }
 
     public function findLocal(string $className, string $methodName): ParserData|null

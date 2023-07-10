@@ -6,8 +6,9 @@ namespace ResourceParserGenerator\Types;
 
 use Illuminate\Support\Collection;
 use ResourceParserGenerator\Contracts\Types\TypeContract;
+use ResourceParserGenerator\Contracts\Types\TypeWithChildrenContract;
 
-class ClassType implements TypeContract
+class ClassType implements TypeContract, TypeWithChildrenContract
 {
     /**
      * @param class-string $fullyQualifiedName
@@ -25,6 +26,14 @@ class ClassType implements TypeContract
     public function alias(): string|null
     {
         return $this->alias;
+    }
+
+    /**
+     * @return Collection<int, TypeContract>
+     */
+    public function children(): Collection
+    {
+        return $this->generics?->collect() ?? collect();
     }
 
     /**

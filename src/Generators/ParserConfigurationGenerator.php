@@ -17,17 +17,17 @@ class ParserConfigurationGenerator
     }
 
     /**
-     * @param ParserGeneratorConfiguration $configuration
+     * @param ParserGeneratorConfiguration $generatorConfiguration
      * @param class-string $className
      * @param string $methodName
      * @return ParserConfiguration
      */
     public function generate(
-        ParserGeneratorConfiguration $configuration,
+        ParserGeneratorConfiguration $generatorConfiguration,
         string $className,
         string $methodName,
     ): ParserConfiguration {
-        $configuration = $configuration->parser($className, $methodName)
+        $configuration = $generatorConfiguration->parser($className, $methodName)
             ?? new ParserConfiguration([$className, $methodName]);
 
         $parserFile = $configuration->parserFile

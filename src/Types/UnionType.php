@@ -6,9 +6,10 @@ namespace ResourceParserGenerator\Types;
 
 use Illuminate\Support\Collection;
 use ResourceParserGenerator\Contracts\Types\TypeContract;
+use ResourceParserGenerator\Contracts\Types\TypeWithChildrenContract;
 use RuntimeException;
 
-class UnionType implements TypeContract
+class UnionType implements TypeContract, TypeWithChildrenContract
 {
     /**
      * @var Collection<int, TypeContract>
@@ -26,6 +27,14 @@ class UnionType implements TypeContract
             $type,
             ...$this->types->all(),
         );
+    }
+
+    /**
+     * @return Collection<int, TypeContract>
+     */
+    public function children(): Collection
+    {
+        return $this->types->collect();
     }
 
     public function describe(): string

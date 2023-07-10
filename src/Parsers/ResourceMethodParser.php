@@ -7,7 +7,7 @@ namespace ResourceParserGenerator\Parsers;
 use Illuminate\Support\Collection;
 use ResourceParserGenerator\Contracts\Parsers\ClassMethodReturnParserContract;
 use ResourceParserGenerator\Contracts\Parsers\ResourceMethodParserContract;
-use ResourceParserGenerator\Contracts\Types\TypeContract;
+use ResourceParserGenerator\Contracts\Types\TypeWithChildrenContract;
 use ResourceParserGenerator\DataObjects\ResourceData;
 use ResourceParserGenerator\Types;
 use RuntimeException;
@@ -16,7 +16,6 @@ class ResourceMethodParser implements ResourceMethodParserContract
 {
     public function __construct(
         private readonly ClassMethodReturnParserContract $classMethodReturnParser,
-        private readonly ResourceTypeProcessor $resourceTypeProcessor,
     ) {
         //
     }
@@ -48,12 +47,16 @@ class ResourceMethodParser implements ResourceMethodParserContract
             );
         }
 
-        foreach ($returnType->properties() as $type) {
-            $this->resourceTypeProcessor->process($type, function (TypeContract $type) use (&$parsedResources) {
+        foreach ($returnType->properties() as $property) {
+            $types = $property instanceof TypeWithChildrenContract
+                ? $property->children()->add($property)
+                : collect([$property]);
+
+            foreach ($types as $type) {
                 if ($type instanceof Types\ClassWithMethodType) {
                     $parsedResources = $this->parse($type->fullyQualifiedName(), $type->methodName(), $parsedResources);
                 }
-            });
+            }
         }
 
         return $parsedResources->add(new ResourceData(

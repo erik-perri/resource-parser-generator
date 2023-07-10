@@ -9,7 +9,7 @@ use ResourceParserGenerator\Contracts\Generators\ParserNameGeneratorContract;
 
 class ParserNameGenerator implements ParserNameGeneratorContract
 {
-    public function generateFileName(string $fullyQualifiedName): string
+    public function generateFileName(string $fullyQualifiedName, string $methodName): string
     {
         $shortName = class_basename($fullyQualifiedName);
 

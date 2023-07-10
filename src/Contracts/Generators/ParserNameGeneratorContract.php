@@ -6,7 +6,7 @@ namespace ResourceParserGenerator\Contracts\Generators;
 
 interface ParserNameGeneratorContract
 {
-    public function generateFileName(string $fullyQualifiedName): string;
+    public function generateFileName(string $fullyQualifiedName, string $methodName): string;
 
     public function generateTypeName(string $fullyQualifiedName, string $methodName): string;
 

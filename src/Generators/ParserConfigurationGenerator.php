@@ -31,7 +31,7 @@ class ParserConfigurationGenerator
             ?? new ParserConfiguration([$className, $methodName]);
 
         $parserFile = $configuration->parserFile
-            ?? $this->nameGenerator->generateFileName($configuration->method[0]);
+            ?? $this->nameGenerator->generateFileName($configuration->method[0], $configuration->method[1]);
         $typeName = $configuration->typeName
             ?? $this->nameGenerator->generateTypeName($configuration->method[0], $configuration->method[1]);
         $variableName = $configuration->variableName

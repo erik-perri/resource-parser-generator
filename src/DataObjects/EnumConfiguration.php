@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace ResourceParserGenerator\DataObjects;
 
-use ResourceParserGenerator\Contracts\DataObjects\ParserSourceContract;
+use ResourceParserGenerator\Contracts\DataObjects\EnumSourceContract;
 
-class EnumConfiguration implements ParserSourceContract
+class EnumConfiguration implements EnumSourceContract
 {
     /**
      * @param class-string $className

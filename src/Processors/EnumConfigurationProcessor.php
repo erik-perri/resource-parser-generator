@@ -50,7 +50,7 @@ class EnumConfigurationProcessor
                     }
                 } catch (Throwable $error) {
                     throw new RuntimeException(sprintf(
-                        'Failed to pars enum "%s" for "%s::%s"',
+                        'Failed to parse enum "%s" for "%s::%s"',
                         $name,
                         $resource->className,
                         $resource->methodName,

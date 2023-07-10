@@ -3,7 +3,7 @@
 ## Command
 
 ```shell
-php artisan build:resource-parsers [--check] [--config=build.resource_parsers]
+php artisan build:resource-parsers [--check] [--enum-config=build.enums] [--parser-config=build.resources]
 ```
 
 Generate resource parsers based on the specified configuration.
@@ -16,7 +16,7 @@ Checks if the generated files are up-to-date and exits with a non-zero exit code
 
 ##### `--config`
 
-The Laravel configuration path to load parsers from. Default: `build.resource_parsers`
+The Laravel configuration path to load parsers from. Default: `build.resources`
 
 ## Configuration
 
@@ -26,9 +26,25 @@ The Laravel configuration path to load parsers from. Default: `build.resource_pa
 <?php
 
 return [
-    'resource_parsers' => [
+    'enums' => [
         // Where to put the generated files. (Required)
-        'output_path' => dirname(__DIR__) . '/resources/scripts/generated',
+        'output_path' => dirname(__DIR__) . '/resources/scripts/generated/enums',
+        // The enums to include or customize. (Optional)
+        'sources' => [
+            // No overrides, type and file name generated from class name
+            new EnumConfiguration(\App\Enums\Permission::class),
+
+            // Overriding options, all options but class are optional and generated if not specified
+            new EnumConfiguration(
+                \App\Enums\Permission::class,
+                enumFile: 'permissions.ts',
+                typeName: 'Permissions',
+            )
+        ],
+    ],
+    'resources' => [
+        // Where to put the generated files. (Required)
+        'output_path' => dirname(__DIR__) . '/resources/scripts/generated/parsers',
         // The parsers to include. (Required)
         'sources' => [
             // No overrides, parser name and file name generated from class and method names

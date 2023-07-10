@@ -96,5 +96,4 @@ class ParserGeneratorConfigurationParser
 
         return new ParserGeneratorConfiguration($outputPath, ...$sources);
     }
-
 }

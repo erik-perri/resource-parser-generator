@@ -10,6 +10,7 @@ use ResourceParserGenerator\Contracts\Generators\ParserGeneratorContract;
 use ResourceParserGenerator\Contracts\ParserGeneratorContextContract;
 use ResourceParserGenerator\DataObjects\ParserData;
 use ResourceParserGenerator\Exceptions\ConfigurationParserException;
+use ResourceParserGenerator\Parsers\EnumGeneratorConfigurationParser;
 use ResourceParserGenerator\Parsers\ParserGeneratorConfigurationParser;
 use ResourceParserGenerator\Processors\EnumConfigurationProcessor;
 use ResourceParserGenerator\Processors\ParserConfigurationProcessor;
@@ -19,7 +20,9 @@ use Throwable;
 
 class BuildResourceParsersCommand extends Command
 {
-    protected $signature = 'build:resource-parsers {--check} {--enum-config=build.enums} {--parser-config=build.resources}';
+    protected $signature = 'build:resource-parsers {--check}
+                                                   {--enum-config=build.enums}
+                                                   {--parser-config=build.resources}';
     protected $description = 'Generate resource parsers based on the specified configuration.';
 
     public function handle(): int
@@ -28,17 +31,24 @@ class BuildResourceParsersCommand extends Command
             $parserConfiguration = $this->resolve(ParserGeneratorConfigurationParser::class)->parse(
                 strval($this->option('parser-config')),
             );
+            $enumConfiguration = $this->resolve(EnumGeneratorConfigurationParser::class)->parse(
+                strval($this->option('enum-config')),
+            );
         } catch (ConfigurationParserException $error) {
             $this->components->error($error->getMessage());
             if ($error->errors) {
                 $this->components->bulletList($error->errors);
             }
             return static::FAILURE;
+        } catch (Throwable $error) {
+            $this->components->error('Failed to parse configuration.');
+            $this->components->bulletList([$error->getMessage()]);
+            return static::FAILURE;
         }
 
         try {
             $resources = $this->resolve(ResourceConfigurationProcessor::class)->process($parserConfiguration);
-            $enums = $this->resolve(EnumConfigurationProcessor::class)->process($parserConfiguration, $resources);
+            $enums = $this->resolve(EnumConfigurationProcessor::class)->process($enumConfiguration, $resources);
             $parsers = $this->resolve(ParserConfigurationProcessor::class)
                 ->process($parserConfiguration, $resources, $enums);
 

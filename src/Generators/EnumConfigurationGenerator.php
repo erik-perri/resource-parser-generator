@@ -6,7 +6,7 @@ namespace ResourceParserGenerator\Generators;
 
 use ResourceParserGenerator\Contracts\Generators\EnumNameGeneratorContract;
 use ResourceParserGenerator\DataObjects\EnumConfiguration;
-use ResourceParserGenerator\DataObjects\ParserGeneratorConfiguration;
+use ResourceParserGenerator\DataObjects\EnumGeneratorConfiguration;
 
 class EnumConfigurationGenerator
 {
@@ -17,14 +17,13 @@ class EnumConfigurationGenerator
     }
 
     /**
-     * @param ParserGeneratorConfiguration $generatorConfiguration
+     * @param EnumGeneratorConfiguration $generatorConfiguration
      * @param class-string $className
      * @return EnumConfiguration
      */
-    public function generate(ParserGeneratorConfiguration $generatorConfiguration, string $className): EnumConfiguration
+    public function generate(EnumGeneratorConfiguration $generatorConfiguration, string $className): EnumConfiguration
     {
-        // TODO Load configured ?? new EnumConfiguration
-        $configuration = new EnumConfiguration($className);
+        $configuration = $generatorConfiguration->enum($className) ?? new EnumConfiguration($className);
 
         $parserFile = $configuration->parserFile
             ?? $this->nameGenerator->generateFileName($configuration->className);

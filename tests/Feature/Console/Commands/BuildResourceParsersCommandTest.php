@@ -36,7 +36,7 @@ class BuildResourceParsersCommandTest extends TestCase
     {
         $this->artisan(BuildResourceParsersCommand::class)
             ->expectsOutputToContain(
-                'No configuration found at "build.resource_parsers" for resource parser generation.',
+                'No configuration found at "build.resources" for resource parser generation.',
             )
             ->assertExitCode(1)
             ->execute();
@@ -44,7 +44,8 @@ class BuildResourceParsersCommandTest extends TestCase
 
     public function testShouldReturnFailureIfClassDoesNotExist(): void
     {
-        Config::set('build.resource_parsers', [
+        Config::set('build.enums', ['output_path' => dirname(__DIR__, 3) . '/Output']);
+        Config::set('build.resources', [
             'output_path' => dirname(__DIR__, 3) . '/Output',
             'sources' => [
                 new ParserConfiguration([UserResource::class, 'base']),
@@ -60,7 +61,8 @@ class BuildResourceParsersCommandTest extends TestCase
 
     public function testShouldReturnFailureIfMethodDoesNotExist(): void
     {
-        Config::set('build.resource_parsers', [
+        Config::set('build.enums', ['output_path' => dirname(__DIR__, 3) . '/Output']);
+        Config::set('build.resources', [
             'output_path' => dirname(__DIR__, 3) . '/Output',
             'sources' => [
                 new ParserConfiguration([UserResource::class, 'base']),
@@ -76,7 +78,8 @@ class BuildResourceParsersCommandTest extends TestCase
 
     public function testShouldReturnFailureIfFileDoesNotExist(): void
     {
-        Config::set('build.resource_parsers', [
+        Config::set('build.enums', ['output_path' => dirname(__DIR__, 3) . '/Output']);
+        Config::set('build.resources', [
             'output_path' => '/where/is/this/file',
             'sources' => [
                 new ParserConfiguration([UserResource::class, 'base']),
@@ -99,7 +102,8 @@ class BuildResourceParsersCommandTest extends TestCase
             ],
         ];
 
-        Config::set('build.resource_parsers', $config);
+        Config::set('build.enums', ['output_path' => $outputPath]);
+        Config::set('build.resources', $config);
 
         $this->artisan(BuildResourceParsersCommand::class)
             ->assertExitCode(0)
@@ -127,7 +131,8 @@ class BuildResourceParsersCommandTest extends TestCase
         $outputPath = dirname(__DIR__, 3) . '/Output';
         $config = $configFactory->call($this, $outputPath);
 
-        Config::set('build.resource_parsers', $config);
+        Config::set('build.enums', ['output_path' => $outputPath]);
+        Config::set('build.resources', $config);
 
         $this->artisan(BuildResourceParsersCommand::class)
             ->assertExitCode(0)

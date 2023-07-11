@@ -141,9 +141,9 @@ class ParserTypeConverter implements ParserTypeConverterContract
          * TODO Flatten the union before this point
          * @var Collection<int, TypeContract> $flatTypes
          */
-        $flatTypes = $type->types()->map(function (TypeContract $type) {
-            return $type instanceof Types\UnionType ? $type->types() : $type;
-        })->flatten();
+        $flatTypes = $type->types()
+            ->map(fn(TypeContract $type) => $type instanceof Types\UnionType ? $type->types() : $type)
+            ->flatten();
 
         if ($flatTypes->count() === 2) {
             if ($type->hasType(Types\NullType::class)) {

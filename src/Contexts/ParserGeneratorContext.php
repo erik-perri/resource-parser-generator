@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace ResourceParserGenerator\Contexts;
 
-use Closure;
 use Illuminate\Support\Collection;
 use ResourceParserGenerator\Contracts\ParserGeneratorContextContract;
 use ResourceParserGenerator\DataObjects\ParserData;
@@ -15,21 +14,19 @@ use ResourceParserGenerator\DataObjects\ParserData;
 class ParserGeneratorContext implements ParserGeneratorContextContract
 {
     /**
-     * @var Collection<int, ParserData>
+     * @param Collection<int, ParserData> $localParsers
+     * @param Collection<int, ParserData> $globalParsers
      */
-    private Collection $localParsers;
-
-    /**
-     * @param Collection<int, ParserData> $parsers
-     */
-    public function __construct(private readonly Collection $parsers)
-    {
-        $this->localParsers = collect();
+    public function __construct(
+        private readonly Collection $localParsers,
+        private readonly Collection $globalParsers,
+    ) {
+        //
     }
 
-    public function find(string $className, string $methodName): ParserData|null
+    public function findGlobal(string $className, string $methodName): ParserData|null
     {
-        return $this->parsers->first(
+        return $this->globalParsers->first(
             fn(ParserData $context) => $context->resource->className === $className
                 && $context->resource->methodName === $methodName,
         );
@@ -41,20 +38,5 @@ class ParserGeneratorContext implements ParserGeneratorContextContract
             fn(ParserData $context) => $context->resource->className === $className
                 && $context->resource->methodName === $methodName,
         );
-    }
-
-    /**
-     * @template T
-     * @param Collection<int, ParserData> $localParsers
-     * @param Closure(): T $callback
-     * @return T
-     */
-    public function withLocalContext(Collection $localParsers, Closure $callback): mixed
-    {
-        $this->localParsers = $localParsers->collect();
-        $result = $callback();
-        $this->localParsers = collect();
-
-        return $result;
     }
 }

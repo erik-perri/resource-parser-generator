@@ -4,10 +4,14 @@ declare(strict_types=1);
 
 namespace ResourceParserGenerator\Console\Commands;
 
+use Closure;
 use Illuminate\Console\Command;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\File;
+use Illuminate\Support\Str;
+use ResourceParserGenerator\Contracts\Generators\EnumGeneratorContract;
 use ResourceParserGenerator\Contracts\Generators\ParserGeneratorContract;
-use ResourceParserGenerator\Contracts\ParserGeneratorContextContract;
+use ResourceParserGenerator\DataObjects\EnumData;
 use ResourceParserGenerator\DataObjects\ParserData;
 use ResourceParserGenerator\Exceptions\ConfigurationParserException;
 use ResourceParserGenerator\Parsers\EnumGeneratorConfigurationParser;
@@ -51,38 +55,81 @@ class BuildResourceParsersCommand extends Command
             $enums = $this->resolve(EnumConfigurationProcessor::class)->process($enumConfiguration, $resources);
             $parsers = $this->resolve(ParserConfigurationProcessor::class)
                 ->process($parserConfiguration, $resources, $enums);
-
-            $parsersByFile = $parsers->groupBy(function (ParserData $data) {
-                if (!$data->configuration->parserFile) {
-                    throw new RuntimeException(sprintf(
-                        'Could not find output file path for "%s::%s"',
-                        $data->configuration->method[0],
-                        $data->configuration->method[1],
-                    ));
-                }
-
-                return $data->configuration->parserFile;
-            });
         } catch (Throwable $error) {
             $this->components->error('Failed to parse resources.');
             $this->components->bulletList(array_filter([$error->getMessage(), $error->getPrevious()?->getMessage()]));
             return static::FAILURE;
         }
 
-        // Create a new context for the generation to control which parsers are being generated per file, then split up
-        // the parsers by file and loop over generating each file after updating the local context.
-        $generatorContext = $this->resolve(ParserGeneratorContextContract::class, ['parsers' => $parsers]);
-        $parserGenerator = $this->resolve(ParserGeneratorContract::class);
         $returnValue = static::SUCCESS;
 
-        foreach ($parsersByFile as $fileName => $localParsers) {
-            $filePath = $parserConfiguration->outputPath . '/' . $fileName;
+        if ($enums->isNotEmpty()) {
+            $this->components->info(
+                sprintf('Processing %s %s', $enums->count(), Str::plural('enum', $enums->count())),
+            );
+
+            $enumsByFile = $enums->groupBy(fn(EnumData $data) => $data->configuration->enumFile
+                ?? throw new RuntimeException(sprintf(
+                    'Could not find output file path for "%s"',
+                    $data->configuration->className,
+                )));
+
+            $enumGenerator = $this->resolve(EnumGeneratorContract::class);
+
+            $returnValue = $this->writeOrCheckFiles(
+                $enumConfiguration->outputPath,
+                $enumsByFile,
+                fn(Collection $localEnums) => $enumGenerator->generate($localEnums),
+                $returnValue,
+            );
+        }
+
+        if ($parsers->isNotEmpty()) {
+            $this->components->info(
+                sprintf('Processing %s %s', $parsers->count(), Str::plural('parser', $parsers->count())),
+            );
+
+            $parsersByFile = $parsers->groupBy(fn(ParserData $data) => $data->configuration->parserFile
+                ?? throw new RuntimeException(sprintf(
+                    'Could not find output file path for "%s::%s"',
+                    $data->configuration->method[0],
+                    $data->configuration->method[1],
+                )));
+
+            $parserGenerator = $this->resolve(ParserGeneratorContract::class);
+
+            $returnValue = $this->writeOrCheckFiles(
+                $parserConfiguration->outputPath,
+                $parsersByFile,
+                fn(Collection $localParsers) => $parserGenerator->generate($localParsers, $parsers),
+                $returnValue,
+            );
+        }
+
+        return $returnValue;
+    }
+
+    /**
+     * @template TKey of array-key
+     * @template TValue
+     *
+     * @param string $outputPath
+     * @param Collection<TKey, TValue> $itemsGroupedByFile
+     * @param Closure(TValue): string $generateCallback
+     * @param int $returnValue
+     * @return int
+     */
+    private function writeOrCheckFiles(
+        string $outputPath,
+        Collection $itemsGroupedByFile,
+        Closure $generateCallback,
+        int $returnValue
+    ): int {
+        foreach ($itemsGroupedByFile as $fileName => $localItems) {
+            $filePath = $outputPath . '/' . $fileName;
 
             try {
-                $fileContents = $generatorContext->withLocalContext(
-                    $localParsers,
-                    fn() => $parserGenerator->generate($localParsers, $generatorContext),
-                );
+                $fileContents = $generateCallback($localItems);
             } catch (Throwable $error) {
                 $this->components->twoColumnDetail(
                     $this->isChecking()

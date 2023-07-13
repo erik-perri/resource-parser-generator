@@ -13,7 +13,7 @@ use BenSampo\Enum\Enum;
  */
 class LegacyPostStatus extends Enum
 {
-    const READ = 'read';
-    const WRITE = 'write';
-    const DELETE = 'delete';
+    const DRAFT = 'draft';
+    const PUBLISHED = 'published';
+    const ARCHIVED = 'archived';
 }

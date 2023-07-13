@@ -4,20 +4,20 @@ declare(strict_types=1);
 
 namespace ResourceParserGenerator\Parsers;
 
-use PHPStan\PhpDocParser\Ast\PhpDoc\MethodTagValueNode;
-use PHPStan\PhpDocParser\Ast\PhpDoc\ParamTagValueNode;
+use Illuminate\Support\Collection;
+use PHPStan\PhpDocParser\Ast\PhpDoc\PhpDocChildNode;
 use PHPStan\PhpDocParser\Ast\PhpDoc\PhpDocNode;
 use PHPStan\PhpDocParser\Ast\PhpDoc\PhpDocTagNode;
-use PHPStan\PhpDocParser\Ast\PhpDoc\PropertyTagValueNode;
+use PHPStan\PhpDocParser\Ast\PhpDoc\PhpDocTextNode;
 use PHPStan\PhpDocParser\Ast\PhpDoc\ReturnTagValueNode;
-use PHPStan\PhpDocParser\Ast\PhpDoc\VarTagValueNode;
 use PHPStan\PhpDocParser\Lexer\Lexer;
 use PHPStan\PhpDocParser\Parser\PhpDocParser;
 use PHPStan\PhpDocParser\Parser\TokenIterator;
 use ResourceParserGenerator\Contracts\Converters\DocBlockTypeConverterContract;
 use ResourceParserGenerator\Contracts\Parsers\DocBlockParserContract;
 use ResourceParserGenerator\Contracts\Resolvers\ResolverContract;
-use ResourceParserGenerator\Parsers\Data\DocBlock;
+use ResourceParserGenerator\Contracts\Types\TypeContract;
+use ResourceParserGenerator\DataObjects\DocBlockData;
 use ResourceParserGenerator\Types;
 use RuntimeException;
 
@@ -31,13 +31,11 @@ class DocBlockParser implements DocBlockParserContract
         //
     }
 
-    public function parse(string $content, ResolverContract $resolver): DocBlock
+    public function parse(string $content, ResolverContract $resolver): DocBlockData
     {
-        $docBlock = DocBlock::create();
-
         $content = trim($content);
         if (!$content) {
-            return $docBlock;
+            return new DocBlockData(null, null, collect(), collect(), collect(), collect());
         }
 
         $tokens = $this->phpDocLexer->tokenize($content);
@@ -49,56 +47,86 @@ class DocBlockParser implements DocBlockParserContract
 
         $docNode = $this->phpDocParser->parse($tokenIterator);
 
-        $this->parseMethods($docNode, $resolver, $docBlock);
-        $this->parseParams($docNode, $resolver, $docBlock);
-        $this->parseProperties($docNode, $resolver, $docBlock);
-        $this->parseReturn($docNode, $resolver, $docBlock);
-        $this->parseVars($docNode, $resolver, $docBlock);
-
-        return $docBlock;
+        return new DocBlockData(
+            collect($docNode->children)
+                ->filter(fn(PhpDocChildNode $node) => $node instanceof PhpDocTextNode)
+                ->map(fn(PhpDocTextNode $node) => $node->text)
+                ->join("\n"),
+            $this->parseReturn($docNode, $resolver),
+            $this->parseParams($docNode, $resolver),
+            $this->parseProperties($docNode, $resolver),
+            $this->parseMethods($docNode, $resolver),
+            $this->parseVars($docNode, $resolver),
+        );
     }
 
-    private function parseMethods(PhpDocNode $docNode, ResolverContract $resolver, DocBlock $docBlock): void
+    /**
+     * @param PhpDocNode $docNode
+     * @param ResolverContract $resolver
+     * @return Collection<string, TypeContract>
+     */
+    private function parseMethods(PhpDocNode $docNode, ResolverContract $resolver): Collection
     {
-        $methodNodes = $docNode->getTagsByName('@method');
+        $methods = collect();
+
+        $methodNodes = $docNode->getMethodTagValues();
         foreach ($methodNodes as $node) {
-            if ($node->value instanceof MethodTagValueNode) {
-                $docBlock->setMethod(
-                    $node->value->methodName,
-                    $node->value->returnType
-                        ? $this->docBlockTypeConverter->convert($node->value->returnType, $resolver)
-                        : new Types\UntypedType(),
-                );
-            }
+            $methods->put(
+                $node->methodName,
+                $node->returnType
+                    ? $this->docBlockTypeConverter->convert($node->returnType, $resolver)
+                    : new Types\UntypedType(),
+            );
         }
+
+        return $methods;
     }
 
-    private function parseParams(PhpDocNode $docNode, ResolverContract $resolver, DocBlock $docBlock): void
+    /**
+     * @param PhpDocNode $docNode
+     * @param ResolverContract $resolver
+     * @return Collection<string, TypeContract>
+     */
+    private function parseParams(PhpDocNode $docNode, ResolverContract $resolver): Collection
     {
-        $paramNodes = $docNode->getTagsByName('@param');
+        $params = collect();
+
+        $paramNodes = $docNode->getParamTagValues();
         foreach ($paramNodes as $node) {
-            if ($node->value instanceof ParamTagValueNode) {
-                $name = ltrim($node->value->parameterName, '$');
-                $docBlock->setParam($name, $this->docBlockTypeConverter->convert($node->value->type, $resolver));
-            }
+            $name = ltrim($node->parameterName, '$');
+            $params->put($name, $this->docBlockTypeConverter->convert($node->type, $resolver));
         }
+
+        return $params;
     }
 
-    private function parseProperties(PhpDocNode $docNode, ResolverContract $resolver, DocBlock $docBlock): void
+    /**
+     * @param PhpDocNode $docNode
+     * @param ResolverContract $resolver
+     * @return Collection<string, TypeContract>
+     */
+    private function parseProperties(PhpDocNode $docNode, ResolverContract $resolver): Collection
     {
+        $properties = collect();
+
         $propertyNodes = collect([
-            ...$docNode->getTagsByName('@property'),
-            ...$docNode->getTagsByName('@property-read'),
+            ...$docNode->getPropertyTagValues(),
+            ...$docNode->getPropertyReadTagValues(),
         ]);
         foreach ($propertyNodes as $node) {
-            if ($node->value instanceof PropertyTagValueNode) {
-                $name = ltrim($node->value->propertyName, '$');
-                $docBlock->setProperty($name, $this->docBlockTypeConverter->convert($node->value->type, $resolver));
-            }
+            $name = ltrim($node->propertyName, '$');
+            $properties->put($name, $this->docBlockTypeConverter->convert($node->type, $resolver));
         }
+
+        return $properties;
     }
 
-    private function parseReturn(PhpDocNode $docNode, ResolverContract $resolver, DocBlock $docBlock): void
+    /**
+     * @param PhpDocNode $docNode
+     * @param ResolverContract $resolver
+     * @return ?TypeContract
+     */
+    private function parseReturn(PhpDocNode $docNode, ResolverContract $resolver): ?TypeContract
     {
         $returnNodes = $docNode->getTagsByName('@return');
         $returnNodeCount = count($returnNodes);
@@ -112,23 +140,32 @@ class DocBlockParser implements DocBlockParserContract
              */
             $returnNode = reset($returnNodes);
             if ($returnNode->value instanceof ReturnTagValueNode) {
-                $docBlock->setReturn($this->docBlockTypeConverter->convert($returnNode->value->type, $resolver));
+                return $this->docBlockTypeConverter->convert($returnNode->value->type, $resolver);
             }
         }
+
+        return null;
     }
 
-    private function parseVars(PhpDocNode $docNode, ResolverContract $resolver, DocBlock $docBlock): void
+    /**
+     * @param PhpDocNode $docNode
+     * @param ResolverContract $resolver
+     * @return Collection<string, TypeContract>
+     */
+    private function parseVars(PhpDocNode $docNode, ResolverContract $resolver): Collection
     {
-        $varNodes = $docNode->getTagsByName('@var');
-        foreach ($varNodes as $node) {
-            if ($node->value instanceof VarTagValueNode) {
-                $name = trim($node->value->variableName);
-                if ($name) {
-                    $name = ltrim($node->value->variableName, '$');
-                }
+        $vars = collect();
 
-                $docBlock->setVar($name, $this->docBlockTypeConverter->convert($node->value->type, $resolver));
+        $varNodes = $docNode->getVarTagValues();
+        foreach ($varNodes as $node) {
+            $name = trim($node->variableName);
+            if ($name) {
+                $name = ltrim($node->variableName, '$');
             }
+
+            $vars->put($name, $this->docBlockTypeConverter->convert($node->type, $resolver));
         }
+
+        return $vars;
     }
 }

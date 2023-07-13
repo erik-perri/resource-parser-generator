@@ -16,11 +16,12 @@ use ResourceParserGenerator\Contracts\Converters\DeclaredTypeConverterContract;
 use ResourceParserGenerator\Contracts\Parsers\DocBlockParserContract;
 use ResourceParserGenerator\Contracts\Resolvers\ResolverContract;
 use ResourceParserGenerator\Contracts\Types\TypeContract;
+use ResourceParserGenerator\DataObjects\DocBlockData;
 use RuntimeException;
 
 class ClassMethodScope implements ClassMethodScopeContract
 {
-    private DocBlock|null $docBlock = null;
+    private DocBlockData|null $docBlock = null;
 
     /**
      * @var Collection<string, TypeContract>
@@ -59,7 +60,7 @@ class ClassMethodScope implements ClassMethodScopeContract
         return null;
     }
 
-    public function docBlock(): DocBlock|null
+    public function docBlock(): DocBlockData|null
     {
         if ($this->docBlock === null && $this->node->getDocComment() !== null) {
             $this->docBlock = $this->docBlockParser->parse(
@@ -115,7 +116,7 @@ class ClassMethodScope implements ClassMethodScopeContract
 
     public function returnType(): TypeContract
     {
-        return $this->docBlock()?->return()
+        return $this->docBlock()?->return
             ?? ($this->returnType ??= $this->declaredTypeConverter->convert($this->node->returnType, $this->resolver));
     }
 

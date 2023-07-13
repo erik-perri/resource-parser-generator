@@ -11,10 +11,11 @@ use ResourceParserGenerator\Contracts\Converters\DeclaredTypeConverterContract;
 use ResourceParserGenerator\Contracts\Parsers\DocBlockParserContract;
 use ResourceParserGenerator\Contracts\Resolvers\ResolverContract;
 use ResourceParserGenerator\Contracts\Types\TypeContract;
+use ResourceParserGenerator\DataObjects\DocBlockData;
 
 class ClassProperty implements ClassPropertyContract
 {
-    private DocBlock|null $docBlock = null;
+    private DocBlockData|null $docBlock = null;
     private TypeContract $type;
 
     public function __construct(
@@ -39,7 +40,7 @@ class ClassProperty implements ClassPropertyContract
         ]);
     }
 
-    public function docBlock(): DocBlock|null
+    public function docBlock(): DocBlockData|null
     {
         if ($this->docBlock === null && $this->property->getDocComment() !== null) {
             $this->docBlock = $this->docBlockParser->parse(
@@ -59,11 +60,13 @@ class ClassProperty implements ClassPropertyContract
     public function type(): TypeContract
     {
         $docBlock = $this->docBlock();
-        if ($docBlock?->hasVar('')) {
-            return $docBlock->var('');
+        $emptyVar = $docBlock?->vars->get('');
+        if ($emptyVar) {
+            return $emptyVar;
         }
-        if ($docBlock?->hasVar($this->name())) {
-            return $docBlock->var($this->name());
+        $overriddenVar = $docBlock?->vars->get($this->name());
+        if ($overriddenVar) {
+            return $overriddenVar;
         }
         return $this->type ??= $this->declaredTypeConverter->convert($this->property->type, $this->resolver);
     }

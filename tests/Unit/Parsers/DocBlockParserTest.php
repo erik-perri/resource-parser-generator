@@ -33,7 +33,7 @@ class DocBlockParserTest extends TestCase
         // Assert
         $this->assertEquals(
             $expectedResult,
-            $result->properties()
+            $result->properties
                 ->map(fn(TypeContract $type) => $type->describe())
                 ->toArray(),
         );
@@ -136,10 +136,10 @@ class DocBlockParserTest extends TestCase
         );
 
         // Assert
-        $property = $result->property('aliasedClass');
+        $property = $result->properties->get('aliasedClass');
         $this->assertEquals('AliasedClass', $property->describe());
 
-        $property = $result->property('fullyQualifiedClass');
+        $property = $result->properties->get('fullyQualifiedClass');
         $this->assertEquals('App\FullyQualifiedClass', $property->describe());
     }
 
@@ -156,10 +156,10 @@ class DocBlockParserTest extends TestCase
 
         // Assert
         if (!count($expectedResult)) {
-            $this->assertEmpty($result->methods());
+            $this->assertEmpty($result->methods);
         } else {
             foreach ($expectedResult as $method => $types) {
-                $this->assertEquals($types, $result->method($method)->describe());
+                $this->assertEquals($types, $result->methods->get($method)->describe());
             }
         }
     }
@@ -216,7 +216,7 @@ class DocBlockParserTest extends TestCase
         $result = $parser->parse($docBlock, $resolver);
 
         // Assert
-        $this->assertEquals($expectedResult, $result->return()?->describe());
+        $this->assertEquals($expectedResult, $result->return?->describe());
     }
 
     public static function parseReturnProvider(): array
@@ -267,7 +267,7 @@ class DocBlockParserTest extends TestCase
         // Assert
         $this->assertEquals(
             $expectedResult,
-            $result->vars()
+            $result->vars
                 ->map(fn(TypeContract $type) => $type->describe())
                 ->toArray()
         );
@@ -353,7 +353,7 @@ class DocBlockParserTest extends TestCase
         // Assert
         $this->assertEquals(
             $expectedResult,
-            $result->params()
+            $result->params
                 ->map(fn(TypeContract $type) => $type->describe())
                 ->toArray()
         );

@@ -13,11 +13,12 @@ use ResourceParserGenerator\Contracts\ClassScopeContract;
 use ResourceParserGenerator\Contracts\Parsers\DocBlockParserContract;
 use ResourceParserGenerator\Contracts\Resolvers\ResolverContract;
 use ResourceParserGenerator\Contracts\Types\TypeContract;
+use ResourceParserGenerator\DataObjects\DocBlockData;
 use RuntimeException;
 
 class ClassScope implements ClassScopeContract
 {
-    private DocBlock|null $docBlock = null;
+    private DocBlockData|null $docBlock = null;
 
     /**
      * @var Collection<string, ClassMethodScopeContract>|null
@@ -113,7 +114,7 @@ class ClassScope implements ClassScopeContract
         return $constant;
     }
 
-    public function docBlock(): DocBlock|null
+    public function docBlock(): DocBlockData|null
     {
         if ($this->docBlock === null && $this->node->getDocComment() !== null) {
             $this->docBlock = $this->docBlockParser->parse(
@@ -169,8 +170,8 @@ class ClassScope implements ClassScopeContract
     public function method(string $name): ClassMethodScopeContract|null
     {
         $methodLocators = [
-            fn() => $this->docBlock()?->hasMethod($name)
-                ? VirtualClassMethodScope::create($this->docBlock()->method($name))
+            fn() => $this->docBlock()?->methods->get($name)
+                ? VirtualClassMethodScope::create($this->docBlock()->methods->get($name))
                 : null,
             fn() => $this->getMethods()->get($name),
             fn() => $this->traits->first(fn(ClassScopeContract $trait) => (bool)$trait->method($name))?->method($name),
@@ -214,8 +215,8 @@ class ClassScope implements ClassScopeContract
 
     public function property(string $name): ClassPropertyContract|null
     {
-        if ($this->docBlock()?->hasProperty($name)) {
-            return VirtualClassProperty::create($this->docBlock()->property($name));
+        if ($this->docBlock()?->properties->get($name)) {
+            return VirtualClassProperty::create($this->docBlock()->properties->get($name));
         }
 
         $property = $this->getProperties()->get($name);

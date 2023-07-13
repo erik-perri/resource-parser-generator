@@ -9,12 +9,12 @@ use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\DataProvider;
 use ResourceParserGenerator\Contracts\Types\TypeContract;
 use ResourceParserGenerator\Converters\DocBlockTypeConverter;
-use ResourceParserGenerator\Parsers\Data\DocBlock;
+use ResourceParserGenerator\DataObjects\DocBlockData;
 use ResourceParserGenerator\Parsers\DocBlockParser;
 use ResourceParserGenerator\Resolvers\Resolver;
 use ResourceParserGenerator\Tests\TestCase;
 
-#[CoversClass(DocBlock::class)]
+#[CoversClass(DocBlockData::class)]
 #[CoversClass(DocBlockParser::class)]
 #[CoversClass(DocBlockTypeConverter::class)]
 class DocBlockParserTest extends TestCase

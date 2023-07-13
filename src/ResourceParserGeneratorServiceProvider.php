@@ -32,6 +32,7 @@ use ResourceParserGenerator\Contracts\Parsers\ClassConstFetchValueParserContract
 use ResourceParserGenerator\Contracts\Parsers\ClassMethodReturnParserContract;
 use ResourceParserGenerator\Contracts\Parsers\ClassParserContract;
 use ResourceParserGenerator\Contracts\Parsers\DocBlockParserContract;
+use ResourceParserGenerator\Contracts\Parsers\ExpressionValueParserContract;
 use ResourceParserGenerator\Contracts\Parsers\PhpFileParserContract;
 use ResourceParserGenerator\Contracts\Parsers\ResourceMethodParserContract;
 use ResourceParserGenerator\Converters\DeclaredTypeConverter;
@@ -51,6 +52,7 @@ use ResourceParserGenerator\Parsers\ClassConstFetchValueParser;
 use ResourceParserGenerator\Parsers\ClassMethodReturnParser;
 use ResourceParserGenerator\Parsers\ClassParser;
 use ResourceParserGenerator\Parsers\DocBlockParser;
+use ResourceParserGenerator\Parsers\ExpressionValueParser;
 use ResourceParserGenerator\Parsers\PhpFileParser;
 use ResourceParserGenerator\Parsers\ResourceMethodParser;
 use RuntimeException;
@@ -116,10 +118,11 @@ class ResourceParserGeneratorServiceProvider extends ServiceProvider
             $this->app->singleton(ResourceFileFormatLocatorContract::class, ResourceFileFormatLocator::class);
 
             // Parsers
-            $this->app->singleton(ClassParserContract::class, ClassParser::class);
             $this->app->singleton(ClassConstFetchValueParserContract::class, ClassConstFetchValueParser::class);
             $this->app->singleton(ClassMethodReturnParserContract::class, ClassMethodReturnParser::class);
+            $this->app->singleton(ClassParserContract::class, ClassParser::class);
             $this->app->singleton(DocBlockParserContract::class, DocBlockParser::class);
+            $this->app->singleton(ExpressionValueParserContract::class, ExpressionValueParser::class);
             $this->app->singleton(PhpFileParserContract::class, PhpFileParser::class);
             $this->app->singleton(ResourceMethodParserContract::class, ResourceMethodParser::class);
         }

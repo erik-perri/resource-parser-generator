@@ -5,19 +5,18 @@ declare(strict_types=1);
 namespace ResourceParserGenerator\Parsers\Data;
 
 use PhpParser\Node\Attribute;
-use PhpParser\Node\Expr\ClassConstFetch;
-use PhpParser\Node\Scalar\String_;
 use ResourceParserGenerator\Contracts\AttributeContract;
-use ResourceParserGenerator\Contracts\Parsers\ClassConstFetchValueParserContract;
+use ResourceParserGenerator\Contracts\Parsers\ExpressionValueParserContract;
 use ResourceParserGenerator\Contracts\Resolvers\ResolverContract;
 use RuntimeException;
+use Throwable;
 
 class ClassMethodAttribute implements AttributeContract
 {
     public function __construct(
         private readonly Attribute $attribute,
         private readonly ResolverContract $resolver,
-        private readonly ClassConstFetchValueParserContract $classConstFetchValueParser,
+        private readonly ExpressionValueParserContract $expressionValueParser,
     ) {
         //
     }
@@ -36,16 +35,14 @@ class ClassMethodAttribute implements AttributeContract
     {
         $value = $this->attribute->args[$index]->value;
 
-        if ($value instanceof String_) {
-            return $value->value;
+        try {
+            return $this->expressionValueParser->parse($value, $this->resolver);
+        } catch (Throwable $exception) {
+            throw new RuntimeException(
+                sprintf('Unhandled argument type of "%s" for index %d', get_class($value), $index),
+                0,
+                $exception,
+            );
         }
-
-        if ($value instanceof ClassConstFetch) {
-            return $this->classConstFetchValueParser->parse($value, $this->resolver);
-        }
-
-        throw new RuntimeException(
-            sprintf('Unhandled argument type of "%s" for index %d', get_class($value), $index),
-        );
     }
 }

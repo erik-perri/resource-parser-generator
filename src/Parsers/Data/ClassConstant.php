@@ -9,9 +9,9 @@ use PhpParser\Node\Scalar\String_;
 use ResourceParserGenerator\Contexts\ConverterContext;
 use ResourceParserGenerator\Contracts\ClassConstantContract;
 use ResourceParserGenerator\Contracts\Converters\ExpressionTypeConverterContract;
+use ResourceParserGenerator\Contracts\Parsers\ExpressionValueParserContract;
 use ResourceParserGenerator\Contracts\Resolvers\ResolverContract;
 use ResourceParserGenerator\Contracts\Types\TypeContract;
-use RuntimeException;
 
 class ClassConstant implements ClassConstantContract
 {
@@ -19,6 +19,7 @@ class ClassConstant implements ClassConstantContract
         private readonly Const_ $constant,
         private readonly ResolverContract $resolver,
         private readonly ExpressionTypeConverterContract $expressionTypeConverter,
+        private readonly ExpressionValueParserContract $expressionValueParser,
     ) {
         //
     }
@@ -46,12 +47,6 @@ class ClassConstant implements ClassConstantContract
 
     public function value(): mixed
     {
-        $value = $this->constant->value;
-
-        if ($value instanceof String_) {
-            return $value->value;
-        }
-
-        throw new RuntimeException(sprintf('Unhandled constant value type "%s"', get_class($value)));
+        return $this->expressionValueParser->parse($this->constant->value, $this->resolver);
     }
 }

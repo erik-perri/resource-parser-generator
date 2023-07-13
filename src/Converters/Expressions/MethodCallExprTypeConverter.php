@@ -7,21 +7,19 @@ namespace ResourceParserGenerator\Converters\Expressions;
 use Illuminate\Http\Resources\MissingValue;
 use Illuminate\Support\Collection;
 use PhpParser\Node\Expr\ArrowFunction;
-use PhpParser\Node\Expr\ClassConstFetch;
 use PhpParser\Node\Expr\MethodCall;
 use PhpParser\Node\Expr\NullsafeMethodCall;
 use PhpParser\Node\Expr\PropertyFetch;
 use PhpParser\Node\Expr\Variable;
 use PhpParser\Node\Identifier;
-use PhpParser\Node\Scalar\String_;
 use PhpParser\NodeAbstract;
 use PhpParser\NodeFinder;
 use ResourceParserGenerator\Contexts\ConverterContext;
 use ResourceParserGenerator\Contracts\ClassScopeContract;
 use ResourceParserGenerator\Contracts\Converters\Expressions\ExprTypeConverterContract;
 use ResourceParserGenerator\Contracts\Converters\ExpressionTypeConverterContract;
-use ResourceParserGenerator\Contracts\Parsers\ClassConstFetchValueParserContract;
 use ResourceParserGenerator\Contracts\Parsers\ClassParserContract;
+use ResourceParserGenerator\Contracts\Parsers\ExpressionValueParserContract;
 use ResourceParserGenerator\Contracts\Types\TypeContract;
 use ResourceParserGenerator\Converters\Traits\ParsesFetchSides;
 use ResourceParserGenerator\Parsers\Data\ClassScope;
@@ -35,10 +33,10 @@ class MethodCallExprTypeConverter implements ExprTypeConverterContract
     use ParsesFetchSides;
 
     public function __construct(
-        private readonly ClassConstFetchValueParserContract $classConstFetchValueParser,
+        private readonly ArrowFunctionExprTypeConverter $arrowFunctionExprTypeConverter,
         private readonly ClassParserContract $classParser,
         private readonly ExpressionTypeConverterContract $expressionTypeConverter,
-        private readonly ArrowFunctionExprTypeConverter $arrowFunctionExprTypeConverter,
+        private readonly ExpressionValueParserContract $expressionValueParser,
         private readonly NodeFinder $nodeFinder,
     ) {
         //
@@ -164,17 +162,11 @@ class MethodCallExprTypeConverter implements ExprTypeConverterContract
         }
 
         $argument = reset($arguments)->value;
-        if ($argument instanceof String_) {
-            $argument = $argument->value;
-        } elseif ($argument instanceof ClassConstFetch) {
-            $argument = $this->classConstFetchValueParser->parse($argument, $context->resolver());
-        } else {
-            throw new RuntimeException(sprintf('Unhandled first argument type for pluck "%s"', get_class($argument)));
-        }
+        $argument = $this->expressionValueParser->parse($argument, $context->resolver());
 
         if (!is_string($argument)) {
             throw new RuntimeException(
-                sprintf('Unhandled first argument value type for pluck "%s"', gettype($argument)),
+                sprintf('Unhandled non-string first argument for pluck "%s"', gettype($argument)),
             );
         }
 
@@ -211,17 +203,11 @@ class MethodCallExprTypeConverter implements ExprTypeConverterContract
         ConverterContext $context,
         ClassScopeContract $classScope,
     ): void {
-        $formatName = null;
         $formatArg = $expr->getArgs()[0]->value;
+        $formatName = $this->expressionValueParser->parse($formatArg, $context->resolver());
 
-        if ($formatArg instanceof String_) {
-            $formatName = $formatArg->value;
-        } elseif ($formatArg instanceof ClassConstFetch) {
-            $formatName = $this->classConstFetchValueParser->parse($formatArg, $context->resolver());
-
-            if (!is_string($formatName)) {
-                throw new RuntimeException('Format name is not a string');
-            }
+        if (!is_string($formatName)) {
+            throw new RuntimeException(sprintf('Unhandled non-string format name "%s"', gettype($formatArg)));
         }
 
         if ($formatName) {
@@ -284,10 +270,13 @@ class MethodCallExprTypeConverter implements ExprTypeConverterContract
         }
 
         $loadedProperty = $args[0]->value;
-        if (!($loadedProperty instanceof String_)) {
-            throw new RuntimeException('Unhandled non-string first argument for whenLoaded');
+        $loadedProperty = $this->expressionValueParser->parse($loadedProperty, $context->resolver());
+
+        if (!is_string($loadedProperty)) {
+            throw new RuntimeException(
+                sprintf('Unhandled non-string first argument for whenLoaded "%s"', gettype($loadedProperty)),
+            );
         }
-        $loadedProperty = $loadedProperty->value;
 
         $returnWhenLoaded = $this->expressionTypeConverter->convert(
             $args[1]->value,

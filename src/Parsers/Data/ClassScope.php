@@ -259,7 +259,7 @@ class ClassScope implements ClassScopeContract
 
         foreach ($this->node->getConstants() as $constantGroup) {
             foreach ($constantGroup->consts as $constant) {
-                $constantScope = ClassConstant::create($constant, $this->resolver);
+                $constantScope = ClassConstant::create($constant, $this->resolver, $constantGroup->getDocComment());
                 $this->constants->put($constantScope->name(), $constantScope);
             }
         }

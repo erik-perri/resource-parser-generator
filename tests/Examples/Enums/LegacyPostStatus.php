@@ -13,7 +13,15 @@ use BenSampo\Enum\Enum;
  */
 class LegacyPostStatus extends Enum
 {
+    /**
+     * In Draft
+     */
     const DRAFT = 'draft';
     const PUBLISHED = 'published';
+    /**
+     * With
+     *
+     * New Lines
+     */
     const ARCHIVED = 'archived';
 }

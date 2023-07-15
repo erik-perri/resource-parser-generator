@@ -9,13 +9,13 @@ use Illuminate\Support\Collection;
 class EnumData
 {
     /**
-     * @var ReadOnlyCollection<string, EnumCase>
+     * @var ReadOnlyCollection<int, EnumCaseData>
      */
     public readonly ReadOnlyCollection $cases;
 
     /**
      * @param EnumConfiguration $configuration
-     * @param Collection<string, EnumCase> $cases
+     * @param Collection<int, EnumCaseData> $cases
      */
     public function __construct(
         public readonly EnumConfiguration $configuration,

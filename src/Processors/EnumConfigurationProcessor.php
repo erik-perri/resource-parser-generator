@@ -11,6 +11,7 @@ use ResourceParserGenerator\DataObjects\EnumData;
 use ResourceParserGenerator\DataObjects\EnumGeneratorConfiguration;
 use ResourceParserGenerator\DataObjects\ResourceData;
 use ResourceParserGenerator\Generators\EnumConfigurationGenerator;
+use ResourceParserGenerator\Parsers\EnumCaseParser;
 use ResourceParserGenerator\Types\EnumType;
 use RuntimeException;
 use Throwable;
@@ -19,6 +20,7 @@ class EnumConfigurationProcessor
 {
     public function __construct(
         private readonly EnumConfigurationGenerator $configurationGenerator,
+        private readonly EnumCaseParser $enumCaseParser,
     ) {
         //
     }
@@ -59,7 +61,7 @@ class EnumConfigurationProcessor
             try {
                 return new EnumData(
                     $this->configurationGenerator->generate($configuration, $data[0]),
-                    collect(), // TODO $this->...->parse(...);
+                    $this->enumCaseParser->parse($data[0]),
                 );
             } catch (Throwable $error) {
                 // TODO Don't throw and let type transformation fail at the Type->ParserType level instead?

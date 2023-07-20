@@ -7,6 +7,7 @@ namespace ResourceParserGenerator\Generators;
 use Illuminate\Support\Collection;
 use ResourceParserGenerator\Contracts\Generators\ParserGeneratorContract;
 use ResourceParserGenerator\Contracts\ParserGeneratorContextContract;
+use ResourceParserGenerator\Contracts\Types\ParserTypeWithCommentContract;
 use ResourceParserGenerator\DataObjects\Import;
 use ResourceParserGenerator\DataObjects\ImportCollection;
 use ResourceParserGenerator\DataObjects\ParserData;
@@ -34,12 +35,40 @@ class ParserGenerator implements ParserGeneratorContract
             $imports = $imports->merge($property->imports($generatorContext));
         }
 
-        $content = view('resource-parser-generator::resource-parser-file', [
-            'context' => $generatorContext,
-            'imports' => $imports->groupForView(),
-            'parser' => $parser,
-        ])->render();
+        $content = [];
 
-        return trim($content) . "\n";
+        foreach ($imports->groupForView() as $module) {
+            $line = [];
+            if ($module->defaultImport()) {
+                $line[] = $module->defaultImport();
+            }
+            if (count($module->imports())) {
+                $line[] = '{' . implode(', ', $module->imports()) . '}';
+            }
+            $content[] = sprintf("import %s from '%s';", implode(', ', $line), $module->module());
+        }
+
+        $content[] = '';
+        $content[] = sprintf('export const %s = object({', $parser->configuration->variableName);
+
+        foreach ($parser->properties as $name => $type) {
+            if ($type instanceof ParserTypeWithCommentContract && $type->comment()) {
+                $content[] = '  /**';
+                $content[] = sprintf('   * %s', $type->comment());
+                $content[] = '   */';
+            }
+            $content[] = sprintf('  %s: %s,', $name, $type->constraint($generatorContext));
+        }
+
+        $content[] = '});';
+
+        $content[] = '';
+        $content[] = sprintf(
+            'export type %s = output<typeof %s>;',
+            $parser->configuration->typeName,
+            $parser->configuration->variableName
+        );
+
+        return trim(implode("\n", $content)) . "\n";
     }
 }

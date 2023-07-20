@@ -269,7 +269,7 @@ class DocBlockParserTest extends TestCase
             $expectedResult,
             $result->vars
                 ->map(fn(TypeContract $type) => $type->describe())
-                ->toArray()
+                ->toArray(),
         );
     }
 
@@ -355,7 +355,7 @@ class DocBlockParserTest extends TestCase
             $expectedResult,
             $result->params
                 ->map(fn(TypeContract $type) => $type->describe())
-                ->toArray()
+                ->toArray(),
         );
     }
 

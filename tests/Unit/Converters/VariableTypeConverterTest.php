@@ -36,7 +36,7 @@ class VariableTypeConverterTest extends TestCase
             'object' => [
                 new class {
                 },
-                'object'
+                'object',
             ],
             'resource' => [fopen('php://memory', 'r'), 'resource'],
             'resource (closed)' => [tap(fopen('php://memory', 'r'), fn($resource) => fclose($resource)), 'resource'],

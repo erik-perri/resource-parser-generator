@@ -43,14 +43,14 @@ class PhpFileParserTest extends TestCase
 namespace ResourceParserGenerator\Tests\Examples;
 class Test {}
 PHP,
-                'expected' => 'ResourceParserGenerator\Tests\Examples'
+                'expected' => 'ResourceParserGenerator\Tests\Examples',
             ],
             'no namespace' => [
                 'contents' => <<<PHP
 <?php
 class Test {}
 PHP,
-                'expected' => null
+                'expected' => null,
             ],
         ];
     }

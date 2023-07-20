@@ -18,7 +18,7 @@ class ClassNameResolverTest extends TestCase
     public function testResolvesClasses(
         Closure $fileScopeFactory,
         string $inputClass,
-        string|null $expected
+        string|null $expected,
     ): void {
         // Arrange
         $fileScope = $fileScopeFactory->call($this);

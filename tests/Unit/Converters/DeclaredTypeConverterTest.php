@@ -158,7 +158,7 @@ class DeclaredTypeConverterTest extends TestCase
             'Countable&Iterable' => [
                 'input' => new Node\IntersectionType([
                     new Node\Name\FullyQualified('Countable'),
-                    new Node\Name\FullyQualified('Iterable')
+                    new Node\Name\FullyQualified('Iterable'),
                 ]),
                 'expected' => new Types\IntersectionType(
                     new Types\ClassType('Countable', 'Countable'),

@@ -26,7 +26,7 @@ class DocBlockTypeConverterTest extends TestCase
     public function testParsesTypeAsExpected(
         TypeNode $input,
         string $expectedOutput,
-        ?Closure $resolverFactory = null
+        ?Closure $resolverFactory = null,
     ): void {
         // Arrange
         /**

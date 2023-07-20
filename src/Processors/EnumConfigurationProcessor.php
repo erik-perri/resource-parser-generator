@@ -48,16 +48,13 @@ class EnumConfigurationProcessor
         $enumClassesInResources = $this->getEnumClassesInResources($resources);
 
         /**
-         * @var Collection<int, array{class-string, string|null}> $enumClassesInResources
+         * @var Collection<int, array{class-string, string|null}> $enumClasses
          */
         $enumClasses = $enumClassesInConfiguration
             ->merge($enumClassesInResources)
             ->unique(fn(array $enum) => $enum[0]);
 
         return $enumClasses->map(function (array $data) use ($configuration) {
-            /**
-             * @var array{class-string, string|null} $data
-             */
             try {
                 return new EnumData(
                     $this->configurationGenerator->generate($configuration, $data[0]),

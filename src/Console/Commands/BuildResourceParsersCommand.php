@@ -88,42 +88,42 @@ class BuildResourceParsersCommand extends Command
         Collection $enums,
         int $returnValue,
     ): int {
-        if ($enums->isNotEmpty()) {
-            $this->components->info(
-                sprintf('Processing %s %s', $enums->count(), Str::plural('enum', $enums->count())),
-            );
-
-            /**
-             * @var Collection<string, EnumData> $enumsByFile
-             */
-            $enumsByFile = $enums
-                ->collect()
-                ->groupBy(fn(EnumData $data) => $data->configuration->enumFile ?? throw new RuntimeException(sprintf(
-                    'Could not find output file path for "%s"',
-                    $data->configuration->className,
-                )))
-                ->map(function (Collection $fileEnums, string $fileName) {
-                    if ($fileEnums->count() > 1) {
-                        throw new RuntimeException(sprintf(
-                            'Multiple enums found while generating "%s", only one item per file is supported.',
-                            $fileName,
-                        ));
-                    }
-
-                    return $fileEnums->firstOrFail();
-                });
-
-            $enumGenerator = $this->resolve(EnumGeneratorContract::class);
-
-            $returnValue = $this->writeOrCheckFiles(
-                $enumConfiguration->outputPath,
-                $enumsByFile,
-                fn(EnumData $enum) => $enumGenerator->generate($enum),
-                $returnValue,
-            );
+        if ($enums->isEmpty()) {
+            return $returnValue;
         }
 
-        return $returnValue;
+        $this->components->info(
+            sprintf('Processing %s %s', $enums->count(), Str::plural('enum', $enums->count())),
+        );
+
+        /**
+         * @var Collection<string, EnumData> $enumsByFile
+         */
+        $enumsByFile = $enums
+            ->collect()
+            ->groupBy(fn(EnumData $data) => $data->configuration->enumFile ?? throw new RuntimeException(sprintf(
+                'Could not find output file path for "%s"',
+                $data->configuration->className,
+            )))
+            ->map(function (Collection $fileEnums, string $fileName) {
+                if ($fileEnums->count() > 1) {
+                    throw new RuntimeException(sprintf(
+                        'Multiple enums found while generating "%s", only one item per file is supported.',
+                        $fileName,
+                    ));
+                }
+
+                return $fileEnums->firstOrFail();
+            });
+
+        $enumGenerator = $this->resolve(EnumGeneratorContract::class);
+
+        return $this->writeOrCheckFiles(
+            $enumConfiguration->outputPath,
+            $enumsByFile,
+            fn(EnumData $enum) => $enumGenerator->generate($enum),
+            $returnValue,
+        );
     }
 
     /**
@@ -137,44 +137,44 @@ class BuildResourceParsersCommand extends Command
         Collection $parsers,
         int $returnValue,
     ): int {
-        if ($parsers->isNotEmpty()) {
-            $this->components->info(
-                sprintf('Processing %s %s', $parsers->count(), Str::plural('parser', $parsers->count())),
-            );
-
-            /**
-             * @var Collection<string, ParserData> $parsersByFile
-             */
-            $parsersByFile = $parsers
-                ->collect()
-                ->groupBy(fn(ParserData $data) => $data->configuration->parserFile
-                    ?? throw new RuntimeException(sprintf(
-                        'Could not find output file path for "%s::%s"',
-                        $data->configuration->method[0],
-                        $data->configuration->method[1],
-                    )))
-                ->map(function (Collection $fileParsers, string $fileName) {
-                    if ($fileParsers->count() > 1) {
-                        throw new RuntimeException(sprintf(
-                            'Multiple parsers found while generating "%s", only one item per file is supported.',
-                            $fileName,
-                        ));
-                    }
-
-                    return $fileParsers->firstOrFail();
-                });
-
-            $parserGenerator = $this->resolve(ParserGeneratorContract::class);
-
-            $returnValue = $this->writeOrCheckFiles(
-                $parserConfiguration->outputPath,
-                $parsersByFile,
-                fn(ParserData $parser) => $parserGenerator->generate($parser, $parsers),
-                $returnValue,
-            );
+        if ($parsers->isEmpty()) {
+            return $returnValue;
         }
 
-        return $returnValue;
+        $this->components->info(
+            sprintf('Processing %s %s', $parsers->count(), Str::plural('parser', $parsers->count())),
+        );
+
+        /**
+         * @var Collection<string, ParserData> $parsersByFile
+         */
+        $parsersByFile = $parsers
+            ->collect()
+            ->groupBy(fn(ParserData $data) => $data->configuration->parserFile
+                ?? throw new RuntimeException(sprintf(
+                    'Could not find output file path for "%s::%s"',
+                    $data->configuration->method[0],
+                    $data->configuration->method[1],
+                )))
+            ->map(function (Collection $fileParsers, string $fileName) {
+                if ($fileParsers->count() > 1) {
+                    throw new RuntimeException(sprintf(
+                        'Multiple parsers found while generating "%s", only one item per file is supported.',
+                        $fileName,
+                    ));
+                }
+
+                return $fileParsers->firstOrFail();
+            });
+
+        $parserGenerator = $this->resolve(ParserGeneratorContract::class);
+
+        return $this->writeOrCheckFiles(
+            $parserConfiguration->outputPath,
+            $parsersByFile,
+            fn(ParserData $parser) => $parserGenerator->generate($parser, $parsers),
+            $returnValue,
+        );
     }
 
     /**

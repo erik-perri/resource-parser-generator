@@ -16,7 +16,7 @@ class EnumType implements TypeContract, TypeWithChildrenContract
      */
     public function __construct(
         public readonly string $fullyQualifiedName,
-        public readonly TypeContract $backingType
+        public readonly TypeContract $backingType,
     ) {
         //
     }

@@ -28,7 +28,7 @@ class ImportCollection implements ImportCollectionContract
         if ($import->isDefaultExport()) {
             $existingDefault = $this->imports->first(
                 fn(ImportContract $existingImport) => $existingImport->isDefaultExport()
-                    && $existingImport->file() === $import->file()
+                    && $existingImport->file() === $import->file(),
             );
             if ($existingDefault) {
                 throw new RuntimeException(sprintf(
@@ -40,7 +40,7 @@ class ImportCollection implements ImportCollectionContract
         } else {
             $existing = $this->imports->first(
                 fn(ImportContract $existingImport) => $existingImport->name() === $import->name()
-                    && $existingImport->file() === $import->file()
+                    && $existingImport->file() === $import->file(),
             );
             if ($existing) {
                 return new self(...$this->imports->all());

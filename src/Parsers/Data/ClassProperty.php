@@ -31,7 +31,7 @@ class ClassProperty implements ClassPropertyContract
     public static function create(
         Property $property,
         PropertyProperty $propertyProperty,
-        ResolverContract $resolver
+        ResolverContract $resolver,
     ): self {
         return resolve(self::class, [
             'property' => $property,

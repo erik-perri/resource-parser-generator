@@ -86,7 +86,7 @@ class BuildResourceParsersCommand extends Command
     private function generateEnums(
         EnumGeneratorConfiguration $enumConfiguration,
         Collection $enums,
-        int $returnValue
+        int $returnValue,
     ): int {
         if ($enums->isNotEmpty()) {
             $this->components->info(
@@ -135,7 +135,7 @@ class BuildResourceParsersCommand extends Command
     private function generateParsers(
         ParserGeneratorConfiguration $parserConfiguration,
         Collection $parsers,
-        int $returnValue
+        int $returnValue,
     ): int {
         if ($parsers->isNotEmpty()) {
             $this->components->info(
@@ -191,7 +191,7 @@ class BuildResourceParsersCommand extends Command
         string $outputPath,
         Collection $itemsGroupedByFile,
         Closure $generateCallback,
-        int $returnValue
+        int $returnValue,
     ): int {
         foreach ($itemsGroupedByFile as $fileName => $item) {
             $filePath = $outputPath . '/' . $fileName;

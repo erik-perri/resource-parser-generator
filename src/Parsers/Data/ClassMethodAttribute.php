@@ -23,7 +23,7 @@ class ClassMethodAttribute implements AttributeContract
 
     public static function create(
         Attribute $attribute,
-        ResolverContract $resolver
+        ResolverContract $resolver,
     ): self {
         return resolve(self::class, [
             'attribute' => $attribute,

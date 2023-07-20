@@ -14,7 +14,7 @@ class VariableResolver implements VariableResolverContract
      * @param Collection<string, TypeContract> $variables
      */
     public function __construct(
-        private readonly Collection $variables
+        private readonly Collection $variables,
     ) {
         //
     }

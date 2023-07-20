@@ -115,7 +115,7 @@ class MethodCallExprTypeConverter implements ExprTypeConverterContract
     private function handleCollectionMap(
         MethodCall|NullsafeMethodCall $expr,
         ConverterContext $context,
-        ClassScopeContract $leftSide
+        ClassScopeContract $leftSide,
     ): TypeContract {
         $arguments = $expr->getArgs();
         if (!count($arguments)) {
@@ -139,7 +139,7 @@ class MethodCallExprTypeConverter implements ExprTypeConverterContract
     private function handleCollectionPluck(
         MethodCall|NullsafeMethodCall $expr,
         ConverterContext $context,
-        ClassScopeContract $leftSide
+        ClassScopeContract $leftSide,
     ): TypeContract {
         $arguments = $expr->getArgs();
         if (!count($arguments)) {
@@ -223,7 +223,7 @@ class MethodCallExprTypeConverter implements ExprTypeConverterContract
     private function handleWhen(
         MethodCall|NullsafeMethodCall $expr,
         ConverterContext $context,
-        TypeContract $type
+        TypeContract $type,
     ): TypeContract {
         if (!($type instanceof Types\UnionType)) {
             throw new RuntimeException(

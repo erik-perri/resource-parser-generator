@@ -79,25 +79,27 @@ class ParserGeneratorConfigurationParser
          */
         $sources = collect();
 
-        foreach ($valid['sources'] as $source) {
-            if ($source instanceof ParserConfiguration) {
-                if ($source->parserFile !== null && $sources->contains('parserFile', $source->parserFile)) {
-                    throw new ConfigurationParserException(sprintf(
-                        'Duplicate parser file "%s" configured.',
-                        $source->parserFile,
-                    ));
-                }
-                $sources->push($source);
-            } elseif ($source instanceof ResourcePath) {
-                $files = $this->resourceFileLocator->files($source);
-                foreach ($files as $file) {
-                    $formats = $this->resourceFileFormatLocator->formats($file);
-                    foreach ($formats as $format) {
-                        $sources[] = new ParserConfiguration($format);
+        if (isset($valid['sources'])) {
+            foreach ($valid['sources'] as $source) {
+                if ($source instanceof ParserConfiguration) {
+                    if ($source->parserFile !== null && $sources->contains('parserFile', $source->parserFile)) {
+                        throw new ConfigurationParserException(sprintf(
+                            'Duplicate parser file "%s" configured.',
+                            $source->parserFile,
+                        ));
                     }
+                    $sources->push($source);
+                } elseif ($source instanceof ResourcePath) {
+                    $files = $this->resourceFileLocator->files($source);
+                    foreach ($files as $file) {
+                        $formats = $this->resourceFileFormatLocator->formats($file);
+                        foreach ($formats as $format) {
+                            $sources[] = new ParserConfiguration($format);
+                        }
+                    }
+                } else {
+                    throw new ConfigurationParserException(sprintf('Unhandled source type "%s"', get_class($source)));
                 }
-            } else {
-                throw new ConfigurationParserException(sprintf('Unhandled source type "%s"', get_class($source)));
             }
         }
 

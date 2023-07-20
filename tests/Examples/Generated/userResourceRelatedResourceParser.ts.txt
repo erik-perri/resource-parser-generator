@@ -1,0 +1,12 @@
+import {relatedResourceBaseParser} from './relatedResourceBaseParser';
+import {relatedResourceShortFormatNotNamedLikeFormatNameParser} from './relatedResourceShortFormatNotNamedLikeFormatNameParser';
+import {relatedResourceVerboseParser} from './relatedResourceVerboseParser';
+import {object, output} from 'zod';
+
+export const userResourceRelatedResourceParser = object({
+  with_format_default: relatedResourceBaseParser,
+  with_format_short: relatedResourceShortFormatNotNamedLikeFormatNameParser,
+  with_format_verbose: relatedResourceVerboseParser,
+});
+
+export type UserResourceRelatedResource = output<typeof userResourceRelatedResourceParser>;

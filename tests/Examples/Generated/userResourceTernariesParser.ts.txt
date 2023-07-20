@@ -1,0 +1,9 @@
+import {boolean, number, object, output, string, union} from 'zod';
+
+export const userResourceTernariesParser = object({
+  ternary_to_int: number(),
+  ternary_to_compound: union([boolean(), number(), string()]),
+  short_ternary: string(),
+});
+
+export type UserResourceTernaries = output<typeof userResourceTernariesParser>;

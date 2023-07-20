@@ -1,0 +1,7 @@
+import {object, output, string} from 'zod';
+
+export const postResourceSimpleParser = object({
+  status: string(),
+});
+
+export type PostResourceSimple = output<typeof postResourceSimpleParser>;

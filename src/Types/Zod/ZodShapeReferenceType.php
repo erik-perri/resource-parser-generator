@@ -26,7 +26,7 @@ class ZodShapeReferenceType implements ParserTypeContract
 
     public function constraint(ParserGeneratorContextContract $context): string
     {
-        $parserData = $context->findGlobal($this->className, $this->methodName);
+        $parserData = $context->find($this->className, $this->methodName);
         if (!$parserData) {
             throw new RuntimeException(sprintf(
                 'Unable to find global resource context for "%s::%s"',
@@ -49,12 +49,7 @@ class ZodShapeReferenceType implements ParserTypeContract
 
     public function imports(ParserGeneratorContextContract $context): ImportCollectionContract
     {
-        // If this resource is available in the local context, then we don't need to import it.
-        if ($context->findLocal($this->className, $this->methodName)) {
-            return new ImportCollection();
-        }
-
-        $parserData = $context->findGlobal($this->className, $this->methodName);
+        $parserData = $context->find($this->className, $this->methodName);
         if (!$parserData) {
             throw new RuntimeException(sprintf(
                 'Unable to find local resource data for "%s::%s"',

@@ -1,0 +1,7 @@
+import {number, object, output} from 'zod';
+
+export const relatedResourceShortFormatNotNamedLikeFormatNameParser = object({
+  id: number(),
+});
+
+export type RelatedResourceShortFormatNotNamedLikeFormatName = output<typeof relatedResourceShortFormatNotNamedLikeFormatNameParser>;

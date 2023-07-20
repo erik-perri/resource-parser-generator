@@ -9,10 +9,13 @@ use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\File;
 use PHPUnit\Framework\Attributes\DataProvider;
 use ResourceParserGenerator\Console\Commands\BuildResourceParsersCommand;
+use ResourceParserGenerator\Contracts\Generators\EnumNameGeneratorContract;
+use ResourceParserGenerator\Contracts\Generators\ParserNameGeneratorContract;
+use ResourceParserGenerator\DataObjects\EnumConfiguration;
 use ResourceParserGenerator\DataObjects\ParserConfiguration;
 use ResourceParserGenerator\DataObjects\ResourcePath;
-use ResourceParserGenerator\Tests\Examples\Resources\Nested\RelatedResource;
-use ResourceParserGenerator\Tests\Examples\Resources\PostResource;
+use ResourceParserGenerator\Tests\Examples\Enums\Permission;
+use ResourceParserGenerator\Tests\Examples\Enums\PostStatus;
 use ResourceParserGenerator\Tests\Examples\Resources\UserResource;
 use ResourceParserGenerator\Tests\TestCase;
 
@@ -113,7 +116,7 @@ class BuildResourceParsersCommandTest extends TestCase
             ->assertExitCode(0)
             ->execute();
 
-        file_put_contents($outputPath . '/userResourceParsers.ts', '// Out of date content');
+        file_put_contents($outputPath . '/userResourceBaseParser.ts', '// Out of date content');
 
         $this->artisan(BuildResourceParsersCommand::class, ['--check' => true])
             ->assertExitCode(1)
@@ -121,8 +124,95 @@ class BuildResourceParsersCommandTest extends TestCase
 
         $this->assertEquals(
             '// Out of date content',
-            file_get_contents($outputPath . '/userResourceParsers.ts'),
+            file_get_contents($outputPath . '/userResourceBaseParser.ts'),
         );
+    }
+
+    public function testShouldFailWhenMultipleParsersAreConfiguredWithTheSameFile(): void
+    {
+        Config::set('build.enums', ['output_path' => dirname(__DIR__, 3) . '/Output']);
+        Config::set('build.resources', [
+            'output_path' => dirname(__DIR__, 3) . '/Output',
+            'sources' => [
+                new ParserConfiguration([UserResource::class, 'base'], parserFile: 'user.ts'),
+                new ParserConfiguration([UserResource::class, 'relatedResource'], parserFile: 'user.ts'),
+            ],
+        ]);
+
+        $this->artisan(BuildResourceParsersCommand::class)
+            ->expectsOutputToContain('Duplicate parser file "user.ts" configured.')
+            ->assertExitCode(1)
+            ->execute();
+    }
+
+    public function testShouldFailWhenMultipleParsersAreGeneratedWithTheSameFile(): void
+    {
+        Config::set('build.enums', ['output_path' => dirname(__DIR__, 3) . '/Output']);
+        Config::set('build.resources', [
+            'output_path' => dirname(__DIR__, 3) . '/Output',
+            'sources' => [
+                new ParserConfiguration([UserResource::class, 'base']),
+                new ParserConfiguration([UserResource::class, 'relatedResource']),
+            ],
+        ]);
+
+        $mock = $this->mock(ParserNameGeneratorContract::class);
+        $mock->expects('generateTypeName')
+            ->andReturn('Parser')
+            ->zeroOrMoreTimes();
+        $mock->expects('generateVariableName')
+            ->andReturn('parser')
+            ->zeroOrMoreTimes();
+        $mock->expects('generateFileName')
+            ->andReturn('user.ts')
+            ->zeroOrMoreTimes();
+
+        $this->artisan(BuildResourceParsersCommand::class)
+            ->expectsOutputToContain('Multiple parsers found while generating "user.ts"')
+            ->assertExitCode(1)
+            ->execute();
+    }
+
+    public function testShouldFailWhenMultipleEnumsAreConfiguredWithTheSameFile(): void
+    {
+        Config::set('build.enums', [
+            'output_path' => dirname(__DIR__, 3) . '/Output',
+            'sources' => [
+                new EnumConfiguration(PostStatus::class, enumFile: 'enum.ts'),
+                new EnumConfiguration(Permission::class, enumFile: 'enum.ts'),
+            ],
+        ]);
+        Config::set('build.resources', ['output_path' => dirname(__DIR__, 3) . '/Output']);
+
+        $this->artisan(BuildResourceParsersCommand::class)
+            ->expectsOutputToContain('Duplicate enum file "enum.ts" configured.')
+            ->assertExitCode(1)
+            ->execute();
+    }
+
+    public function testShouldFailWhenMultipleEnumsAreGeneratedWithTheSameFile(): void
+    {
+        Config::set('build.enums', [
+            'output_path' => dirname(__DIR__, 3) . '/Output',
+            'sources' => [
+                new EnumConfiguration(PostStatus::class),
+                new EnumConfiguration(Permission::class),
+            ],
+        ]);
+        Config::set('build.resources', ['output_path' => dirname(__DIR__, 3) . '/Output']);
+
+        $mock = $this->mock(EnumNameGeneratorContract::class);
+        $mock->expects('generateTypeName')
+            ->andReturn('Enum')
+            ->zeroOrMoreTimes();
+        $mock->expects('generateFileName')
+            ->andReturn('enum.ts')
+            ->zeroOrMoreTimes();
+
+        $this->artisan(BuildResourceParsersCommand::class)
+            ->expectsOutputToContain('Multiple enums found while generating "enum.ts"')
+            ->assertExitCode(1)
+            ->execute();
     }
 
     #[DataProvider('generatedContentProvider')]
@@ -148,7 +238,7 @@ class BuildResourceParsersCommandTest extends TestCase
         $examples = dirname(__DIR__, 3) . '/Examples/Generated';
 
         return [
-            'UserResource::base not configured' => [
+            'UserResource::base' => [
                 'config' => fn(string $outputPath) => [
                     'output_path' => $outputPath,
                     'sources' => [
@@ -156,9 +246,7 @@ class BuildResourceParsersCommandTest extends TestCase
                     ],
                 ],
                 'expectedOutput' => [
-                    'userResourceParsers.ts' => file_get_contents(
-                        $examples . '/UserResource-base-not-configured.ts.txt',
-                    ),
+                    'userResourceBaseParser.ts' => file_get_contents($examples . '/userResourceBaseParser.ts.txt'),
                 ],
             ],
             'UserResource::base configured' => [
@@ -175,79 +263,7 @@ class BuildResourceParsersCommandTest extends TestCase
                 ],
                 'expectedOutput' => [
                     'custom.ts' => file_get_contents(
-                        $examples . '/UserResource-base-configured.ts.txt',
-                    ),
-                ],
-            ],
-            'combined' => [
-                'config' => fn(string $outputPath) => [
-                    'output_path' => $outputPath,
-                    'sources' => [
-                        new ParserConfiguration(
-                            [UserResource::class, 'base'],
-                            'parsers.ts',
-                        ),
-                        new ParserConfiguration(
-                            [UserResource::class, 'combined'],
-                            'parsers.ts',
-                        ),
-                        new ParserConfiguration(
-                            [UserResource::class, 'ternaries'],
-                            'parsers.ts',
-                        ),
-                        new ParserConfiguration(
-                            [UserResource::class, 'relatedResource'],
-                            'parsers.ts',
-                        ),
-                        new ParserConfiguration(
-                            [RelatedResource::class, 'base'],
-                            'parsers.ts',
-                        ),
-                        new ParserConfiguration(
-                            [RelatedResource::class, 'shortFormatNotNamedLikeFormatName'],
-                            'parsers.ts',
-                        ),
-                        new ParserConfiguration(
-                            [RelatedResource::class, 'verbose'],
-                            'parsers.ts',
-                        ),
-                    ],
-                ],
-                'expectedOutput' => [
-                    'parsers.ts' => file_get_contents($examples . '/combined.ts.txt'),
-                ],
-            ],
-            'split' => [
-                'config' => fn(string $outputPath) => [
-                    'output_path' => $outputPath,
-                    'sources' => [
-                        new ParserConfiguration([UserResource::class, 'base']),
-                        new ParserConfiguration([UserResource::class, 'combined']),
-                        new ParserConfiguration([UserResource::class, 'ternaries']),
-                        new ParserConfiguration([UserResource::class, 'relatedResource']),
-                        new ParserConfiguration([RelatedResource::class, 'base']),
-                        new ParserConfiguration([RelatedResource::class, 'shortFormatNotNamedLikeFormatName']),
-                        new ParserConfiguration([RelatedResource::class, 'verbose']),
-                    ],
-                ],
-                'expectedOutput' => [
-                    'userResourceParsers.ts' => file_get_contents($examples . '/split/userResourceParsers.ts.txt'),
-                    'relatedResourceParsers.ts' => file_get_contents(
-                        $examples . '/split/relatedResourceParsers.ts.txt',
-                    ),
-                ],
-            ],
-            'using path' => [
-                'config' => fn(string $outputPath) => [
-                    'output_path' => $outputPath,
-                    'sources' => [
-                        new ResourcePath(dirname(__DIR__, 3) . '/Examples/Resources'),
-                    ],
-                ],
-                'expectedOutput' => [
-                    'postResourceParsers.ts' => file_get_contents($examples . '/split/postResourceParsers.ts.txt'),
-                    'relatedResourceParsers.ts' => file_get_contents(
-                        $examples . '/split/relatedResourceParsers.ts.txt',
+                        $examples . '/userResourceBaseParser-custom.ts.txt',
                     ),
                 ],
             ],
@@ -259,17 +275,22 @@ class BuildResourceParsersCommandTest extends TestCase
                     ],
                 ],
                 'expectedOutput' => [
-                    'userResourceParsers.ts' => <<<TS
-import {postResourceBaseParser} from './postResourceParsers';
-import {nullable, object, output, string} from 'zod';
-
-export const userResourceChildArraysParser = object({
-  should_have_been_a_resource: object({should_have_been_when_loaded: nullable(postResourceBaseParser), id: string()}),
-});
-
-export type UserResourceChildArrays = output<typeof userResourceChildArraysParser>;
-
-TS,
+                    'userResourceChildArraysParser.ts' => file_get_contents(
+                        $examples . '/userResourceChildArraysParser.ts.txt',
+                    ),
+                ],
+            ],
+            'UserResource::combined' => [
+                'config' => fn(string $outputPath) => [
+                    'output_path' => $outputPath,
+                    'sources' => [
+                        new ParserConfiguration([UserResource::class, 'combined']),
+                    ],
+                ],
+                'expectedOutput' => [
+                    'userResourceCombinedParser.ts' => file_get_contents(
+                        $examples . '/userResourceCombinedParser.ts.txt',
+                    ),
                 ],
             ],
             'UserResource::enumMethods' => [
@@ -278,21 +299,49 @@ TS,
                     'sources' => [
                         new ParserConfiguration(
                             [UserResource::class, 'enumMethods'],
-                            'parsers.ts',
+                            'parser.ts',
                         ),
                     ],
                 ],
                 'expectedOutput' => [
-                    'parsers.ts' => <<<TS
-import {array, object, output, string} from 'zod';
-
-export const userResourceEnumMethodsParser = object({
-  permissions: array(string()),
-});
-
-export type UserResourceEnumMethods = output<typeof userResourceEnumMethodsParser>;
-
-TS,
+                    'parser.ts' => file_get_contents(
+                        $examples . '/userResourceEnumMethodsParser.ts.txt',
+                    ),
+                ],
+            ],
+            'UserResource::relatedResource' => [
+                'config' => fn(string $outputPath) => [
+                    'output_path' => $outputPath,
+                    'sources' => [
+                        new ParserConfiguration([UserResource::class, 'relatedResource']),
+                    ],
+                ],
+                'expectedOutput' => [
+                    'userResourceRelatedResourceParser.ts' => file_get_contents(
+                        $examples . '/userResourceRelatedResourceParser.ts.txt',
+                    ),
+                    'relatedResourceBaseParser.ts' => file_get_contents(
+                        $examples . '/relatedResourceBaseParser.ts.txt',
+                    ),
+                    'relatedResourceShortFormatNotNamedLikeFormatNameParser.ts' => file_get_contents(
+                        $examples . '/relatedResourceShortFormatNotNamedLikeFormatNameParser.ts.txt',
+                    ),
+                    'relatedResourceVerboseParser.ts' => file_get_contents(
+                        $examples . '/relatedResourceVerboseParser.ts.txt',
+                    ),
+                ],
+            ],
+            'UserResource::ternaries' => [
+                'config' => fn(string $outputPath) => [
+                    'output_path' => $outputPath,
+                    'sources' => [
+                        new ParserConfiguration([UserResource::class, 'ternaries']),
+                    ],
+                ],
+                'expectedOutput' => [
+                    'userResourceTernariesParser.ts' => file_get_contents(
+                        $examples . '/userResourceTernariesParser.ts.txt',
+                    ),
                 ],
             ],
             'UserResource::unknownComments' => [
@@ -301,58 +350,14 @@ TS,
                     'sources' => [
                         new ParserConfiguration(
                             [UserResource::class, 'unknownComments'],
-                            'parsers.ts',
+                            'parser.ts',
                         ),
                     ],
                 ],
                 'expectedOutput' => [
-                    'parsers.ts' => <<<TS
-import {object, output, unknown} from 'zod';
-
-export const userResourceUnknownCommentsParser = object({
-  /**
-   * Error: Unknown property "what" in "User"
-   */
-  propertyName: unknown(),
-});
-
-export type UserResourceUnknownComments = output<typeof userResourceUnknownCommentsParser>;
-
-TS,
-                ],
-            ],
-            'UserResource::usingWhenLoaded' => [
-                'config' => fn(string $outputPath) => [
-                    'output_path' => $outputPath,
-                    'sources' => [
-                        new ParserConfiguration(
-                            [UserResource::class, 'usingWhenLoaded'],
-                            'parsers.ts',
-                        ),
-                        new ParserConfiguration(
-                            [PostResource::class, 'simple'],
-                            'parsers.ts',
-                        ),
-                    ],
-                ],
-                'expectedOutput' => [
-                    'parsers.ts' => <<<TS
-import {object, optional, output, string} from 'zod';
-
-export const postResourceSimpleParser = object({
-  status: string(),
-});
-
-export type PostResourceSimple = output<typeof postResourceSimpleParser>;
-
-export const userResourceUsingWhenLoadedParser = object({
-  no_fallback: optional(postResourceSimpleParser),
-  with_fallback: string(),
-});
-
-export type UserResourceUsingWhenLoaded = output<typeof userResourceUsingWhenLoadedParser>;
-
-TS,
+                    'parser.ts' => file_get_contents(
+                        $examples . '/userResourceUnknownCommentsParser.ts.txt',
+                    ),
                 ],
             ],
             'UserResource::usingResourceCollection' => [
@@ -363,29 +368,53 @@ TS,
                             [UserResource::class, 'usingResourceCollection'],
                             'parsers.ts',
                         ),
+                    ],
+                ],
+                'expectedOutput' => [
+                    'parsers.ts' => file_get_contents(
+                        $examples . '/userResourceUsingResourceCollectionParser.ts.txt',
+                    ),
+                ],
+            ],
+            'UserResource::usingWhenLoaded' => [
+                'config' => fn(string $outputPath) => [
+                    'output_path' => $outputPath,
+                    'sources' => [
                         new ParserConfiguration(
-                            [PostResource::class, 'simple'],
-                            'parsers.ts',
+                            [UserResource::class, 'usingWhenLoaded'],
+                            'parser.ts',
                         ),
                     ],
                 ],
                 'expectedOutput' => [
-                    'parsers.ts' => <<<TS
-import {array, object, output, string} from 'zod';
-
-export const postResourceSimpleParser = object({
-  status: string(),
-});
-
-export type PostResourceSimple = output<typeof postResourceSimpleParser>;
-
-export const userResourceUsingResourceCollectionParser = object({
-  posts: array(postResourceSimpleParser),
-});
-
-export type UserResourceUsingResourceCollection = output<typeof userResourceUsingResourceCollectionParser>;
-
-TS,
+                    'parser.ts' => file_get_contents(
+                        $examples . '/userResourceUsingWhenLoadedParser.ts.txt',
+                    ),
+                ],
+            ],
+            'configured with ResourcePath' => [
+                'config' => fn(string $outputPath) => [
+                    'output_path' => $outputPath,
+                    'sources' => [
+                        new ResourcePath(dirname(__DIR__, 3) . '/Examples/Resources'),
+                    ],
+                ],
+                'expectedOutput' => [
+                    'postResourceBaseParser.ts' => file_get_contents(
+                        $examples . '/postResourceBaseParser.ts.txt',
+                    ),
+                    'postResourceSimpleParser.ts' => file_get_contents(
+                        $examples . '/postResourceSimpleParser.ts.txt',
+                    ),
+                    'relatedResourceBaseParser.ts' => file_get_contents(
+                        $examples . '/relatedResourceBaseParser.ts.txt',
+                    ),
+                    'relatedResourceShortFormatNotNamedLikeFormatNameParser.ts' => file_get_contents(
+                        $examples . '/relatedResourceShortFormatNotNamedLikeFormatNameParser.ts.txt',
+                    ),
+                    'relatedResourceVerboseParser.ts' => file_get_contents(
+                        $examples . '/relatedResourceVerboseParser.ts.txt',
+                    ),
                 ],
             ],
         ];

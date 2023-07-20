@@ -1,0 +1,7 @@
+import {array, object, output, string} from 'zod';
+
+export const userResourceEnumMethodsParser = object({
+  permissions: array(string()),
+});
+
+export type UserResourceEnumMethods = output<typeof userResourceEnumMethodsParser>;

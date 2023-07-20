@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace ResourceParserGenerator\Parsers;
 
 use Illuminate\Support\Arr;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Validator;
@@ -74,13 +75,19 @@ class ParserGeneratorConfigurationParser
         }
 
         /**
-         * @var ParserConfiguration[] $sources
+         * @var Collection<int, ParserConfiguration> $sources
          */
-        $sources = [];
+        $sources = collect();
 
         foreach ($valid['sources'] as $source) {
             if ($source instanceof ParserConfiguration) {
-                $sources[] = $source;
+                if ($source->parserFile !== null && $sources->contains('parserFile', $source->parserFile)) {
+                    throw new ConfigurationParserException(sprintf(
+                        'Duplicate parser file "%s" configured.',
+                        $source->parserFile,
+                    ));
+                }
+                $sources->push($source);
             } elseif ($source instanceof ResourcePath) {
                 $files = $this->resourceFileLocator->files($source);
                 foreach ($files as $file) {
@@ -94,6 +101,6 @@ class ParserGeneratorConfigurationParser
             }
         }
 
-        return new ParserGeneratorConfiguration($outputPath, ...$sources);
+        return new ParserGeneratorConfiguration($outputPath, ...$sources->all());
     }
 }

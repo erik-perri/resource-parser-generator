@@ -1,0 +1,7 @@
+import {number, object, output} from 'zod';
+
+export const postResourceBaseParser = object({
+  id: number(),
+});
+
+export type PostResourceBase = output<typeof postResourceBaseParser>;

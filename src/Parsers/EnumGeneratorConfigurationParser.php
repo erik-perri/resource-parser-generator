@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace ResourceParserGenerator\Parsers;
 
 use Illuminate\Support\Arr;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Validator;
@@ -61,21 +62,27 @@ class EnumGeneratorConfigurationParser
         }
 
         /**
-         * @var EnumConfiguration[] $sources
+         * @var Collection<int, EnumConfiguration> $sources
          */
-        $sources = [];
+        $sources = collect();
 
         if (isset($valid['sources'])) {
             foreach ($valid['sources'] as $source) {
                 // TODO Add EnumPath?
                 if ($source instanceof EnumConfiguration) {
-                    $sources[] = $source;
+                    if ($source->enumFile !== null && $sources->contains('enumFile', $source->enumFile)) {
+                        throw new ConfigurationParserException(sprintf(
+                            'Duplicate enum file "%s" configured.',
+                            $source->enumFile,
+                        ));
+                    }
+                    $sources->push($source);
                 } else {
                     throw new ConfigurationParserException(sprintf('Unhandled source type "%s"', get_class($source)));
                 }
             }
         }
 
-        return new EnumGeneratorConfiguration($outputPath, ...$sources);
+        return new EnumGeneratorConfiguration($outputPath, ...$sources->all());
     }
 }

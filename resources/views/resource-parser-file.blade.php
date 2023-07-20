@@ -6,7 +6,7 @@
 
     /** @var ParserGeneratorContext $context */
     /** @var Collection<int, ImportGroupContract> $imports */
-    /** @var Collection<string, ParserData> $parsers */
+    /** @var ParserData $parser */
 @endphp
 
 @foreach($imports as $module)
@@ -22,12 +22,9 @@
 import {{ implode(', ', $line) }} from '{{$module->module()}}';
 @endforeach
 
-@foreach($parsers as $parserName => $parser)
 @include('resource-parser-generator::resource-parser', [
     'context' => $context,
     'properties' => $parser->properties->all(),
     'typeName' => $parser->configuration->typeName,
     'variableName' => $parser->configuration->variableName,
 ])
-
-@endforeach

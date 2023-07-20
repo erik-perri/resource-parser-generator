@@ -12,7 +12,9 @@ use Illuminate\Support\Str;
 use ResourceParserGenerator\Contracts\Generators\EnumGeneratorContract;
 use ResourceParserGenerator\Contracts\Generators\ParserGeneratorContract;
 use ResourceParserGenerator\DataObjects\EnumData;
+use ResourceParserGenerator\DataObjects\EnumGeneratorConfiguration;
 use ResourceParserGenerator\DataObjects\ParserData;
+use ResourceParserGenerator\DataObjects\ParserGeneratorConfiguration;
 use ResourceParserGenerator\Exceptions\ConfigurationParserException;
 use ResourceParserGenerator\Parsers\EnumGeneratorConfigurationParser;
 use ResourceParserGenerator\Parsers\ParserGeneratorConfigurationParser;
@@ -63,45 +65,111 @@ class BuildResourceParsersCommand extends Command
 
         $returnValue = static::SUCCESS;
 
+        try {
+            $returnValue = $this->generateEnums($enumConfiguration, $enums, $returnValue);
+            $returnValue = $this->generateParsers($parserConfiguration, $parsers, $returnValue);
+        } catch (Throwable $error) {
+            $this->components->error('Failed to generate resources.');
+            $this->components->bulletList([$error->getMessage()]);
+            return static::FAILURE;
+        }
+
+        return $returnValue;
+    }
+
+    /**
+     * @param EnumGeneratorConfiguration $enumConfiguration
+     * @param Collection<int, EnumData> $enums
+     * @param int $returnValue
+     * @return int
+     */
+    private function generateEnums(
+        EnumGeneratorConfiguration $enumConfiguration,
+        Collection $enums,
+        int $returnValue
+    ): int {
         if ($enums->isNotEmpty()) {
             $this->components->info(
                 sprintf('Processing %s %s', $enums->count(), Str::plural('enum', $enums->count())),
             );
 
-            $enumsByFile = $enums->groupBy(fn(EnumData $data) => $data->configuration->enumFile
-                ?? throw new RuntimeException(sprintf(
+            /**
+             * @var Collection<string, EnumData> $enumsByFile
+             */
+            $enumsByFile = $enums
+                ->collect()
+                ->groupBy(fn(EnumData $data) => $data->configuration->enumFile ?? throw new RuntimeException(sprintf(
                     'Could not find output file path for "%s"',
                     $data->configuration->className,
-                )));
+                )))
+                ->map(function (Collection $fileEnums, string $fileName) {
+                    if ($fileEnums->count() > 1) {
+                        throw new RuntimeException(sprintf(
+                            'Multiple enums found while generating "%s", only one item per file is supported.',
+                            $fileName,
+                        ));
+                    }
+
+                    return $fileEnums->firstOrFail();
+                });
 
             $enumGenerator = $this->resolve(EnumGeneratorContract::class);
 
             $returnValue = $this->writeOrCheckFiles(
                 $enumConfiguration->outputPath,
                 $enumsByFile,
-                fn(Collection $localEnums) => $enumGenerator->generate($localEnums),
+                fn(EnumData $enum) => $enumGenerator->generate($enum),
                 $returnValue,
             );
         }
 
+        return $returnValue;
+    }
+
+    /**
+     * @param ParserGeneratorConfiguration $parserConfiguration
+     * @param Collection<int, ParserData> $parsers
+     * @param int $returnValue
+     * @return int
+     */
+    private function generateParsers(
+        ParserGeneratorConfiguration $parserConfiguration,
+        Collection $parsers,
+        int $returnValue
+    ): int {
         if ($parsers->isNotEmpty()) {
             $this->components->info(
                 sprintf('Processing %s %s', $parsers->count(), Str::plural('parser', $parsers->count())),
             );
 
-            $parsersByFile = $parsers->groupBy(fn(ParserData $data) => $data->configuration->parserFile
-                ?? throw new RuntimeException(sprintf(
-                    'Could not find output file path for "%s::%s"',
-                    $data->configuration->method[0],
-                    $data->configuration->method[1],
-                )));
+            /**
+             * @var Collection<string, ParserData> $parsersByFile
+             */
+            $parsersByFile = $parsers
+                ->collect()
+                ->groupBy(fn(ParserData $data) => $data->configuration->parserFile
+                    ?? throw new RuntimeException(sprintf(
+                        'Could not find output file path for "%s::%s"',
+                        $data->configuration->method[0],
+                        $data->configuration->method[1],
+                    )))
+                ->map(function (Collection $fileParsers, string $fileName) {
+                    if ($fileParsers->count() > 1) {
+                        throw new RuntimeException(sprintf(
+                            'Multiple parsers found while generating "%s", only one item per file is supported.',
+                            $fileName,
+                        ));
+                    }
+
+                    return $fileParsers->firstOrFail();
+                });
 
             $parserGenerator = $this->resolve(ParserGeneratorContract::class);
 
             $returnValue = $this->writeOrCheckFiles(
                 $parserConfiguration->outputPath,
                 $parsersByFile,
-                fn(Collection $localParsers) => $parserGenerator->generate($localParsers, $parsers),
+                fn(ParserData $parser) => $parserGenerator->generate($parser, $parsers),
                 $returnValue,
             );
         }
@@ -125,11 +193,11 @@ class BuildResourceParsersCommand extends Command
         Closure $generateCallback,
         int $returnValue
     ): int {
-        foreach ($itemsGroupedByFile as $fileName => $localItems) {
+        foreach ($itemsGroupedByFile as $fileName => $item) {
             $filePath = $outputPath . '/' . $fileName;
 
             try {
-                $fileContents = $generateCallback($localItems);
+                $fileContents = $generateCallback($item);
             } catch (Throwable $error) {
                 $this->components->twoColumnDetail(
                     $this->isChecking()
@@ -178,6 +246,7 @@ class BuildResourceParsersCommand extends Command
      * @param class-string<T> $class
      * @param array<string, mixed> $parameters
      * @return T
+     * @noinspection PhpSameParameterValueInspection
      */
     private function resolve(string $class, array $parameters = [])
     {

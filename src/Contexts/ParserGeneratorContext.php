@@ -14,27 +14,16 @@ use ResourceParserGenerator\DataObjects\ParserData;
 class ParserGeneratorContext implements ParserGeneratorContextContract
 {
     /**
-     * @param Collection<int, ParserData> $localParsers
-     * @param Collection<int, ParserData> $globalParsers
+     * @param Collection<int, ParserData> $parsers
      */
-    public function __construct(
-        private readonly Collection $localParsers,
-        private readonly Collection $globalParsers,
-    ) {
+    public function __construct(private readonly Collection $parsers)
+    {
         //
     }
 
-    public function findGlobal(string $className, string $methodName): ParserData|null
+    public function find(string $className, string $methodName): ParserData|null
     {
-        return $this->globalParsers->first(
-            fn(ParserData $context) => $context->resource->className === $className
-                && $context->resource->methodName === $methodName,
-        );
-    }
-
-    public function findLocal(string $className, string $methodName): ParserData|null
-    {
-        return $this->localParsers->first(
+        return $this->parsers->first(
             fn(ParserData $context) => $context->resource->className === $className
                 && $context->resource->methodName === $methodName,
         );

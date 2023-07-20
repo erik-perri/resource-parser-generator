@@ -11,9 +11,7 @@ class ParserNameGenerator implements ParserNameGeneratorContract
 {
     public function generateFileName(string $fullyQualifiedName, string $methodName): string
     {
-        $shortName = class_basename($fullyQualifiedName);
-
-        return Str::camel($shortName) . 'Parsers.ts';
+        return $this->generateVariableName($fullyQualifiedName, $methodName) . '.ts';
     }
 
     public function generateTypeName(string $fullyQualifiedName, string $methodName): string

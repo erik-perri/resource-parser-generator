@@ -1,0 +1,8 @@
+import {nullable, object, optional, output, string} from 'zod';
+
+export const userResourceCombinedParser = object({
+  email: nullable(string()),
+  name: optional(string()),
+});
+
+export type UserResourceCombined = output<typeof userResourceCombinedParser>;

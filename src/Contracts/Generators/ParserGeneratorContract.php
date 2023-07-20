@@ -10,9 +10,9 @@ use ResourceParserGenerator\DataObjects\ParserData;
 interface ParserGeneratorContract
 {
     /**
-     * @param Collection<int, ParserData> $localParsers
-     * @param Collection<int, ParserData> $globalParsers
+     * @param ParserData $parser
+     * @param Collection<int, ParserData> $otherParsers
      * @return string
      */
-    public function generate(Collection $localParsers, Collection $globalParsers): string;
+    public function generate(ParserData $parser, Collection $otherParsers): string;
 }

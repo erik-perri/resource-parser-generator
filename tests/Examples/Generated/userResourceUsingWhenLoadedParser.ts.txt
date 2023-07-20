@@ -1,0 +1,9 @@
+import {postResourceSimpleParser} from './postResourceSimpleParser';
+import {object, optional, output, string} from 'zod';
+
+export const userResourceUsingWhenLoadedParser = object({
+  no_fallback: optional(postResourceSimpleParser),
+  with_fallback: string(),
+});
+
+export type UserResourceUsingWhenLoaded = output<typeof userResourceUsingWhenLoadedParser>;

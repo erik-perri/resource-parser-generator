@@ -13,12 +13,5 @@ interface ParserGeneratorContextContract
      * @param string $methodName
      * @return ParserData|null
      */
-    public function findGlobal(string $className, string $methodName): ParserData|null;
-
-    /**
-     * @param class-string $className
-     * @param string $methodName
-     * @return ParserData|null
-     */
-    public function findLocal(string $className, string $methodName): ParserData|null;
+    public function find(string $className, string $methodName): ParserData|null;
 }

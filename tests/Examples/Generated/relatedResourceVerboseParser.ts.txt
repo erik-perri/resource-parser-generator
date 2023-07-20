@@ -1,0 +1,8 @@
+import {number, object, output, string} from 'zod';
+
+export const relatedResourceVerboseParser = object({
+  id: number(),
+  email: string(),
+});
+
+export type RelatedResourceVerbose = output<typeof relatedResourceVerboseParser>;

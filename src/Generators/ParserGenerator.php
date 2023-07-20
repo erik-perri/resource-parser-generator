@@ -14,11 +14,11 @@ use ResourceParserGenerator\DataObjects\ParserData;
 class ParserGenerator implements ParserGeneratorContract
 {
     /**
-     * @param Collection<int, ParserData> $localParsers
-     * @param Collection<int, ParserData> $globalParsers
+     * @param ParserData $parser
+     * @param Collection<int, ParserData> $otherParsers
      * @return string
      */
-    public function generate(Collection $localParsers, Collection $globalParsers): string
+    public function generate(ParserData $parser, Collection $otherParsers): string
     {
         // TODO Make these imports configurable.
         $imports = new ImportCollection(
@@ -27,20 +27,17 @@ class ParserGenerator implements ParserGeneratorContract
         );
 
         $generatorContext = resolve(ParserGeneratorContextContract::class, [
-            'globalParsers' => $globalParsers,
-            'localParsers' => $localParsers,
+            'parsers' => $otherParsers,
         ]);
 
-        foreach ($localParsers as $parser) {
-            foreach ($parser->properties as $property) {
-                $imports = $imports->merge($property->imports($generatorContext));
-            }
+        foreach ($parser->properties as $property) {
+            $imports = $imports->merge($property->imports($generatorContext));
         }
 
         $content = view('resource-parser-generator::resource-parser-file', [
             'context' => $generatorContext,
             'imports' => $imports->groupForView(),
-            'parsers' => $localParsers->collect(),
+            'parser' => $parser,
         ])->render();
 
         return trim($content) . "\n";

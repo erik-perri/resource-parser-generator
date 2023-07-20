@@ -1,0 +1,8 @@
+import {postResourceSimpleParser} from './postResourceSimpleParser';
+import {array, object, output} from 'zod';
+
+export const userResourceUsingResourceCollectionParser = object({
+  posts: array(postResourceSimpleParser),
+});
+
+export type UserResourceUsingResourceCollection = output<typeof userResourceUsingResourceCollectionParser>;

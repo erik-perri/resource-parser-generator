@@ -1,0 +1,7 @@
+import {object, output, string} from 'zod';
+
+export const relatedResourceBaseParser = object({
+  name: string(),
+});
+
+export type RelatedResourceBase = output<typeof relatedResourceBaseParser>;

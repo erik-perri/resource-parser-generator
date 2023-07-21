@@ -30,12 +30,13 @@ class ParserTypeConverter implements ParserTypeConverterContract
     protected function convertCollection(Types\ClassType $type): ParserTypeContract
     {
         if ($type->generics()) {
-            if ($type->generics()->count() > 1) {
-                $key = $type->generics()->get(0);
-                $value = $type->generics()->get(1);
+            $values = $type->generics()->values();
+            if ($values->count() > 1) {
+                $key = $values->get(0);
+                $value = $values->get(1);
             } else {
                 $key = null;
-                $value = $type->generics()->get(0);
+                $value = $values->get(0);
             }
 
             if ($key instanceof Types\IntType) {

@@ -8,8 +8,10 @@ use Closure;
 use Illuminate\Support\Collection;
 use Mockery\CompositeExpectation;
 use PHPStan\PhpDocParser\Ast\Type\ArrayTypeNode;
+use PHPStan\PhpDocParser\Ast\Type\CallableTypeNode;
 use PHPStan\PhpDocParser\Ast\Type\GenericTypeNode;
 use PHPStan\PhpDocParser\Ast\Type\IdentifierTypeNode;
+use PHPStan\PhpDocParser\Ast\Type\NullableTypeNode;
 use PHPStan\PhpDocParser\Ast\Type\ThisTypeNode;
 use PHPStan\PhpDocParser\Ast\Type\TypeNode;
 use PHPStan\PhpDocParser\Ast\Type\UnionTypeNode;
@@ -70,7 +72,19 @@ class DocBlockTypeConverterTest extends TestCase
                 ),
                 'expectedOutput' => 'array<int, string>',
             ],
-            'callable' => [
+            'array-key' => [
+                'input' => new IdentifierTypeNode('array-key'),
+                'expectedOutput' => 'int|string',
+            ],
+            'callable node' => [
+                'input' => new CallableTypeNode(
+                    new IdentifierTypeNode('Closure'),
+                    [],
+                    new IdentifierTypeNode('string')
+                ),
+                'expectedOutput' => 'callable',
+            ],
+            'callable identifier' => [
                 'input' => new IdentifierTypeNode('callable'),
                 'expectedOutput' => 'callable',
             ],
@@ -107,6 +121,14 @@ class DocBlockTypeConverterTest extends TestCase
             'null' => [
                 'input' => new IdentifierTypeNode('null'),
                 'expectedOutput' => 'null',
+            ],
+            'nullable' => [
+                'input' => new NullableTypeNode(new IdentifierTypeNode('CarbonImmutable')),
+                'expectedOutput' => 'Carbon\CarbonImmutable|null',
+                'resolverFactory' => fn() => $this->mock(ResolverContract::class)
+                    ->expects('resolveClass')
+                    ->with('CarbonImmutable')
+                    ->andReturn('Carbon\\CarbonImmutable'),
             ],
             'object' => [
                 'input' => new IdentifierTypeNode('object'),

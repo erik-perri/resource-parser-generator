@@ -21,7 +21,9 @@ use RuntimeException;
 /**
  * This class takes a parsed docblock type and converts it to a TypeContract.
  *
- * `@param string $foo ` `string` is a docblock type.
+ * "@param string $foo"
+ *         |    |
+ *         $type
  */
 class DocBlockTypeConverter implements DocBlockTypeConverterContract
 {

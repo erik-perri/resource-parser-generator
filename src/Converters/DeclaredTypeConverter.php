@@ -20,7 +20,13 @@ use RuntimeException;
 /**
  * This class takes a parsed explicitly declared type and converts it to a TypeContract.
  *
- * `fn(string $foo): int => 1` Both `string` and `int` are declared types.
+ * "fn(?string $foo): int => 1"
+ *     |     |        | |
+ *     ComplexType    Identifier
+ *
+ * "Resource::make(...)"
+ *  |      |
+ *  Name
  */
 class DeclaredTypeConverter implements DeclaredTypeConverterContract
 {

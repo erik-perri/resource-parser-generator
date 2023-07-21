@@ -14,7 +14,9 @@ use RuntimeException;
 /**
  * This class takes a parsed function parameter and converts it to a TypeContract.
  *
- * `fn(string $foo): int => 1` `$foo` is the parameter.
+ * "fn(string $foo): int => 1"
+ *     |    |
+ *     $param->type
  */
 class ParamTypeConverter implements ParamTypeConverterContract
 {

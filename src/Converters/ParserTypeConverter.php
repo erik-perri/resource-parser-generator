@@ -143,18 +143,11 @@ class ParserTypeConverter implements ParserTypeConverterContract
 
     protected function convertUnion(Types\UnionType $type): ParserTypeContract
     {
-        /**
-         * TODO Flatten the union before this point
-         * @var Collection<int, TypeContract> $flatTypes
-         */
-        $flatTypes = $type->types()
-            ->map(fn(TypeContract $type) => $type instanceof Types\UnionType ? $type->types() : $type)
-            ->flatten();
-
-        if ($flatTypes->count() === 2) {
+        $subTypes = $type->types();
+        if ($subTypes->count() === 2) {
             if ($type->hasType(Types\NullType::class)) {
                 return new Types\Zod\ZodNullableType($this->convert(
-                    $flatTypes
+                    $subTypes
                         ->filter(fn(TypeContract $type) => !($type instanceof Types\NullType))
                         ->firstOrFail(),
                 ));
@@ -162,15 +155,13 @@ class ParserTypeConverter implements ParserTypeConverterContract
 
             if ($type->hasType(Types\UndefinedType::class)) {
                 return new Types\Zod\ZodOptionalType($this->convert(
-                    $flatTypes
+                    $subTypes
                         ->filter(fn(TypeContract $type) => !($type instanceof Types\UndefinedType))
                         ->firstOrFail(),
                 ));
             }
         }
 
-        return new Types\Zod\ZodUnionType(
-            ...$flatTypes->map(fn(TypeContract $type) => $this->convert($type))->all(),
-        );
+        return new Types\Zod\ZodUnionType(...$subTypes->map(fn(TypeContract $type) => $this->convert($type))->all());
     }
 }

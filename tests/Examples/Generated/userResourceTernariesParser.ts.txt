@@ -2,7 +2,7 @@ import {boolean, number, object, output, string, union} from 'zod';
 
 export const userResourceTernariesParser = object({
   ternary_to_int: number(),
-  ternary_to_compound: union([boolean(), number(), string()]),
+  ternary_to_compound: union([string(), union([boolean(), number()])]),
   short_ternary: string(),
 });
 

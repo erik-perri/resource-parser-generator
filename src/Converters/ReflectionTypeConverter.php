@@ -33,8 +33,6 @@ class ReflectionTypeConverter implements ReflectionTypeConverterContract
             }
         }
 
-        throw new RuntimeException(
-            sprintf('Reflection type converter not implemented for "%s"', get_class($type)),
-        );
+        throw new RuntimeException(sprintf('Unhandled reflection type "%s"', get_class($type)));
     }
 }

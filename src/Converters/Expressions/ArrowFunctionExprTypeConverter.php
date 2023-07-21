@@ -10,19 +10,20 @@ use PhpParser\Node\Expr\Variable;
 use PhpParser\Node\Param;
 use ResourceParserGenerator\Contexts\ConverterContext;
 use ResourceParserGenerator\Contexts\ConverterContextProcessor;
+use ResourceParserGenerator\Contracts\Converters\DeclaredTypeConverterContract;
 use ResourceParserGenerator\Contracts\Converters\Expressions\ExprTypeConverterContract;
 use ResourceParserGenerator\Contracts\Converters\ExpressionTypeConverterContract;
-use ResourceParserGenerator\Contracts\Converters\ParamTypeConverterContract;
 use ResourceParserGenerator\Contracts\Types\TypeContract;
 use ResourceParserGenerator\Resolvers\VariableResolver;
+use ResourceParserGenerator\Types\UntypedType;
 use RuntimeException;
 
 class ArrowFunctionExprTypeConverter implements ExprTypeConverterContract
 {
     public function __construct(
         private readonly ExpressionTypeConverterContract $expressionTypeConverter,
-        private readonly ParamTypeConverterContract $paramTypeConverter,
         private readonly ConverterContextProcessor $contextProcessor,
+        private readonly DeclaredTypeConverterContract $declaredTypeConverter,
     ) {
         //
     }
@@ -56,8 +57,13 @@ class ArrowFunctionExprTypeConverter implements ExprTypeConverterContract
                     throw new RuntimeException('Variable name is not a string');
                 }
 
+                $declaredType = $param->type
+                    ? $this->declaredTypeConverter->convert($param->type, $context->resolver())
+                    : (new UntypedType())
+                        ->setComment(sprintf('No declared type on parameter %s', $param->var->name));
+
                 return [
-                    $param->var->name => $this->paramTypeConverter->convert($param, $context),
+                    $param->var->name => $declaredType,
                 ];
             });
 

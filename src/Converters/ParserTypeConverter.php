@@ -113,6 +113,11 @@ class ParserTypeConverter implements ParserTypeConverterContract
             return new Types\Zod\ZodUndefinedType();
         }
 
+        if ($type instanceof Types\UntypedType && $type->comment()) {
+            return (new Types\Zod\ZodUnknownType())
+                ->setComment($type->comment());
+        }
+
         if ($type instanceof Types\UnionType) {
             return $this->convertUnion($type);
         }

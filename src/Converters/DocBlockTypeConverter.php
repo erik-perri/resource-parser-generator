@@ -23,7 +23,7 @@ use RuntimeException;
  *
  * "@param string $foo"
  *         |    |
- *         $type
+ *         TypeNode
  */
 class DocBlockTypeConverter implements DocBlockTypeConverterContract
 {

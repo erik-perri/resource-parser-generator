@@ -14,7 +14,7 @@ use RuntimeException;
 use Throwable;
 
 /**
- * This converts a resource's TypeContract into a parser's ParserTypeContract.
+ * This converts a resource's TypeContract into a parser's ParserTypeContract (StringType -> ZodStringType).
  */
 class ParserTypeConverter implements ParserTypeConverterContract
 {

@@ -16,6 +16,7 @@ use ResourceParserGenerator\DataObjects\EnumGeneratorConfiguration;
 use ResourceParserGenerator\DataObjects\ParserData;
 use ResourceParserGenerator\DataObjects\ParserGeneratorConfiguration;
 use ResourceParserGenerator\Exceptions\ConfigurationParserException;
+use ResourceParserGenerator\Filesystem\ImportPathFinder;
 use ResourceParserGenerator\Parsers\EnumGeneratorConfigurationParser;
 use ResourceParserGenerator\Parsers\ParserGeneratorConfigurationParser;
 use ResourceParserGenerator\Processors\EnumConfigurationProcessor;
@@ -61,6 +62,22 @@ class BuildResourceParsersCommand extends Command
             return static::FAILURE;
         }
 
+        $enumImportPath = null;
+        if ($parserConfiguration->outputPath && $enumConfiguration->outputPath) {
+            $enumImportPath = $this->resolve(ImportPathFinder::class)->find(
+                $enumConfiguration->outputPath,
+                $parserConfiguration->outputPath,
+            );
+            if (!$enumImportPath) {
+                $this->components->error(sprintf(
+                    'Could not find import path from "%s" to "%s".',
+                    $parserConfiguration->outputPath,
+                    $enumConfiguration->outputPath,
+                ));
+                return static::FAILURE;
+            }
+        }
+
         if ($parserConfiguration->parsers->isEmpty() && $enumConfiguration->enums->isEmpty()) {
             $this->components->info('No resources found to generate.');
             return static::FAILURE;
@@ -70,7 +87,7 @@ class BuildResourceParsersCommand extends Command
             $resources = $this->resolve(ResourceConfigurationProcessor::class)->process($parserConfiguration);
             $enums = $this->resolve(EnumConfigurationProcessor::class)->process($enumConfiguration, $resources);
             $parsers = $this->resolve(ParserConfigurationProcessor::class)
-                ->process($parserConfiguration, $resources, $enums);
+                ->process($parserConfiguration, $enumImportPath, $resources, $enums);
         } catch (Throwable $error) {
             $this->components->error('Failed to parse resources.');
             $this->components->bulletList(array_filter([$error->getMessage(), $error->getPrevious()?->getMessage()]));

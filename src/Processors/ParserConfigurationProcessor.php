@@ -27,12 +27,14 @@ class ParserConfigurationProcessor
      * Convert the resource types into parser types and return a collection of the data for the parsers.
      *
      * @param ParserGeneratorConfiguration $configuration
+     * @param string|null $enumImportPath
      * @param Collection<int, ResourceData> $resources
      * @param Collection<int, EnumData> $enums
      * @return Collection<int, ParserData>
      */
     public function process(
         ParserGeneratorConfiguration $configuration,
+        ?string $enumImportPath,
         Collection $resources,
         Collection $enums,
     ): Collection {
@@ -41,6 +43,7 @@ class ParserConfigurationProcessor
         /** @var ParserTypeConverterContract $parserTypeConverter */
         $parserTypeConverter = resolve(ParserTypeConverterContract::class, [
             'enums' => $enums,
+            'enumImportPath' => $enumImportPath,
         ]);
 
         foreach ($resources as $resource) {

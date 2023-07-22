@@ -20,9 +20,11 @@ class ParserTypeConverter implements ParserTypeConverterContract
 {
     /**
      * @param Collection<int, EnumData> $enums
+     * @param string|null $enumImportPath
      */
     public function __construct(
         private readonly Collection $enums,
+        private readonly ?string $enumImportPath,
     ) {
         //
     }
@@ -92,13 +94,13 @@ class ParserTypeConverter implements ParserTypeConverterContract
         }
 
         if ($type instanceof Types\EnumType) {
-            $parsedEnum = $this->enums->first(
+            $parsedEnumConfiguration = $this->enums->first(
                 fn(EnumData $enum) => $enum->configuration->className === $type->fullyQualifiedName,
-            );
-            if ($parsedEnum?->configuration->typeName && $parsedEnum->configuration->enumFile) {
+            )?->configuration;
+            if ($parsedEnumConfiguration?->typeName && $parsedEnumConfiguration->enumFile && $this->enumImportPath) {
                 return new Types\Zod\ZodNativeEnum(
-                    $parsedEnum->configuration->typeName,
-                    $parsedEnum->configuration->enumFile,
+                    $parsedEnumConfiguration->typeName,
+                    sprintf('%s/%s', $this->enumImportPath, $parsedEnumConfiguration->enumFile),
                     true,
                 );
             }

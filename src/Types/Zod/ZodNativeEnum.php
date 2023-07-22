@@ -27,11 +27,9 @@ class ZodNativeEnum implements ParserTypeContract
 
     public function imports(ParserGeneratorContextContract $context): ImportCollectionContract
     {
-        // TODO Figure out how to get the import file path by finding the difference between the configured
-        //      parser output path and enum output path.
         return new ImportCollection(
             new Import('nativeEnum', 'zod'),
-            new Import($this->importName, sprintf('./%s', $this->importFile), $this->isDefaultImport),
+            new Import($this->importName, $this->importFile, $this->isDefaultImport),
         );
     }
 }

@@ -249,8 +249,7 @@ class BuildResourceParsersCommandTest extends TestCase
 
         $this->assertEqualsCanonicalizing(
             array_keys($expectedOutput),
-            collect(scandir($outputPath))
-                ->filter(fn(string $file) => !in_array($file, ['.', '..', '.gitignore']))
+            collect(File::glob($outputPath . '/*'))
                 ->map(fn(string $file) => basename($file))
                 ->toArray(),
         );
@@ -487,8 +486,7 @@ class BuildResourceParsersCommandTest extends TestCase
 
         $this->assertEqualsCanonicalizing(
             array_keys($expectedOutput),
-            collect(scandir($outputPath))
-                ->filter(fn(string $file) => !in_array($file, ['.', '..', '.gitignore']))
+            collect(File::glob($outputPath . '/*'))
                 ->map(fn(string $file) => basename($file))
                 ->toArray(),
         );
@@ -576,8 +574,51 @@ class BuildResourceParsersCommandTest extends TestCase
         ];
     }
 
+    public function testParserGeneratorShouldImportEnumsFromCorrectPath(): void
+    {
+        $outputPath = dirname(__DIR__, 3) . '/Output';
+        $enumOutputPath = $outputPath . '/Enums';
+        $parserOutputPath = $outputPath . '/Parsers';
+
+        File::makeDirectory($enumOutputPath);
+        File::makeDirectory($parserOutputPath);
+
+        Config::set('build.enums', ['output_path' => $enumOutputPath]);
+        Config::set('build.resources', [
+            'output_path' => $parserOutputPath,
+            'sources' => [
+                new ParserConfiguration([UserResource::class, 'enumWithoutValue']),
+            ],
+        ]);
+
+        $examples = dirname(__DIR__, 3) . '/Examples/Generated';
+        $expectedOutput = [
+            'Enums/LegacyPostStatus.ts' => file_get_contents($examples . '/LegacyPostStatus.ts.txt'),
+            'Enums/PostStatus.ts' => file_get_contents($examples . '/PostStatus.ts.txt'),
+            'Parsers/userResourceEnumWithoutValueParser.ts' => file_get_contents(
+                $examples . '/userResourceEnumWithoutValueParser-relative.ts.txt',
+            ),
+        ];
+
+        $this->artisan(BuildResourceParsersCommand::class)
+            ->assertExitCode(0)
+            ->execute();
+
+        foreach ($expectedOutput as $file => $contents) {
+            $this->assertEquals($contents, file_get_contents($outputPath . '/' . $file));
+        }
+
+        $this->assertEqualsCanonicalizing(
+            array_keys($expectedOutput),
+            collect(File::glob($outputPath . '/**/*'))
+                ->map(fn(string $file) => basename(dirname($file)) . '/' . basename($file))
+                ->toArray(),
+        );
+    }
+
     private function clearTestOutputFiles(): void
     {
         File::delete(File::glob(dirname(__DIR__, 3) . '/Output/*'));
+        File::deleteDirectories(dirname(__DIR__, 3) . '/Output');
     }
 }

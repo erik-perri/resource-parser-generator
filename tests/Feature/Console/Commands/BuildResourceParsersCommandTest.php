@@ -227,8 +227,10 @@ class BuildResourceParsersCommandTest extends TestCase
     }
 
     #[DataProvider('generatedContentProvider')]
-    public function testShouldReturnExpectedContent(Closure $configFactory, array $expectedOutput): void
-    {
+    public function testResourceGeneratorShouldReturnExpectedContent(
+        Closure $configFactory,
+        array $expectedOutput,
+    ): void {
         $outputPath = dirname(__DIR__, 3) . '/Output';
         $config = $configFactory->call($this, $outputPath);
 
@@ -242,6 +244,14 @@ class BuildResourceParsersCommandTest extends TestCase
         foreach ($expectedOutput as $file => $contents) {
             $this->assertEquals($contents, file_get_contents($outputPath . '/' . $file));
         }
+
+        $this->assertEqualsCanonicalizing(
+            array_keys($expectedOutput),
+            collect(scandir($outputPath))
+                ->filter(fn(string $file) => !in_array($file, ['.', '..', '.gitignore']))
+                ->map(fn(string $file) => basename($file))
+                ->toArray(),
+        );
     }
 
     public static function generatedContentProvider(): array
@@ -286,6 +296,9 @@ class BuildResourceParsersCommandTest extends TestCase
                     ],
                 ],
                 'expectedOutput' => [
+                    'postResourceBaseParser.ts' => file_get_contents(
+                        $examples . '/postResourceBaseParser.ts.txt',
+                    ),
                     'userResourceChildArraysParser.ts' => file_get_contents(
                         $examples . '/userResourceChildArraysParser.ts.txt',
                     ),
@@ -385,6 +398,9 @@ class BuildResourceParsersCommandTest extends TestCase
                     'parsers.ts' => file_get_contents(
                         $examples . '/userResourceUsingResourceCollectionParser.ts.txt',
                     ),
+                    'postResourceSimpleParser.ts' => file_get_contents(
+                        $examples . '/postResourceSimpleParser.ts.txt',
+                    ),
                 ],
             ],
             'UserResource::usingWhenLoaded' => [
@@ -400,6 +416,9 @@ class BuildResourceParsersCommandTest extends TestCase
                 'expectedOutput' => [
                     'parser.ts' => file_get_contents(
                         $examples . '/userResourceUsingWhenLoadedParser.ts.txt',
+                    ),
+                    'postResourceSimpleParser.ts' => file_get_contents(
+                        $examples . '/postResourceSimpleParser.ts.txt',
                     ),
                 ],
             ],

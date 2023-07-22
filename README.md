@@ -14,9 +14,13 @@ Generate resource parsers based on the specified configuration.
 
 Checks if the generated files are up-to-date and exits with a non-zero exit code if they are not.
 
-##### `--config`
+##### `--enum-config`
 
-The Laravel configuration path to load parsers from. Default: `build.resources`
+The Laravel configuration path to load the enum configuration from. Default: `build.enums`
+
+##### `--parser-config`
+
+The Laravel configuration path to load the parser configuration from. Default: `build.resources`
 
 ## Configuration
 

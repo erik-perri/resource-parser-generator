@@ -1,0 +1,9 @@
+const Permission = {
+  Read: 'read',
+  Write: 'write',
+  Delete: 'delete',
+} as const;
+
+type Permission = typeof Permission[keyof typeof Permission];
+
+export default Permission;

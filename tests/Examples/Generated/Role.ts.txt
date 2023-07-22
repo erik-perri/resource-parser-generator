@@ -1,0 +1,8 @@
+const Role = {
+  Guest: 0,
+  Admin: 1,
+} as const;
+
+type Role = typeof Role[keyof typeof Role];
+
+export default Role;

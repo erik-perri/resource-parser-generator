@@ -1,0 +1,17 @@
+const PostStatusEnum = {
+  /**
+   * Draft
+   */
+  Draft: 'draft',
+  Published: 'published',
+  /**
+   * With
+   *
+   * New Lines
+   */
+  Archived: 'archived',
+} as const;
+
+type PostStatusEnum = typeof PostStatusEnum[keyof typeof PostStatusEnum];
+
+export default PostStatusEnum;

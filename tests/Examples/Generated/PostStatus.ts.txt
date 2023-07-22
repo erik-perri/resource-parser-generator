@@ -1,0 +1,17 @@
+const PostStatus = {
+  /**
+   * Draft
+   */
+  Draft: 'draft',
+  Published: 'published',
+  /**
+   * With
+   *
+   * New Lines
+   */
+  Archived: 'archived',
+} as const;
+
+type PostStatus = typeof PostStatus[keyof typeof PostStatus];
+
+export default PostStatus;

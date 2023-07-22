@@ -14,8 +14,10 @@ use ResourceParserGenerator\Contracts\Generators\ParserNameGeneratorContract;
 use ResourceParserGenerator\DataObjects\EnumConfiguration;
 use ResourceParserGenerator\DataObjects\ParserConfiguration;
 use ResourceParserGenerator\DataObjects\ResourcePath;
+use ResourceParserGenerator\Tests\Examples\Enums\LegacyPostStatus;
 use ResourceParserGenerator\Tests\Examples\Enums\Permission;
 use ResourceParserGenerator\Tests\Examples\Enums\PostStatus;
+use ResourceParserGenerator\Tests\Examples\Enums\Role;
 use ResourceParserGenerator\Tests\Examples\Resources\UserResource;
 use ResourceParserGenerator\Tests\TestCase;
 
@@ -226,8 +228,8 @@ class BuildResourceParsersCommandTest extends TestCase
             ->execute();
     }
 
-    #[DataProvider('generatedContentProvider')]
-    public function testResourceGeneratorShouldReturnExpectedContent(
+    #[DataProvider('generatedParserContentProvider')]
+    public function testParserGeneratorShouldReturnExpectedContent(
         Closure $configFactory,
         array $expectedOutput,
     ): void {
@@ -254,7 +256,7 @@ class BuildResourceParsersCommandTest extends TestCase
         );
     }
 
-    public static function generatedContentProvider(): array
+    public static function generatedParserContentProvider(): array
     {
         $examples = dirname(__DIR__, 3) . '/Examples/Generated';
 
@@ -444,6 +446,111 @@ class BuildResourceParsersCommandTest extends TestCase
                     ),
                     'relatedResourceVerboseParser.ts' => file_get_contents(
                         $examples . '/relatedResourceVerboseParser.ts.txt',
+                    ),
+                ],
+            ],
+        ];
+    }
+
+    #[DataProvider('generatedEnumContentProvider')]
+    public function testEnumGeneratorShouldReturnExpectedContent(
+        Closure $configFactory,
+        array $expectedOutput,
+    ): void {
+        $outputPath = dirname(__DIR__, 3) . '/Output';
+        $config = $configFactory->call($this, $outputPath);
+
+        Config::set('build.enums', $config);
+
+        $this->artisan(BuildResourceParsersCommand::class)
+            ->assertExitCode(0)
+            ->execute();
+
+        $this->assertEqualsCanonicalizing(
+            array_keys($expectedOutput),
+            collect(scandir($outputPath))
+                ->filter(fn(string $file) => !in_array($file, ['.', '..', '.gitignore']))
+                ->map(fn(string $file) => basename($file))
+                ->toArray(),
+        );
+
+        foreach ($expectedOutput as $file => $contents) {
+            $this->assertFileExists($outputPath . '/' . $file);
+            $this->assertEquals($contents, file_get_contents($outputPath . '/' . $file));
+        }
+    }
+
+    public static function generatedEnumContentProvider(): array
+    {
+        $examples = dirname(__DIR__, 3) . '/Examples/Generated';
+
+        return [
+            'LegacyPostStatus' => [
+                'config' => fn(string $outputPath) => [
+                    'output_path' => $outputPath,
+                    'sources' => [
+                        new EnumConfiguration(LegacyPostStatus::class),
+                    ],
+                ],
+                'expectedOutput' => [
+                    'LegacyPostStatus.ts' => file_get_contents(
+                        $examples . '/LegacyPostStatus.ts.txt',
+                    ),
+                ],
+            ],
+            'PostStatus' => [
+                'config' => fn(string $outputPath) => [
+                    'output_path' => $outputPath,
+                    'sources' => [
+                        new EnumConfiguration(PostStatus::class),
+                    ],
+                ],
+                'expectedOutput' => [
+                    'PostStatus.ts' => file_get_contents(
+                        $examples . '/PostStatus.ts.txt',
+                    ),
+                ],
+            ],
+            'PostStatus configured' => [
+                'config' => fn(string $outputPath) => [
+                    'output_path' => $outputPath,
+                    'sources' => [
+                        new EnumConfiguration(
+                            PostStatus::class,
+                            'enum.ts',
+                            'PostStatusEnum',
+                        ),
+                    ],
+                ],
+                'expectedOutput' => [
+                    'enum.ts' => file_get_contents(
+                        $examples . '/PostStatus-custom.ts.txt',
+                    ),
+                ],
+            ],
+            'Permission' => [
+                'config' => fn(string $outputPath) => [
+                    'output_path' => $outputPath,
+                    'sources' => [
+                        new EnumConfiguration(Permission::class),
+                    ],
+                ],
+                'expectedOutput' => [
+                    'Permission.ts' => file_get_contents(
+                        $examples . '/Permission.ts.txt',
+                    ),
+                ],
+            ],
+            'Role' => [
+                'config' => fn(string $outputPath) => [
+                    'output_path' => $outputPath,
+                    'sources' => [
+                        new EnumConfiguration(Role::class),
+                    ],
+                ],
+                'expectedOutput' => [
+                    'Role.ts' => file_get_contents(
+                        $examples . '/Role.ts.txt',
                     ),
                 ],
             ],

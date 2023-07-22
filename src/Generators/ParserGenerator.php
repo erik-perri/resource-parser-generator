@@ -12,6 +12,9 @@ use ResourceParserGenerator\DataObjects\Import;
 use ResourceParserGenerator\DataObjects\ImportCollection;
 use ResourceParserGenerator\DataObjects\ParserData;
 
+/**
+ * TODO Replace with AST based generation
+ */
 class ParserGenerator implements ParserGeneratorContract
 {
     /**
@@ -66,7 +69,7 @@ class ParserGenerator implements ParserGeneratorContract
         $content[] = sprintf(
             'export type %s = output<typeof %s>;',
             $parser->configuration->typeName,
-            $parser->configuration->variableName
+            $parser->configuration->variableName,
         );
 
         return trim(implode("\n", $content)) . "\n";

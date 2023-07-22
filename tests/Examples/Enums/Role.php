@@ -6,10 +6,10 @@ namespace ResourceParserGenerator\Tests\Examples\Enums;
 
 use Illuminate\Support\Collection;
 
-enum Role: string
+enum Role: int
 {
-    case Admin = 'admin';
-    case Guest = 'guest';
+    case Guest = 0;
+    case Admin = 1;
 
     /**
      * @return Collection<int, Permission>

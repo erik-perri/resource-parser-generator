@@ -1,0 +1,17 @@
+const LegacyPostStatus = {
+  /**
+   * In Draft
+   */
+  DRAFT: 'draft',
+  PUBLISHED: 'published',
+  /**
+   * With
+   *
+   * New Lines
+   */
+  ARCHIVED: 'archived',
+} as const;
+
+type LegacyPostStatus = typeof LegacyPostStatus[keyof typeof LegacyPostStatus];
+
+export default LegacyPostStatus;

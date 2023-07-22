@@ -25,7 +25,7 @@ class EnumConfigurationGenerator
     {
         $configuration = $generatorConfiguration->enum($className) ?? new EnumConfiguration($className);
 
-        $parserFile = $configuration->parserFile
+        $parserFile = $configuration->enumFile
             ?? $this->nameGenerator->generateFileName($configuration->className);
         $typeName = $configuration->typeName
             ?? $this->nameGenerator->generateTypeName($configuration->className);

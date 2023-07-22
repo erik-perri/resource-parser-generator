@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace ResourceParserGenerator\Processors;
 
 use Illuminate\Support\Collection;
+use ResourceParserGenerator\Contracts\Converters\ParserTypeConverterContract;
 use ResourceParserGenerator\Contracts\Types\TypeContract;
-use ResourceParserGenerator\Converters\ParserTypeConverter;
 use ResourceParserGenerator\DataObjects\EnumData;
 use ResourceParserGenerator\DataObjects\ParserData;
 use ResourceParserGenerator\DataObjects\ParserGeneratorConfiguration;
@@ -19,7 +19,6 @@ class ParserConfigurationProcessor
 {
     public function __construct(
         private readonly ParserConfigurationGenerator $parserConfigurationGenerator,
-        private readonly ParserTypeConverter $parserTypeConverter,
     ) {
         //
     }
@@ -39,6 +38,11 @@ class ParserConfigurationProcessor
     ): Collection {
         $parsers = collect();
 
+        /** @var ParserTypeConverterContract $parserTypeConverter */
+        $parserTypeConverter = resolve(ParserTypeConverterContract::class, [
+            'enums' => $enums,
+        ]);
+
         foreach ($resources as $resource) {
             try {
                 $parsers = $parsers->add(new ParserData(
@@ -46,8 +50,7 @@ class ParserConfigurationProcessor
                     $this->parserConfigurationGenerator
                         ->generate($configuration, $resource->className, $resource->methodName),
                     $resource->properties
-                        // TODO Pass enums down for parserTypeConverter to make use of
-                        ->map(fn(TypeContract $type) => $this->parserTypeConverter->convert($type)),
+                        ->map(fn(TypeContract $type) => $parserTypeConverter->convert($type)),
                 ));
             } catch (Throwable $error) {
                 throw new RuntimeException(sprintf(

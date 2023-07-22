@@ -335,6 +335,25 @@ class BuildResourceParsersCommandTest extends TestCase
                     ),
                 ],
             ],
+            'UserResource::enumWithoutValue' => [
+                'config' => fn(string $outputPath) => [
+                    'output_path' => $outputPath,
+                    'sources' => [
+                        new ParserConfiguration([UserResource::class, 'enumWithoutValue']),
+                    ],
+                ],
+                'expectedOutput' => [
+                    'LegacyPostStatus.ts' => file_get_contents(
+                        $examples . '/LegacyPostStatus.ts.txt',
+                    ),
+                    'PostStatus.ts' => file_get_contents(
+                        $examples . '/PostStatus.ts.txt',
+                    ),
+                    'userResourceEnumWithoutValueParser.ts' => file_get_contents(
+                        $examples . '/userResourceEnumWithoutValueParser.ts.txt',
+                    ),
+                ],
+            ],
             'UserResource::relatedResource' => [
                 'config' => fn(string $outputPath) => [
                     'output_path' => $outputPath,

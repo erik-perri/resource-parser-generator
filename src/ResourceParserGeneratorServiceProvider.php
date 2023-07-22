@@ -78,7 +78,7 @@ class ResourceParserGeneratorServiceProvider extends ServiceProvider
             $this->app->singleton(DeclaredTypeConverterContract::class, DeclaredTypeConverter::class);
             $this->app->singleton(DocBlockTypeConverterContract::class, DocBlockTypeConverter::class);
             $this->app->singleton(ExpressionTypeConverterContract::class, ExpressionTypeConverter::class);
-            $this->app->singleton(ParserTypeConverterContract::class, ParserTypeConverter::class);
+            $this->app->bind(ParserTypeConverterContract::class, ParserTypeConverter::class);
             $this->app->singleton(ReflectionTypeConverterContract::class, ReflectionTypeConverter::class);
             $this->app->singleton(VariableTypeConverterContract::class, VariableTypeConverter::class);
 

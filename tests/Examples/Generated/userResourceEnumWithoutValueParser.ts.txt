@@ -1,0 +1,10 @@
+import LegacyPostStatus from './LegacyPostStatus';
+import PostStatus from './PostStatus';
+import {nativeEnum, object, optional, output} from 'zod';
+
+export const userResourceEnumWithoutValueParser = object({
+  latestStatus: optional(nativeEnum(PostStatus)),
+  legacyStatus: optional(nativeEnum(LegacyPostStatus)),
+});
+
+export type UserResourceEnumWithoutValue = output<typeof userResourceEnumWithoutValueParser>;

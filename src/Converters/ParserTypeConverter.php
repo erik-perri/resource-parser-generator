@@ -8,6 +8,7 @@ use Illuminate\Support\Collection;
 use ResourceParserGenerator\Contracts\Converters\ParserTypeConverterContract;
 use ResourceParserGenerator\Contracts\Types\ParserTypeContract;
 use ResourceParserGenerator\Contracts\Types\TypeContract;
+use ResourceParserGenerator\DataObjects\EnumData;
 use ResourceParserGenerator\Types;
 use RuntimeException;
 use Throwable;
@@ -17,6 +18,15 @@ use Throwable;
  */
 class ParserTypeConverter implements ParserTypeConverterContract
 {
+    /**
+     * @param Collection<int, EnumData> $enums
+     */
+    public function __construct(
+        private readonly Collection $enums,
+    ) {
+        //
+    }
+
     public function convert(TypeContract $type): ParserTypeContract
     {
         try {
@@ -79,6 +89,19 @@ class ParserTypeConverter implements ParserTypeConverterContract
 
         if ($type instanceof Types\EmptyArrayType) {
             return new Types\Zod\ZodArrayType(null, new Types\Zod\ZodNeverType());
+        }
+
+        if ($type instanceof Types\EnumType) {
+            $parsedEnum = $this->enums->first(
+                fn(EnumData $enum) => $enum->configuration->className === $type->fullyQualifiedName,
+            );
+            if ($parsedEnum?->configuration->typeName && $parsedEnum->configuration->enumFile) {
+                return new Types\Zod\ZodNativeEnum(
+                    $parsedEnum->configuration->typeName,
+                    $parsedEnum->configuration->enumFile,
+                    true,
+                );
+            }
         }
 
         if ($type instanceof Types\ErrorType) {

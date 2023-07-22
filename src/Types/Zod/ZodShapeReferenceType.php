@@ -69,6 +69,6 @@ class ZodShapeReferenceType implements ParserTypeContract
         }
 
         // TODO Move path part to configuration?
-        return new ImportCollection(new Import($variableName, './' . $fileName));
+        return new ImportCollection(new Import($variableName, sprintf('./%s', $fileName)));
     }
 }

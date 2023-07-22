@@ -49,9 +49,10 @@ class StaticCallExprTypeConverter implements ExprTypeConverterContract
             );
         }
 
-        // When we encounter a `::collection` call on a resource, we convert the type to the resource flag the context
-        // as actually being a collection.  This allows us to hook into the existing format handling for loading the
-        // collection format.  It then gets converted into an array of the resource by the context processor.
+        // When we encounter a `::collection` call on a resource, we convert the type to the resource and flag the
+        // context as actually being a collection.  This allows us to hook into the existing format handling for loading
+        // the collection format.  It then gets converted into an array of the resource by the context processor when it
+        // encounters the flag.
         // TODO Figure out a cleaner approach.
         $methodReturn = $methodScope->returnType();
         if ($classScope->hasParent(Resource::class) &&
@@ -59,8 +60,7 @@ class StaticCallExprTypeConverter implements ExprTypeConverterContract
             $methodReturn instanceof Types\ClassType
         ) {
             $isAnonymousResource = $methodReturn->fullyQualifiedName() === AnonymousResourceCollection::class
-                || $this->classParser->parseType($methodReturn)
-                    ->hasParent(AnonymousResourceCollection::class);
+                || $this->classParser->parseType($methodReturn)->hasParent(AnonymousResourceCollection::class);
             if ($isAnonymousResource) {
                 $context->setIsCollection(true);
 

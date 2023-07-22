@@ -4,37 +4,28 @@ declare(strict_types=1);
 
 namespace ResourceParserGenerator\Types\Zod;
 
-use ResourceParserGenerator\Contracts\Converters\ParserTypeConverterContract;
+use Illuminate\Support\Collection;
 use ResourceParserGenerator\Contracts\ImportCollectionContract;
 use ResourceParserGenerator\Contracts\ParserGeneratorContextContract;
 use ResourceParserGenerator\Contracts\Types\ParserTypeContract;
-use ResourceParserGenerator\Contracts\Types\TypeContract;
 use ResourceParserGenerator\DataObjects\Import;
 use ResourceParserGenerator\DataObjects\ImportCollection;
-use ResourceParserGenerator\Types\ArrayWithPropertiesType;
 
 class ZodShapeType implements ParserTypeContract
 {
+    /**
+     * @param Collection<string, ParserTypeContract> $properties
+     */
     public function __construct(
-        private readonly ArrayWithPropertiesType $properties,
-        private readonly ParserTypeConverterContract $parserTypeConverter,
+        private readonly Collection $properties,
     ) {
         //
     }
 
-    public static function create(ArrayWithPropertiesType $properties): self
-    {
-        return resolve(self::class, ['properties' => $properties]);
-    }
-
     public function constraint(ParserGeneratorContextContract $context): string
     {
-        $properties = $this->properties->properties()->mapWithKeys(fn(TypeContract $type, string $key) => [
-            $key => $this->parserTypeConverter->convert($type)->constraint($context),
-        ])->sort();
-
-        return sprintf('object({%s})', $properties
-            ->map(fn(string $type, string $key) => sprintf('%s: %s', $key, $type))
+        return sprintf('object({%s})', $this->properties
+            ->map(fn(ParserTypeContract $type, string $key) => sprintf('%s: %s', $key, $type->constraint($context)))
             ->join(', '));
     }
 
@@ -42,8 +33,7 @@ class ZodShapeType implements ParserTypeContract
     {
         $imports = new ImportCollection(new Import('object', 'zod'));
 
-        foreach ($this->properties->properties() as $type) {
-            $parserType = $this->parserTypeConverter->convert($type);
+        foreach ($this->properties as $parserType) {
             $imports = $imports->merge($parserType->imports($context));
         }
 

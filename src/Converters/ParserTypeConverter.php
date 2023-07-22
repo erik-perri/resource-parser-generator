@@ -60,7 +60,9 @@ class ParserTypeConverter implements ParserTypeConverterContract
         }
 
         if ($type instanceof Types\ArrayWithPropertiesType) {
-            return Types\Zod\ZodShapeType::create($type);
+            return new Types\Zod\ZodShapeType($type->properties()->mapWithKeys(fn(TypeContract $type, string $key) => [
+                $key => $this->convert($type),
+            ])->sort());
         }
 
         if ($type instanceof Types\BoolType) {

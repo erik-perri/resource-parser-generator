@@ -52,6 +52,20 @@ class BuildResourceParsersCommand extends Command
             return static::FAILURE;
         }
 
+        if (!$parserConfiguration->outputPath && !$enumConfiguration->outputPath) {
+            $this->components->error(sprintf(
+                'No configuration found at "%s" or "%s" for generation.',
+                $this->option('parser-config'),
+                $this->option('enum-config'),
+            ));
+            return static::FAILURE;
+        }
+
+        if ($parserConfiguration->parsers->isEmpty() && $enumConfiguration->enums->isEmpty()) {
+            $this->components->info('No resources found to generate.');
+            return static::FAILURE;
+        }
+
         try {
             $resources = $this->resolve(ResourceConfigurationProcessor::class)->process($parserConfiguration);
             $enums = $this->resolve(EnumConfigurationProcessor::class)->process($enumConfiguration, $resources);
@@ -92,8 +106,16 @@ class BuildResourceParsersCommand extends Command
             return $returnValue;
         }
 
+        if (!$enumConfiguration->outputPath) {
+            throw new RuntimeException(sprintf(
+                'Found %d %s to generate but no output path was specified.',
+                $enums->count(),
+                Str::plural('enum', $enums->count()),
+            ));
+        }
+
         $this->components->info(
-            sprintf('Processing %s %s', $enums->count(), Str::plural('enum', $enums->count())),
+            sprintf('Processing %d %s', $enums->count(), Str::plural('enum', $enums->count())),
         );
 
         /**
@@ -141,8 +163,16 @@ class BuildResourceParsersCommand extends Command
             return $returnValue;
         }
 
+        if (!$parserConfiguration->outputPath) {
+            throw new RuntimeException(sprintf(
+                'Found %d %s to generate but no output path was specified.',
+                $parsers->count(),
+                Str::plural('parser', $parsers->count()),
+            ));
+        }
+
         $this->components->info(
-            sprintf('Processing %s %s', $parsers->count(), Str::plural('parser', $parsers->count())),
+            sprintf('Processing %d %s', $parsers->count(), Str::plural('parser', $parsers->count())),
         );
 
         /**

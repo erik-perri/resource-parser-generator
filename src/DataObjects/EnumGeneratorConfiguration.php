@@ -12,7 +12,7 @@ class EnumGeneratorConfiguration
     public readonly ReadOnlyCollection $enums;
 
     public function __construct(
-        public readonly string $outputPath,
+        public readonly ?string $outputPath,
         EnumConfiguration ...$enums,
     ) {
         $this->enums = new ReadOnlyCollection(array_values($enums));

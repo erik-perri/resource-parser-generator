@@ -12,7 +12,7 @@ class ParserGeneratorConfiguration
     public readonly ReadOnlyCollection $parsers;
 
     public function __construct(
-        public readonly string $outputPath,
+        public readonly ?string $outputPath,
         ParserConfiguration ...$parsers,
     ) {
         $this->parsers = new ReadOnlyCollection(array_values($parsers));

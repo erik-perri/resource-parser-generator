@@ -23,9 +23,7 @@ class EnumGeneratorConfigurationParser
     {
         $config = Config::get($configKey);
         if (!$config) {
-            throw new ConfigurationParserException(
-                sprintf('No configuration found at "%s" for enum generation.', $configKey),
-            );
+            return new EnumGeneratorConfiguration(null);
         }
 
         $validator = Validator::make(

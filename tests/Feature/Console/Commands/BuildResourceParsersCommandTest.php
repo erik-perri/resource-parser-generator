@@ -38,16 +38,33 @@ class BuildResourceParsersCommandTest extends TestCase
     public function testShouldReturnFailureIfConfigurationIsNotSet(): void
     {
         $this->artisan(BuildResourceParsersCommand::class)
-            ->expectsOutputToContain(
-                'No configuration found at "build.resources" for resource parser generation.',
-            )
+            ->expectsOutputToContain('No configuration found at "build.resources" or "build.enums" for generation.')
+            ->assertExitCode(1)
+            ->execute();
+    }
+
+    public function testShouldReturnFailureIfNoResourcesAreFoundWhenResourceGenerationIsConfigured(): void
+    {
+        Config::set('build.resources', ['output_path' => dirname(__DIR__, 3) . '/Output']);
+
+        $this->artisan(BuildResourceParsersCommand::class)
+            ->expectsOutputToContain('No resources found to generate.')
+            ->assertExitCode(1)
+            ->execute();
+    }
+
+    public function testShouldReturnFailureIfNoEnumsAreFoundWhenEnumGenerationIsConfigured(): void
+    {
+        Config::set('build.enums', ['output_path' => dirname(__DIR__, 3) . '/Output']);
+
+        $this->artisan(BuildResourceParsersCommand::class)
+            ->expectsOutputToContain('No resources found to generate.')
             ->assertExitCode(1)
             ->execute();
     }
 
     public function testShouldReturnFailureIfClassDoesNotExist(): void
     {
-        Config::set('build.enums', ['output_path' => dirname(__DIR__, 3) . '/Output']);
         Config::set('build.resources', [
             'output_path' => dirname(__DIR__, 3) . '/Output',
             'sources' => [
@@ -64,7 +81,6 @@ class BuildResourceParsersCommandTest extends TestCase
 
     public function testShouldReturnFailureIfMethodDoesNotExist(): void
     {
-        Config::set('build.enums', ['output_path' => dirname(__DIR__, 3) . '/Output']);
         Config::set('build.resources', [
             'output_path' => dirname(__DIR__, 3) . '/Output',
             'sources' => [
@@ -81,7 +97,6 @@ class BuildResourceParsersCommandTest extends TestCase
 
     public function testShouldReturnFailureIfFileDoesNotExist(): void
     {
-        Config::set('build.enums', ['output_path' => dirname(__DIR__, 3) . '/Output']);
         Config::set('build.resources', [
             'output_path' => '/where/is/this/file',
             'sources' => [
@@ -130,7 +145,6 @@ class BuildResourceParsersCommandTest extends TestCase
 
     public function testShouldFailWhenMultipleParsersAreConfiguredWithTheSameFile(): void
     {
-        Config::set('build.enums', ['output_path' => dirname(__DIR__, 3) . '/Output']);
         Config::set('build.resources', [
             'output_path' => dirname(__DIR__, 3) . '/Output',
             'sources' => [
@@ -147,7 +161,6 @@ class BuildResourceParsersCommandTest extends TestCase
 
     public function testShouldFailWhenMultipleParsersAreGeneratedWithTheSameFile(): void
     {
-        Config::set('build.enums', ['output_path' => dirname(__DIR__, 3) . '/Output']);
         Config::set('build.resources', [
             'output_path' => dirname(__DIR__, 3) . '/Output',
             'sources' => [
@@ -182,7 +195,6 @@ class BuildResourceParsersCommandTest extends TestCase
                 new EnumConfiguration(Permission::class, enumFile: 'enum.ts'),
             ],
         ]);
-        Config::set('build.resources', ['output_path' => dirname(__DIR__, 3) . '/Output']);
 
         $this->artisan(BuildResourceParsersCommand::class)
             ->expectsOutputToContain('Duplicate enum file "enum.ts" configured.')
@@ -199,7 +211,6 @@ class BuildResourceParsersCommandTest extends TestCase
                 new EnumConfiguration(Permission::class),
             ],
         ]);
-        Config::set('build.resources', ['output_path' => dirname(__DIR__, 3) . '/Output']);
 
         $mock = $this->mock(EnumNameGeneratorContract::class);
         $mock->expects('generateTypeName')

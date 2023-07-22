@@ -32,9 +32,7 @@ class ParserGeneratorConfigurationParser
     {
         $config = Config::get($configKey);
         if (!$config) {
-            throw new ConfigurationParserException(
-                sprintf('No configuration found at "%s" for resource parser generation.', $configKey),
-            );
+            return new ParserGeneratorConfiguration(null);
         }
 
         $validator = Validator::make(

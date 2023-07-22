@@ -27,9 +27,9 @@ The Laravel configuration path to load parsers from. Default: `build.resources`
 
 return [
     'enums' => [
-        // Where to put the generated files. (Required)
+        // Where to put the generated files. (Required for enum generation)
         'output_path' => dirname(__DIR__) . '/resources/scripts/generated/enums',
-        // The enums to include or customize. (Optional)
+        // The enums to include or customize if used by parser.
         'sources' => [
             // No overrides, type and file name generated from class name
             new EnumConfiguration(\App\Enums\Permission::class),
@@ -43,9 +43,9 @@ return [
         ],
     ],
     'resources' => [
-        // Where to put the generated files. (Required)
+        // Where to put the generated files. (Required for parser generation)
         'output_path' => dirname(__DIR__) . '/resources/scripts/generated/parsers',
-        // The parsers to include. (Required)
+        // The parsers to include.
         'sources' => [
             // No overrides, parser name and file name generated from class and method names
             new ParserConfiguration([\App\Http\Resources\UserResource::class, 'base']),

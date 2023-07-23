@@ -15,6 +15,7 @@
     "nunomaduro/larastan": "^2.0",
     "orchestra/testbench": "^7.0|^8.0",
     "phpunit/phpunit": "^10.0",
+    "phpstan/phpstan": "^1.10.26",
     "sourcetoad/enhanced-resources": "^6.0",
     "squizlabs/php_codesniffer": "^3.0"
   },

@@ -10,6 +10,7 @@ use ResourceParserGenerator\Tests\TestCase;
 
 class ImportPathFinderTest extends TestCase
 {
+    /** @dataProvider expectedResultProvider */
     #[DataProvider('expectedResultProvider')]
     public function testReturnsExpectedResults(
         string $importingFrom,

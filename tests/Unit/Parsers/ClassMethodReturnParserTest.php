@@ -19,6 +19,7 @@ use ResourceParserGenerator\Types\ArrayWithPropertiesType;
 #[CoversClass(ClassMethodReturnParser::class)]
 class ClassMethodReturnParserTest extends TestCase
 {
+    /** @dataProvider methodReturnProvider */
     #[DataProvider('methodReturnProvider')]
     public function testParsesClassMethodReturn(array $method, array|string $expected): void
     {

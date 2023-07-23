@@ -24,6 +24,7 @@ use ResourceParserGenerator\Tests\TestCase;
 #[CoversClass(DocBlockTypeConverter::class)]
 class DocBlockTypeConverterTest extends TestCase
 {
+    /** @dataProvider expectedParseResultsProvider */
     #[DataProvider('expectedParseResultsProvider')]
     public function testParsesTypeAsExpected(
         TypeNode $input,

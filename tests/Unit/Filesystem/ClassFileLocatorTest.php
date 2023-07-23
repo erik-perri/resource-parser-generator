@@ -15,6 +15,7 @@ use RuntimeException;
 #[CoversClass(ClassFileLocator::class)]
 class ClassFileLocatorTest extends TestCase
 {
+    /** @dataProvider invalidPathProvider */
     #[DataProvider('invalidPathProvider')]
     public function testFailsWhenPassedInvalidPaths(string $path, string $exception): void
     {
@@ -46,6 +47,7 @@ class ClassFileLocatorTest extends TestCase
         ];
     }
 
+    /** @dataProvider existingClassProvider */
     #[DataProvider('existingClassProvider')]
     public function testGetReturnsExpectedResultsForExistingClasses(string $class, string $file): void
     {
@@ -85,6 +87,7 @@ class ClassFileLocatorTest extends TestCase
         // No assertions, only expectations.
     }
 
+    /** @dataProvider existsResultProvider */
     #[DataProvider('existsResultProvider')]
     public function testExistsReturnsExpectedResult(string $class, bool $expected): void
     {

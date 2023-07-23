@@ -228,6 +228,7 @@ class BuildResourceParsersCommandTest extends TestCase
             ->execute();
     }
 
+    /** @dataProvider generatedParserContentProvider */
     #[DataProvider('generatedParserContentProvider')]
     public function testParserGeneratorShouldReturnExpectedContent(
         Closure $configFactory,
@@ -470,6 +471,7 @@ class BuildResourceParsersCommandTest extends TestCase
         ];
     }
 
+    /** @dataProvider generatedEnumContentProvider */
     #[DataProvider('generatedEnumContentProvider')]
     public function testEnumGeneratorShouldReturnExpectedContent(
         Closure $configFactory,

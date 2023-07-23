@@ -14,6 +14,7 @@ use ResourceParserGenerator\Tests\TestCase;
 #[CoversClass(ClassNameResolver::class)]
 class ClassNameResolverTest extends TestCase
 {
+    /** @dataProvider classProvider */
     #[DataProvider('classProvider')]
     public function testResolvesClasses(
         Closure $fileScopeFactory,

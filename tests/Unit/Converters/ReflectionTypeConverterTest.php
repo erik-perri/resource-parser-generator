@@ -15,6 +15,7 @@ use ResourceParserGenerator\Tests\TestCase;
 #[CoversClass(ReflectionTypeConverter::class)]
 class ReflectionTypeConverterTest extends TestCase
 {
+    /** @dataProvider expectedParseResultsProvider */
     #[DataProvider('expectedParseResultsProvider')]
     public function testParsesTypeAsExpected(Closure $inputFactory, string $expectedOutput): void
     {

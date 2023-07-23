@@ -19,6 +19,7 @@ use ResourceParserGenerator\Tests\TestCase;
 #[CoversClass(DocBlockTypeConverter::class)]
 class DocBlockParserTest extends TestCase
 {
+    /** @dataProvider parseProvider */
     #[DataProvider('parseProvider')]
     public function testParseProvidesExpectedResultForBasicTypes(string $docBlock, array|null $expectedResult): void
     {
@@ -143,6 +144,7 @@ class DocBlockParserTest extends TestCase
         $this->assertEquals('App\FullyQualifiedClass', $property->describe());
     }
 
+    /** @dataProvider parseMethodProvider */
     #[DataProvider('parseMethodProvider')]
     public function testParseProvidesExpectedResultForMethod(string $docBlock, array $expectedResult): void
     {
@@ -204,6 +206,7 @@ class DocBlockParserTest extends TestCase
         ];
     }
 
+    /** @dataProvider parseReturnProvider */
     #[DataProvider('parseReturnProvider')]
     public function testParseProvidesExpectedResultForReturn(string $docBlock, string|null $expectedResult): void
     {
@@ -253,6 +256,7 @@ class DocBlockParserTest extends TestCase
         ];
     }
 
+    /** @dataProvider parseVarsProvider */
     #[DataProvider('parseVarsProvider')]
     public function testParseProvidesExpectedResultForVars(string $docBlock, array $expectedResult): void
     {
@@ -339,6 +343,7 @@ class DocBlockParserTest extends TestCase
         ];
     }
 
+    /** @dataProvider parseParamsProvider */
     #[DataProvider('parseParamsProvider')]
     public function testParseProvidesExpectedResultForParams(string $docBlock, array $expectedResult): void
     {

@@ -21,6 +21,7 @@ use RuntimeException;
 #[CoversClass(PhpFileParser::class)]
 class PhpFileParserTest extends TestCase
 {
+    /** @dataProvider namespaceCodeProvider */
     #[DataProvider('namespaceCodeProvider')]
     public function testParsesNamespace(string $contents, string|null $expected): void
     {
@@ -55,6 +56,7 @@ PHP,
         ];
     }
 
+    /** @dataProvider invalidContentProvider */
     #[DataProvider('invalidContentProvider')]
     public function testThrowsErrorOnInvalidContent(
         string $contents,
@@ -105,6 +107,7 @@ PHP,
         ];
     }
 
+    /** @dataProvider useCodeProvider */
     #[DataProvider('useCodeProvider')]
     public function testParsesUseStatements(string $contents, array $expected): void
     {

@@ -12,6 +12,7 @@ use ResourceParserGenerator\Tests\TestCase;
 #[CoversClass(VariableTypeConverter::class)]
 class VariableTypeConverterTest extends TestCase
 {
+    /** @dataProvider expectedParseResultsProvider */
     #[DataProvider('expectedParseResultsProvider')]
     public function testParsesTypeAsExpected($input, string $expectedOutput): void
     {

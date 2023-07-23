@@ -19,6 +19,10 @@ use ResourceParserGenerator\Types;
 #[CoversClass(DeclaredTypeConverter::class)]
 class DeclaredTypeConverterTest extends TestCase
 {
+    /** @dataProvider identifierProvider */
+    /** @dataProvider intersectionProvider */
+    /** @dataProvider nullableProvider */
+    /** @dataProvider unionProvider */
     #[DataProvider('identifierProvider')]
     #[DataProvider('intersectionProvider')]
     #[DataProvider('nullableProvider')]

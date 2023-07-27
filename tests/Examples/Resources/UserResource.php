@@ -9,6 +9,7 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 use Phar;
 use ResourceParserGenerator\Tests\Examples\Enums\Permission;
+use ResourceParserGenerator\Tests\Examples\Enums\Role;
 use ResourceParserGenerator\Tests\Examples\Models\User;
 use ResourceParserGenerator\Tests\Examples\Resources\Nested\RelatedResource;
 
@@ -71,6 +72,18 @@ class UserResource extends JsonResource
             'permissions' => $this->resource->role->permissions()->map(
                 fn(Permission $permission) => $permission->value,
             ),
+        ];
+    }
+
+    public function matchedValue(): array
+    {
+        /** @noinspection PhpUnusedMatchConditionInspection PhpDuplicateMatchArmBodyInspection */
+        return [
+            'matched_value' => match ($this->resource->role) {
+                Role::Admin => PostResource::make($this->resource->latestPost)->format(PostResource::BASE),
+                Role::Guest => PostResource::make($this->resource->latestPost)->format(PostResource::SIMPLE),
+                default => PostResource::make($this->resource->latestPost)->format(PostResource::SIMPLE),
+            },
         ];
     }
 

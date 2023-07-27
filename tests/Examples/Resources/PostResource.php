@@ -14,9 +14,10 @@ use Sourcetoad\EnhancedResources\Resource;
  */
 class PostResource extends Resource
 {
+    public const BASE = 'base';
     public const SIMPLE = 'simple';
 
-    #[IsDefault]
+    #[Format(self::BASE), IsDefault]
     public function base(): array
     {
         return [

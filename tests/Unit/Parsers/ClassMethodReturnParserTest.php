@@ -57,6 +57,12 @@ class ClassMethodReturnParserTest extends TestCase
                     'name' => 'string|undefined',
                 ],
             ],
+            'UserResource::matchedValue' => [
+                'method' => [UserResource::class, 'matchedValue'],
+                'expected' => [
+                    'matched_value' => sprintf('%1$s::base|%1$s::simple', PostResource::class),
+                ],
+            ],
             'UserResource::ternaries' => [
                 'method' => [UserResource::class, 'ternaries'],
                 'expected' => [

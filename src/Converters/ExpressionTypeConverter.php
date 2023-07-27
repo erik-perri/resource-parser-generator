@@ -15,6 +15,7 @@ use PhpParser\Node\Expr\Cast\Int_ as CastInt_;
 use PhpParser\Node\Expr\Cast\String_ as CastString_;
 use PhpParser\Node\Expr\ClassConstFetch;
 use PhpParser\Node\Expr\ConstFetch;
+use PhpParser\Node\Expr\Match_;
 use PhpParser\Node\Expr\MethodCall;
 use PhpParser\Node\Expr\NullsafeMethodCall;
 use PhpParser\Node\Expr\NullsafePropertyFetch;
@@ -36,6 +37,7 @@ use ResourceParserGenerator\Converters\Expressions\BoolExprTypeConverter;
 use ResourceParserGenerator\Converters\Expressions\ClassConstFetchExprTypeConverter;
 use ResourceParserGenerator\Converters\Expressions\ConstFetchExprTypeConverter;
 use ResourceParserGenerator\Converters\Expressions\DoubleExprTypeConverter;
+use ResourceParserGenerator\Converters\Expressions\MatchTypeConverter;
 use ResourceParserGenerator\Converters\Expressions\MethodCallExprTypeConverter;
 use ResourceParserGenerator\Converters\Expressions\NumberExprTypeConverter;
 use ResourceParserGenerator\Converters\Expressions\PropertyFetchExprTypeConverter;
@@ -48,8 +50,8 @@ use RuntimeException;
 /**
  * This class takes a parsed generic PHP expression and attempts to determine what type is returned from the expression.
  *
- * When encountering a chained expression this will attempt to convert the last chunk, recursively calling this for each
- * part of the expression encountered until we find the end type.
+ * When encountering a chained expression this will attempt to convert final part in the chain, recursively calling this
+ * for each earlier part of the expression until we can determine the end type.
  *
  * `$this->resource->method()`
  *  |   |  |      |  |    |
@@ -88,6 +90,7 @@ class ExpressionTypeConverter implements ExpressionTypeConverterContract
             ConstFetch::class => ConstFetchExprTypeConverter::class,
             DNumber::class => DoubleExprTypeConverter::class,
             LNumber::class => NumberExprTypeConverter::class,
+            Match_::class => MatchTypeConverter::class,
             MethodCall::class => MethodCallExprTypeConverter::class,
             NullsafeMethodCall::class => MethodCallExprTypeConverter::class,
             NullsafePropertyFetch::class => PropertyFetchExprTypeConverter::class,

@@ -16,6 +16,6 @@ class ErrorType implements TypeContract
 
     public function describe(): string
     {
-        return 'error';
+        return sprintf('error(%s)', $this->exception->getMessage());
     }
 }

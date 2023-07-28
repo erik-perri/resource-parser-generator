@@ -37,15 +37,15 @@
     }
   },
   "scripts": {
-    "check": [
-      "@composer check-code",
-      "@composer check-style",
+    "check-code": [
+      "@composer analyze",
+      "@composer lint",
       "@composer test"
     ],
-    "check-code": [
+    "analyze": [
       "@php vendor/bin/phpstan analyse"
     ],
-    "check-style": [
+    "lint": [
       "@php vendor/bin/phpcs src/ tests/"
     ],
     "fix-style": [

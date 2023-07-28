@@ -3,8 +3,8 @@
 # complete, the script will output all of the logs and exit with a failure status code if any failed.
 
 COMMANDS=(
-  "composer check-style"
-  "composer check-code"
+  "composer analyze"
+  "composer lint"
   "composer test -- --coverage-html=coverage --coverage-text"
   "composer validate --strict"
 )

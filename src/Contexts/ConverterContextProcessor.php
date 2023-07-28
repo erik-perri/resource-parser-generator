@@ -6,14 +6,11 @@ namespace ResourceParserGenerator\Contexts;
 
 use BenSampo\Enum\Enum;
 use Closure;
-use ResourceParserGenerator\Contracts\ClassScopeContract;
 use ResourceParserGenerator\Contracts\Parsers\ClassParserContract;
 use ResourceParserGenerator\Contracts\Types\TypeContract;
 use ResourceParserGenerator\Parsers\Data\EnumScope;
 use ResourceParserGenerator\Types;
 use RuntimeException;
-use Sourcetoad\EnhancedResources\Formatting\Attributes\IsDefault;
-use Sourcetoad\EnhancedResources\Resource;
 
 /**
  * This class finalizes a converted TypeContract based on the collected context. Turning enums into their backed types,
@@ -29,7 +26,7 @@ class ConverterContextProcessor
 
     public function process(TypeContract $type, ConverterContext $context): TypeContract
     {
-        $type = $this->processChildTypes($type, function (TypeContract $type) use ($context) {
+        return $this->processChildTypes($type, function (TypeContract $type) {
             // If we're not a class or already a processed class we don't need to do anything
             if (!($type instanceof Types\ClassType) || $type instanceof Types\ClassWithMethodType) {
                 return $type;
@@ -56,56 +53,8 @@ class ConverterContextProcessor
                 return new Types\EnumType($returnScope->fullyQualifiedName(), $constants->firstOrFail()->type());
             }
 
-            // Convert any resource classes into a ClassWithMethodType containing their format
-            if ($returnScope->hasParent(Resource::class)) {
-                if ($context->formatMethod()) {
-                    $typeWithMethod = new Types\ClassWithMethodType(
-                        $type->fullyQualifiedName(),
-                        $type->alias(),
-                        $context->formatMethod(),
-                    );
-
-                    $context->setFormatMethod(null);
-
-                    return $typeWithMethod;
-                }
-
-                $defaultFormat = $this->findDefaultFormat($returnScope);
-                if ($defaultFormat) {
-                    return new Types\ClassWithMethodType(
-                        $type->fullyQualifiedName(),
-                        $type->alias(),
-                        $defaultFormat,
-                    );
-                }
-            }
-
             return $type;
         });
-
-        if ($context->isCollection()) {
-            $type = new Types\ArrayType(null, $type);
-
-            $context->setIsCollection(false);
-        }
-
-        return $type;
-    }
-
-    private function findDefaultFormat(ClassScopeContract $resourceClass): string|null
-    {
-        if (!$resourceClass->hasParent(Resource::class)) {
-            return null;
-        }
-
-        foreach ($resourceClass->methods() as $methodName => $methodScope) {
-            $attribute = $methodScope->attribute(IsDefault::class);
-            if ($attribute) {
-                return $methodName;
-            }
-        }
-
-        return null;
     }
 
     private function processChildTypes(TypeContract $type, Closure $callback): TypeContract

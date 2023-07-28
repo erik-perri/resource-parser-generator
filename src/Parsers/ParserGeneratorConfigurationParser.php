@@ -10,7 +10,7 @@ use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Validator;
 use ResourceParserGenerator\Contracts\DataObjects\ParserSourceContract;
-use ResourceParserGenerator\Contracts\Filesystem\ResourceFileFormatLocatorContract;
+use ResourceParserGenerator\Contracts\Filesystem\ResourceFormatLocatorContract;
 use ResourceParserGenerator\DataObjects\ParserConfiguration;
 use ResourceParserGenerator\DataObjects\ParserGeneratorConfiguration;
 use ResourceParserGenerator\DataObjects\ResourcePath;
@@ -21,7 +21,7 @@ class ParserGeneratorConfigurationParser
 {
     public function __construct(
         private readonly ResourceFileLocator $resourceFileLocator,
-        private readonly ResourceFileFormatLocatorContract $resourceFileFormatLocator,
+        private readonly ResourceFormatLocatorContract $resourceFileFormatLocator,
     ) {
     }
 
@@ -90,9 +90,9 @@ class ParserGeneratorConfigurationParser
                 } elseif ($source instanceof ResourcePath) {
                     $files = $this->resourceFileLocator->files($source);
                     foreach ($files as $file) {
-                        $formats = $this->resourceFileFormatLocator->formats($file);
+                        $formats = $this->resourceFileFormatLocator->formatsInFile($file);
                         foreach ($formats as $format) {
-                            $sources[] = new ParserConfiguration($format);
+                            $sources[] = new ParserConfiguration([$format->className, $format->methodName]);
                         }
                     }
                 } else {

@@ -21,7 +21,7 @@ use ResourceParserGenerator\Contracts\Converters\ParserTypeConverterContract;
 use ResourceParserGenerator\Contracts\Converters\ReflectionTypeConverterContract;
 use ResourceParserGenerator\Contracts\Converters\VariableTypeConverterContract;
 use ResourceParserGenerator\Contracts\Filesystem\ClassFileLocatorContract;
-use ResourceParserGenerator\Contracts\Filesystem\ResourceFileFormatLocatorContract;
+use ResourceParserGenerator\Contracts\Filesystem\ResourceFormatLocatorContract;
 use ResourceParserGenerator\Contracts\Generators\EnumGeneratorContract;
 use ResourceParserGenerator\Contracts\Generators\EnumNameGeneratorContract;
 use ResourceParserGenerator\Contracts\Generators\ParserGeneratorContract;
@@ -41,7 +41,7 @@ use ResourceParserGenerator\Converters\ParserTypeConverter;
 use ResourceParserGenerator\Converters\ReflectionTypeConverter;
 use ResourceParserGenerator\Converters\VariableTypeConverter;
 use ResourceParserGenerator\Filesystem\ClassFileLocator;
-use ResourceParserGenerator\Filesystem\ResourceFileFormatLocator;
+use ResourceParserGenerator\Filesystem\ResourceFormatLocator;
 use ResourceParserGenerator\Generators\EnumGenerator;
 use ResourceParserGenerator\Generators\EnumNameGenerator;
 use ResourceParserGenerator\Generators\ParserGenerator;
@@ -105,7 +105,7 @@ class ResourceParserGeneratorServiceProvider extends ServiceProvider
                     return new ClassFileLocator($composerVendorOverride ?: $this->app->basePath('vendor'));
                 },
             );
-            $this->app->singleton(ResourceFileFormatLocatorContract::class, ResourceFileFormatLocator::class);
+            $this->app->singleton(ResourceFormatLocatorContract::class, ResourceFormatLocator::class);
 
             // Parsers
             $this->app->singleton(ClassConstFetchValueParserContract::class, ClassConstFetchValueParser::class);

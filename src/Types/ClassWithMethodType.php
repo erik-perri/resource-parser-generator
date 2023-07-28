@@ -9,12 +9,14 @@ class ClassWithMethodType extends ClassType
     /**
      * @param class-string $fullyQualifiedName
      * @param string|null $alias
-     * @param string $methodName
+     * @param string|null $methodName
+     * @param bool $isCollection
      */
     public function __construct(
         string $fullyQualifiedName,
         string|null $alias,
-        private readonly string $methodName,
+        public readonly string|null $methodName,
+        public readonly bool $isCollection,
     ) {
         parent::__construct($fullyQualifiedName, $alias);
     }
@@ -24,11 +26,12 @@ class ClassWithMethodType extends ClassType
      */
     public function describe(): string
     {
-        return $this->fullyQualifiedName() . '::' . $this->methodName();
-    }
+        $description = $this->methodName
+            ? sprintf('%s::%s', $this->fullyQualifiedName(), $this->methodName)
+            : $this->fullyQualifiedName();
 
-    public function methodName(): string
-    {
-        return $this->methodName;
+        return $this->isCollection
+            ? sprintf('%s[]', $description)
+            : sprintf('%s', $description);
     }
 }

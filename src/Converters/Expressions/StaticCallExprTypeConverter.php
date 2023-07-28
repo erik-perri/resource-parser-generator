@@ -9,8 +9,10 @@ use PhpParser\Node\Expr\StaticCall;
 use ResourceParserGenerator\Contexts\ConverterContext;
 use ResourceParserGenerator\Contracts\Converters\DeclaredTypeConverterContract;
 use ResourceParserGenerator\Contracts\Converters\Expressions\ExprTypeConverterContract;
+use ResourceParserGenerator\Contracts\Filesystem\ResourceFormatLocatorContract;
 use ResourceParserGenerator\Contracts\Parsers\ClassParserContract;
 use ResourceParserGenerator\Contracts\Types\TypeContract;
+use ResourceParserGenerator\DataObjects\ResourceFormat;
 use ResourceParserGenerator\Types;
 use RuntimeException;
 use Sourcetoad\EnhancedResources\AnonymousResourceCollection;
@@ -21,6 +23,7 @@ class StaticCallExprTypeConverter implements ExprTypeConverterContract
     public function __construct(
         private readonly ClassParserContract $classParser,
         private readonly DeclaredTypeConverterContract $declaredTypeConverter,
+        private readonly ResourceFormatLocatorContract $resourceFileFormatLocator,
     ) {
         //
     }
@@ -49,25 +52,41 @@ class StaticCallExprTypeConverter implements ExprTypeConverterContract
             );
         }
 
-        // When we encounter a `::collection` call on a resource, we convert the type to the resource and flag the
-        // context as actually being a collection.  This allows us to hook into the existing format handling for loading
-        // the collection format.  It then gets converted into an array of the resource by the context processor when it
-        // encounters the flag.
-        // TODO Figure out a cleaner approach.
         $methodReturn = $methodScope->returnType();
-        if ($classScope->hasParent(Resource::class) &&
-            $methodName->name === 'collection' &&
-            $methodReturn instanceof Types\ClassType
-        ) {
-            $isAnonymousResource = $methodReturn->fullyQualifiedName() === AnonymousResourceCollection::class
-                || $this->classParser->parseType($methodReturn)->hasParent(AnonymousResourceCollection::class);
-            if ($isAnonymousResource) {
-                $context->setIsCollection(true);
-
-                return new Types\ClassType($classType->fullyQualifiedName(), $classType->alias());
+        if ($classScope->hasParent(Resource::class) && $methodReturn instanceof Types\ClassType) {
+            if ($methodName->name === 'collection' && $this->isAnonymousResource($methodReturn)) {
+                return new Types\ClassWithMethodType(
+                    $classType->fullyQualifiedName(),
+                    $classType->alias(),
+                    $this->resourceFileFormatLocator->formatsInClass($classScope)
+                        ->first(fn(ResourceFormat $format) => $format->isDefault)
+                        ?->methodName,
+                    true,
+                );
+            } elseif ($methodName->name === 'make' && $this->isResource($methodReturn)) {
+                return new Types\ClassWithMethodType(
+                    $classType->fullyQualifiedName(),
+                    $classType->alias(),
+                    $this->resourceFileFormatLocator->formatsInClass($classScope)
+                        ->first(fn(ResourceFormat $format) => $format->isDefault)
+                        ?->methodName,
+                    false,
+                );
             }
         }
 
         return $methodScope->returnType();
+    }
+
+    private function isAnonymousResource(Types\ClassType $type): bool
+    {
+        return $type->fullyQualifiedName() === AnonymousResourceCollection::class
+            || $this->classParser->parseType($type)->hasParent(AnonymousResourceCollection::class);
+    }
+
+    private function isResource(Types\ClassType $methodReturn): bool
+    {
+        return $methodReturn->fullyQualifiedName() === Resource::class
+            || $this->classParser->parseType($methodReturn)->hasParent(Resource::class);
     }
 }

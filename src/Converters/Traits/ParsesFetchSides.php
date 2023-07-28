@@ -24,15 +24,24 @@ trait ParsesFetchSides
 
     abstract protected function classParser(): ClassParserContract;
 
-    private function convertLeftSideToClassScope(
+    private function convertLeftSideToType(
         PropertyFetch|NullsafePropertyFetch|MethodCall|NullsafeMethodCall $expr,
         ConverterContext $context,
-    ): ClassScopeContract {
+    ): TypeContract {
         $leftSide = $this->expressionTypeConverter()->convert($expr->var, $context);
 
         if ($expr instanceof NullsafePropertyFetch || $expr instanceof NullsafeMethodCall) {
             $leftSide = $this->removeNullableFromUnion($expr, $leftSide);
         }
+
+        return $leftSide;
+    }
+
+    private function convertLeftSideToClassScope(
+        PropertyFetch|NullsafePropertyFetch|MethodCall|NullsafeMethodCall $expr,
+        ConverterContext $context,
+    ): ClassScopeContract {
+        $leftSide = $this->convertLeftSideToType($expr, $context);
 
         if (!($leftSide instanceof ClassType)) {
             throw new RuntimeException(

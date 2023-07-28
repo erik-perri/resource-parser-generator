@@ -22,10 +22,11 @@ use ResourceParserGenerator\Contracts\Parsers\ClassParserContract;
 use ResourceParserGenerator\Contracts\Parsers\ExpressionValueParserContract;
 use ResourceParserGenerator\Contracts\Types\TypeContract;
 use ResourceParserGenerator\Converters\Traits\ParsesFetchSides;
+use ResourceParserGenerator\DataObjects\ResourceFormat;
+use ResourceParserGenerator\Filesystem\ResourceFormatLocator;
 use ResourceParserGenerator\Parsers\Data\ClassScope;
 use ResourceParserGenerator\Types;
 use RuntimeException;
-use Sourcetoad\EnhancedResources\Formatting\Attributes\Format;
 use Sourcetoad\EnhancedResources\Resource;
 
 class MethodCallExprTypeConverter implements ExprTypeConverterContract
@@ -38,6 +39,7 @@ class MethodCallExprTypeConverter implements ExprTypeConverterContract
         private readonly ExpressionTypeConverterContract $expressionTypeConverter,
         private readonly ExpressionValueParserContract $expressionValueParser,
         private readonly NodeFinder $nodeFinder,
+        private readonly ResourceFormatLocator $resourceFileFormatLocator,
     ) {
         //
     }
@@ -78,7 +80,26 @@ class MethodCallExprTypeConverter implements ExprTypeConverterContract
         }
 
         if ($leftSide->hasParent(Resource::class) && $rightSide === 'format') {
-            $this->handleResourceFormat($expr, $context, $leftSide);
+            $format = $this->getResourceFormat($expr, $context, $leftSide);
+
+            if ($format) {
+                $actualType = $this->convertLeftSideToType($expr, $context);
+                if ($actualType instanceof Types\ClassWithMethodType) {
+                    $type = new Types\ClassWithMethodType(
+                        $actualType->fullyQualifiedName(),
+                        $actualType->alias(),
+                        $format,
+                        $actualType->isCollection,
+                    );
+                } elseif ($actualType instanceof Types\ClassType) {
+                    $type = new Types\ClassWithMethodType(
+                        $actualType->fullyQualifiedName(),
+                        $actualType->alias(),
+                        $format,
+                        false,
+                    );
+                }
+            }
         }
 
         if ($expr instanceof NullsafeMethodCall) {
@@ -198,11 +219,11 @@ class MethodCallExprTypeConverter implements ExprTypeConverterContract
         );
     }
 
-    private function handleResourceFormat(
+    private function getResourceFormat(
         MethodCall|NullsafeMethodCall $expr,
         ConverterContext $context,
         ClassScopeContract $classScope,
-    ): void {
+    ): ?string {
         $formatArg = $expr->getArgs()[0]->value;
         $formatName = $this->expressionValueParser->parse($formatArg, $context->resolver());
 
@@ -210,14 +231,13 @@ class MethodCallExprTypeConverter implements ExprTypeConverterContract
             throw new RuntimeException(sprintf('Unhandled non-string format name "%s"', gettype($formatArg)));
         }
 
-        if ($formatName) {
-            foreach ($classScope->methods() as $methodName => $methodScope) {
-                $attribute = $methodScope->attribute(Format::class);
-                if ($attribute && $attribute->argument(0) === $formatName) {
-                    $context->setFormatMethod($methodName);
-                }
-            }
+        $format = $this->resourceFileFormatLocator->formatsInClass($classScope)
+            ->first(fn(ResourceFormat $format) => $format->formatName === $formatName);
+        if ($format) {
+            return $format->methodName;
         }
+
+        return null;
     }
 
     private function handleWhen(

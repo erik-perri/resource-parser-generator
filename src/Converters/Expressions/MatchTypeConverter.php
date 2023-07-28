@@ -7,7 +7,6 @@ namespace ResourceParserGenerator\Converters\Expressions;
 use PhpParser\Node\Expr\Match_;
 use PhpParser\Node\MatchArm;
 use ResourceParserGenerator\Contexts\ConverterContext;
-use ResourceParserGenerator\Contexts\ConverterContextProcessor;
 use ResourceParserGenerator\Contracts\Converters\Expressions\ExprTypeConverterContract;
 use ResourceParserGenerator\Contracts\Converters\ExpressionTypeConverterContract;
 use ResourceParserGenerator\Contracts\Types\TypeContract;
@@ -17,7 +16,6 @@ use RuntimeException;
 class MatchTypeConverter implements ExprTypeConverterContract
 {
     public function __construct(
-        private readonly ConverterContextProcessor $contextProcessor,
         private readonly ExpressionTypeConverterContract $expressionTypeConverter,
     ) {
         //
@@ -32,8 +30,8 @@ class MatchTypeConverter implements ExprTypeConverterContract
         $types = collect($expr->arms)
             ->map(function (MatchArm $arm) use ($context) {
                 $childContext = ConverterContext::create($context->resolver(), $context->nonNullProperties());
-                $armResult = $this->expressionTypeConverter->convert($arm->body, $childContext);
-                return $this->contextProcessor->process($armResult, $childContext);
+
+                return $this->expressionTypeConverter->convert($arm->body, $childContext);
             })
             ->unique(fn(TypeContract $type) => $type->describe());
 

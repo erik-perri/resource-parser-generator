@@ -9,7 +9,6 @@ use PhpParser\Node\Expr\ArrowFunction;
 use PhpParser\Node\Expr\Variable;
 use PhpParser\Node\Param;
 use ResourceParserGenerator\Contexts\ConverterContext;
-use ResourceParserGenerator\Contexts\ConverterContextProcessor;
 use ResourceParserGenerator\Contracts\Converters\DeclaredTypeConverterContract;
 use ResourceParserGenerator\Contracts\Converters\Expressions\ExprTypeConverterContract;
 use ResourceParserGenerator\Contracts\Converters\ExpressionTypeConverterContract;
@@ -22,7 +21,6 @@ class ArrowFunctionExprTypeConverter implements ExprTypeConverterContract
 {
     public function __construct(
         private readonly ExpressionTypeConverterContract $expressionTypeConverter,
-        private readonly ConverterContextProcessor $contextProcessor,
         private readonly DeclaredTypeConverterContract $declaredTypeConverter,
     ) {
         //
@@ -36,9 +34,8 @@ class ArrowFunctionExprTypeConverter implements ExprTypeConverterContract
             $context->resolver()->setVariableResolver($variableResolver),
             $context->nonNullProperties(),
         );
-        $type = $this->expressionTypeConverter->convert($expr->expr, $childContext);
 
-        return $this->contextProcessor->process($type, $childContext);
+        return $this->expressionTypeConverter->convert($expr->expr, $childContext);
     }
 
     private function createVariableResolver(ArrowFunction $expr, ConverterContext $context): VariableResolver

@@ -8,7 +8,6 @@ use PhpParser\Node\Expr\Array_;
 use PhpParser\Node\Expr\ArrayItem;
 use PhpParser\Node\Scalar\String_;
 use ResourceParserGenerator\Contexts\ConverterContext;
-use ResourceParserGenerator\Contexts\ConverterContextProcessor;
 use ResourceParserGenerator\Contracts\Converters\Expressions\ExprTypeConverterContract;
 use ResourceParserGenerator\Contracts\Converters\ExpressionTypeConverterContract;
 use ResourceParserGenerator\Contracts\Types\TypeContract;
@@ -19,7 +18,6 @@ class ArrayExprTypeConverter implements ExprTypeConverterContract
 {
     public function __construct(
         private readonly ExpressionTypeConverterContract $expressionTypeConverter,
-        private readonly ConverterContextProcessor $contextProcessor,
     ) {
         //
     }
@@ -41,7 +39,7 @@ class ArrayExprTypeConverter implements ExprTypeConverterContract
                 $context = ConverterContext::create($context->resolver(), $context->nonNullProperties());
                 $type = $this->expressionTypeConverter->convert($item->value, $context);
 
-                return [$key->value => $this->contextProcessor->process($type, $context)];
+                return [$key->value => $type];
             }),
         );
     }

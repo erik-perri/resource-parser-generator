@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace ResourceParserGenerator\Contexts;
+namespace ResourceParserGenerator\Converters;
 
 use BenSampo\Enum\Enum;
 use Closure;
@@ -13,10 +13,9 @@ use ResourceParserGenerator\Types;
 use RuntimeException;
 
 /**
- * This class finalizes a converted TypeContract based on the collected context. Turning enums into their backed types,
- * and resource classes into references to their specified format method.
+ * This class converts a ClassType which actually represents an enum into an EnumType.
  */
-class ConverterContextProcessor
+class EnumTypeConverter
 {
     public function __construct(
         private readonly ClassParserContract $classParser,
@@ -24,39 +23,46 @@ class ConverterContextProcessor
         //
     }
 
-    public function process(TypeContract $type, ConverterContext $context): TypeContract
+    public function convert(TypeContract $type): TypeContract
     {
         return $this->processChildTypes($type, function (TypeContract $type) {
-            // If we're not a class or already a processed class we don't need to do anything
-            if (!($type instanceof Types\ClassType) || $type instanceof Types\ClassWithMethodType) {
+            if (!($type instanceof Types\ClassType)) {
                 return $type;
             }
 
-            $returnScope = $this->classParser->parseType($type);
+            $typeScope = $this->classParser->parseType($type);
 
             // Convert any enums into enum types containing their backed types
-            if ($returnScope instanceof EnumScope) {
-                $type = $returnScope->propertyType('value');
+            if ($typeScope instanceof EnumScope) {
+                $type = $typeScope->propertyType('value');
                 if (!$type) {
                     throw new RuntimeException(
-                        sprintf('Unexpected enum "%s" without type', $returnScope->name()),
+                        sprintf('Unexpected enum "%s" without type', $typeScope->name()),
                     );
                 }
 
-                return new Types\EnumType($returnScope->fullyQualifiedName(), $type);
-            } elseif ($returnScope->hasParent(Enum::class)) {
-                $constants = $returnScope->constants();
+                return new Types\EnumType($typeScope->fullyQualifiedName(), $type);
+            } elseif ($typeScope->hasParent(Enum::class)) {
+                $constants = $typeScope->constants();
                 if ($constants->isEmpty()) {
                     throw new RuntimeException('Unexpected legacy enum without constants');
                 }
 
-                return new Types\EnumType($returnScope->fullyQualifiedName(), $constants->firstOrFail()->type());
+                return new Types\EnumType($typeScope->fullyQualifiedName(), $constants->firstOrFail()->type());
             }
 
             return $type;
         });
     }
 
+    /**
+     * Since the enum type can actually be a child of a number of complex types we need to recursively process the
+     * children of the type to ensure that we convert any enums that we find.
+     *
+     * @param TypeContract $type
+     * @param Closure $callback
+     * @return TypeContract
+     */
     private function processChildTypes(TypeContract $type, Closure $callback): TypeContract
     {
         $updatedType = $callback($type);

@@ -38,8 +38,6 @@ class VariableTypeConverterTest extends TestCase
                 },
                 'object',
             ],
-            'resource' => [fopen('php://memory', 'r'), 'resource'],
-            'resource (closed)' => [tap(fopen('php://memory', 'r'), fn($resource) => fclose($resource)), 'resource'],
             'NULL' => [null, 'null'],
         ];
     }

@@ -109,7 +109,7 @@ class DocBlockTypeConverter implements DocBlockTypeConverterContract
                 case 'object':
                     return new Types\ObjectType();
                 case 'resource':
-                    return new Types\ResourceType();
+                    throw new RuntimeException('Resource type is not supported');
                 case 'string':
                     return new Types\StringType();
                 case 'void':

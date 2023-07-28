@@ -46,7 +46,7 @@ class DeclaredTypeConverter implements DeclaredTypeConverterContract
                 'mixed' => new Types\MixedType(),
                 'null' => new Types\NullType(),
                 'object' => new Types\ObjectType(),
-                'resource' => new Types\ResourceType(),
+                'resource' => throw new RuntimeException('Resource type is not supported'),
                 'string' => new Types\StringType(),
                 'void' => new Types\VoidType(),
                 default => throw new RuntimeException(sprintf('Unhandled identifier type "%s"', $type->name)),

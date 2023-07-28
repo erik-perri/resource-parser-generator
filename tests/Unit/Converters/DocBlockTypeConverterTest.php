@@ -134,10 +134,6 @@ class DocBlockTypeConverterTest extends TestCase
                 'input' => new IdentifierTypeNode('object'),
                 'expectedOutput' => 'object',
             ],
-            'resource' => [
-                'input' => new IdentifierTypeNode('resource'),
-                'expectedOutput' => 'resource',
-            ],
             'self' => [
                 'input' => new IdentifierTypeNode('self'),
                 'expectedOutput' => 'App\\Self',

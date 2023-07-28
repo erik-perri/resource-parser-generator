@@ -73,7 +73,6 @@ class DocBlockParserTest extends TestCase
                      * @property float $float
                      * @property array $array
                      * @property callable $callable
-                     * @property-read resource $resource
                      * @property null $nothing
                      * @property string|null $maybe
                      * @property string|bool|float|null $mixed
@@ -86,7 +85,6 @@ class DocBlockParserTest extends TestCase
                     'float' => 'float',
                     'array' => 'array',
                     'callable' => 'callable',
-                    'resource' => 'resource',
                     'nothing' => 'null',
                     'maybe' => 'null|string',
                     'mixed' => 'bool|float|null|string',
@@ -317,7 +315,6 @@ class DocBlockParserTest extends TestCase
                      * @var float $float
                      * @var array $array
                      * @var callable $callable
-                     * @var resource $resource
                      * @var null $nothing
                      * @var string|null $maybe
                      * @var string|bool|float|null $mixed
@@ -330,7 +327,6 @@ class DocBlockParserTest extends TestCase
                     'float' => 'float',
                     'array' => 'array',
                     'callable' => 'callable',
-                    'resource' => 'resource',
                     'nothing' => 'null',
                     'maybe' => 'null|string',
                     'mixed' => 'bool|float|null|string',

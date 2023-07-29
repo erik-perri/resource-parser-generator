@@ -84,15 +84,15 @@ class MethodCallExprTypeConverter implements ExprTypeConverterContract
 
             if ($format) {
                 $actualType = $this->convertLeftSideToType($expr, $context);
-                if ($actualType instanceof Types\ClassWithMethodType) {
-                    $type = new Types\ClassWithMethodType(
+                if ($actualType instanceof Types\ResourceType) {
+                    $type = new Types\ResourceType(
                         $actualType->fullyQualifiedName(),
                         $actualType->alias(),
                         $format,
                         $actualType->isCollection,
                     );
                 } elseif ($actualType instanceof Types\ClassType) {
-                    $type = new Types\ClassWithMethodType(
+                    $type = new Types\ResourceType(
                         $actualType->fullyQualifiedName(),
                         $actualType->alias(),
                         $format,
@@ -223,7 +223,7 @@ class MethodCallExprTypeConverter implements ExprTypeConverterContract
         MethodCall|NullsafeMethodCall $expr,
         ConverterContext $context,
         ClassScopeContract $classScope,
-    ): ?string {
+    ): ?ResourceFormat {
         $formatArg = $expr->getArgs()[0]->value;
         $formatName = $this->expressionValueParser->parse($formatArg, $context->resolver());
 
@@ -231,13 +231,8 @@ class MethodCallExprTypeConverter implements ExprTypeConverterContract
             throw new RuntimeException(sprintf('Unhandled non-string format name "%s"', gettype($formatArg)));
         }
 
-        $format = $this->resourceFileFormatLocator->formatsInClass($classScope)
+        return $this->resourceFileFormatLocator->formatsInClass($classScope)
             ->first(fn(ResourceFormat $format) => $format->formatName === $formatName);
-        if ($format) {
-            return $format->methodName;
-        }
-
-        return null;
     }
 
     private function handleWhen(

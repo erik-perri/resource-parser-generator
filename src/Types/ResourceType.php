@@ -4,18 +4,20 @@ declare(strict_types=1);
 
 namespace ResourceParserGenerator\Types;
 
-class ClassWithMethodType extends ClassType
+use ResourceParserGenerator\DataObjects\ResourceFormat;
+
+class ResourceType extends ClassType
 {
     /**
      * @param class-string $fullyQualifiedName
      * @param string|null $alias
-     * @param string|null $methodName
+     * @param ResourceFormat|null $format
      * @param bool $isCollection
      */
     public function __construct(
         string $fullyQualifiedName,
         string|null $alias,
-        public readonly string|null $methodName,
+        public readonly ResourceFormat|null $format,
         public readonly bool $isCollection,
     ) {
         parent::__construct($fullyQualifiedName, $alias);
@@ -26,8 +28,8 @@ class ClassWithMethodType extends ClassType
      */
     public function describe(): string
     {
-        $description = $this->methodName
-            ? sprintf('%s::%s', $this->fullyQualifiedName(), $this->methodName)
+        $description = $this->format
+            ? sprintf('%s::%s', $this->fullyQualifiedName(), $this->format->methodName)
             : $this->fullyQualifiedName();
 
         return $this->isCollection

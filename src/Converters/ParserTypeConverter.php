@@ -81,13 +81,13 @@ class ParserTypeConverter implements ParserTypeConverterContract
             return new Types\Zod\ZodBooleanType();
         }
 
-        if ($type instanceof Types\ClassWithMethodType) {
-            if (!$type->methodName) {
+        if ($type instanceof Types\ResourceType) {
+            if (!$type->format) {
                 return (new Types\Zod\ZodUnknownType())
-                    ->setComment(sprintf('Error: Missing method name for resource "%s"', $type->fullyQualifiedName()));
+                    ->setComment(sprintf('Error: Unknown format for resource "%s"', $type->fullyQualifiedName()));
             }
 
-            $parserType = new Types\Zod\ZodShapeReferenceType($type->fullyQualifiedName(), $type->methodName);
+            $parserType = new Types\Zod\ZodShapeReferenceType($type->fullyQualifiedName(), $type->format->methodName);
 
             if ($type->isCollection) {
                 return new Types\Zod\ZodArrayType(null, $parserType);

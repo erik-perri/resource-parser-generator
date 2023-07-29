@@ -53,8 +53,12 @@ class ResourceMethodParser implements ResourceMethodParserContract
                 : collect([$property]);
 
             foreach ($types as $type) {
-                if ($type instanceof Types\ClassWithMethodType && $type->methodName) {
-                    $parsedResources = $this->parse($type->fullyQualifiedName(), $type->methodName, $parsedResources);
+                if ($type instanceof Types\ResourceType && $type->format) {
+                    $parsedResources = $this->parse(
+                        $type->fullyQualifiedName(),
+                        $type->format->methodName,
+                        $parsedResources,
+                    );
                 }
             }
         }

@@ -55,21 +55,19 @@ class StaticCallExprTypeConverter implements ExprTypeConverterContract
         $methodReturn = $methodScope->returnType();
         if ($classScope->hasParent(Resource::class) && $methodReturn instanceof Types\ClassType) {
             if ($methodName->name === 'collection' && $this->isAnonymousResource($methodReturn)) {
-                return new Types\ClassWithMethodType(
+                return new Types\ResourceType(
                     $classType->fullyQualifiedName(),
                     $classType->alias(),
                     $this->resourceFileFormatLocator->formatsInClass($classScope)
-                        ->first(fn(ResourceFormat $format) => $format->isDefault)
-                        ?->methodName,
+                        ->first(fn(ResourceFormat $format) => $format->isDefault),
                     true,
                 );
             } elseif ($methodName->name === 'make' && $this->isResource($methodReturn)) {
-                return new Types\ClassWithMethodType(
+                return new Types\ResourceType(
                     $classType->fullyQualifiedName(),
                     $classType->alias(),
                     $this->resourceFileFormatLocator->formatsInClass($classScope)
-                        ->first(fn(ResourceFormat $format) => $format->isDefault)
-                        ?->methodName,
+                        ->first(fn(ResourceFormat $format) => $format->isDefault),
                     false,
                 );
             }

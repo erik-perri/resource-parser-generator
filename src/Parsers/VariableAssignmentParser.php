@@ -21,7 +21,7 @@ use ResourceParserGenerator\Types;
  * exist and their types. It currently does not respect the scope of the variables, so it will assume if it is assigned
  * in the statement it is available regardless of the actual scope.
  */
-class VariableParser
+class VariableAssignmentParser
 {
     public function __construct(
         private readonly DocBlockParser $docBlockParser,

@@ -32,7 +32,7 @@ class ClassMethodReturnParser implements ClassMethodReturnParserContract
         private readonly ExpressionTypeConverterContract $expressionTypeConverter,
         private readonly EnumTypeConverter $enumTypeConverter,
         private readonly ClassParserContract $classParser,
-        private readonly VariableParser $variableParser,
+        private readonly VariableAssignmentParser $variableAssignmentParser,
         private readonly NodeFinder $nodeFinder,
     ) {
         //
@@ -55,7 +55,7 @@ class ClassMethodReturnParser implements ClassMethodReturnParserContract
         }
 
         $variables = $methodScope->parameters()
-            ->merge($this->variableParser->parse($methodScope->node(), $classScope->resolver()));
+            ->merge($this->variableAssignmentParser->parse($methodScope->node(), $classScope->resolver()));
 
         $resolver = $classScope->resolver()
             ->setVariableResolver(VariableResolver::create($variables));

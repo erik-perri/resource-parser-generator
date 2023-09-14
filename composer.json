@@ -38,18 +38,18 @@
   },
   "scripts": {
     "check-code": [
-      "@composer analyze",
-      "@composer lint",
-      "@composer test"
-    ],
-    "analyze": [
-      "@php vendor/bin/phpstan analyse"
+      "@phpstan",
+      "@lint",
+      "@test"
     ],
     "lint": [
       "@php vendor/bin/phpcs src/ tests/"
     ],
-    "fix-style": [
+    "lint:fix": [
       "@php vendor/bin/phpcbf src/ tests/"
+    ],
+    "phpstan": [
+      "@php vendor/bin/phpstan analyse"
     ],
     "test": [
       "@php vendor/bin/phpunit"

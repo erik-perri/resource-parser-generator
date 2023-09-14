@@ -33,6 +33,7 @@ class ClassMethodReturnParser implements ClassMethodReturnParserContract
         private readonly EnumTypeConverter $enumTypeConverter,
         private readonly ClassParserContract $classParser,
         private readonly VariableParser $variableParser,
+        private readonly NodeFinder $nodeFinder,
     ) {
         //
     }
@@ -53,8 +54,6 @@ class ClassMethodReturnParser implements ClassMethodReturnParserContract
             );
         }
 
-        $nodeFinder = resolve(NodeFinder::class);
-
         $variables = $methodScope->parameters()
             ->merge($this->variableParser->parse($methodScope->node(), $classScope->resolver()));
 
@@ -64,7 +63,7 @@ class ClassMethodReturnParser implements ClassMethodReturnParserContract
         /**
          * @var Return_[] $returnNodes
          */
-        $returnNodes = $nodeFinder->findInstanceOf($methodScope->node(), Return_::class);
+        $returnNodes = $this->nodeFinder->findInstanceOf($methodScope->node(), Return_::class);
 
         /**
          * @var TypeContract[] $types

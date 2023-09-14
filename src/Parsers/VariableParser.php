@@ -21,6 +21,7 @@ class VariableParser
     public function __construct(
         private readonly DocBlockParser $docBlockParser,
         private readonly ExpressionTypeConverterContract $expressionTypeConverter,
+        private readonly NodeFinder $nodeFinder,
     ) {
         //
     }
@@ -37,12 +38,10 @@ class VariableParser
          */
         $variables = collect();
 
-        $nodeFinder = resolve(NodeFinder::class);
-
         /**
          * @var Assign[] $assignNodes
          */
-        $assignNodes = $nodeFinder->findInstanceOf($stmt, Assign::class);
+        $assignNodes = $this->nodeFinder->findInstanceOf($stmt, Assign::class);
 
         foreach ($assignNodes as $assignNode) {
             if (!($assignNode->var instanceof Variable)) {

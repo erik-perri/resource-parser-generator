@@ -4,10 +4,17 @@ declare(strict_types=1);
 
 namespace ResourceParserGenerator\Contracts\Resolvers;
 
+use Illuminate\Support\Collection;
 use ResourceParserGenerator\Contracts\Types\TypeContract;
 
 interface ResolverContract
 {
+    /**
+     * @param Collection<string, TypeContract> $variables
+     * @return self
+     */
+    public function extendVariables(Collection $variables): self;
+
     /**
      * @param string $name
      * @return class-string|null
@@ -24,6 +31,4 @@ interface ResolverContract
      * @return TypeContract|null
      */
     public function resolveVariable(string $name): TypeContract|null;
-
-    public function setVariableResolver(VariableResolverContract $variableResolver): self;
 }

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace ResourceParserGenerator\Converters\Expressions;
 
+use Illuminate\Support\Collection;
 use PhpParser\Node\Expr;
 use PhpParser\Node\Expr\ArrowFunction;
 use PhpParser\Node\Expr\Variable;
@@ -13,7 +14,6 @@ use ResourceParserGenerator\Contracts\Converters\DeclaredTypeConverterContract;
 use ResourceParserGenerator\Contracts\Converters\Expressions\ExprTypeConverterContract;
 use ResourceParserGenerator\Contracts\Converters\ExpressionTypeConverterContract;
 use ResourceParserGenerator\Contracts\Types\TypeContract;
-use ResourceParserGenerator\Resolvers\VariableResolver;
 use ResourceParserGenerator\Types\UntypedType;
 use RuntimeException;
 
@@ -28,19 +28,24 @@ class ArrowFunctionExprTypeConverter implements ExprTypeConverterContract
 
     public function convert(ArrowFunction $expr, ConverterContext $context): TypeContract
     {
-        $variableResolver = $this->createVariableResolver($expr, $context);
+        $variables = $this->parseVariables($expr, $context);
 
         $childContext = ConverterContext::create(
-            $context->resolver()->setVariableResolver($variableResolver),
+            $context->resolver()->extendVariables($variables),
             $context->nonNullProperties(),
         );
 
         return $this->expressionTypeConverter->convert($expr->expr, $childContext);
     }
 
-    private function createVariableResolver(ArrowFunction $expr, ConverterContext $context): VariableResolver
+    /**
+     * @param ArrowFunction $expr
+     * @param ConverterContext $context
+     * @return Collection<string, TypeContract>
+     */
+    private function parseVariables(ArrowFunction $expr, ConverterContext $context): Collection
     {
-        $convertedParams = collect($expr->params)
+        return collect($expr->params)
             ->mapWithKeys(function ($param) use ($context) {
                 if (!($param instanceof Param)) {
                     throw new RuntimeException(sprintf('Unhandled param type "%s"', get_class($param)));
@@ -63,7 +68,5 @@ class ArrowFunctionExprTypeConverter implements ExprTypeConverterContract
                     $param->var->name => $declaredType,
                 ];
             });
-
-        return VariableResolver::create($convertedParams);
     }
 }

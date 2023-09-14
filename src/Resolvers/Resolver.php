@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace ResourceParserGenerator\Resolvers;
 
+use Illuminate\Support\Collection;
 use ResourceParserGenerator\Contracts\Resolvers\ClassNameResolverContract;
 use ResourceParserGenerator\Contracts\Resolvers\ResolverContract;
 use ResourceParserGenerator\Contracts\Resolvers\VariableResolverContract;
@@ -36,6 +37,22 @@ class Resolver implements ResolverContract
         ]);
     }
 
+    /**
+     * @param Collection<string, TypeContract> $variables
+     * @return self
+     */
+    public function extendVariables(Collection $variables): self
+    {
+        $updatedVariableResolver = $this->variableResolver?->extend($variables)
+            ?? VariableResolver::create($variables);
+        
+        return self::create(
+            $this->classResolver,
+            $updatedVariableResolver,
+            $this->thisType,
+        );
+    }
+
     public function resolveClass(string $name): string|null
     {
         return $this->classResolver->resolve($name);
@@ -49,14 +66,5 @@ class Resolver implements ResolverContract
     public function resolveVariable(string $name): TypeContract|null
     {
         return $this->variableResolver?->resolve($name);
-    }
-
-    public function setVariableResolver(VariableResolverContract $variableResolver): self
-    {
-        return self::create(
-            $this->classResolver,
-            $variableResolver,
-            $this->thisType,
-        );
     }
 }

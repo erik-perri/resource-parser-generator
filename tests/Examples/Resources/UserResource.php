@@ -75,6 +75,34 @@ class UserResource extends JsonResource
         ];
     }
 
+    public function variableFromVariable(): array
+    {
+        $a = 1;
+        $b = '2';
+
+        if ($this->resource->created_at) {
+            $variable = $a;
+        } else {
+            $variable = $b;
+        }
+
+        return [
+            'variable' => $variable,
+        ];
+    }
+
+    public function variableFromVariableAndParameter(Request $request): array
+    {
+        $a = $request->hasPreviousSession();
+        $b = $request->fullUrl();
+
+        $variable = $this->resource->created_at ? $a : $b;
+
+        return [
+            'variable' => $variable,
+        ];
+    }
+
     public function variableHinted(): array
     {
         /** @var string $variable Should be nullable, but not due to override */

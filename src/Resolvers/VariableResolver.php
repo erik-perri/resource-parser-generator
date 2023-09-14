@@ -30,6 +30,15 @@ class VariableResolver implements VariableResolverContract
         ]);
     }
 
+    /**
+     * @param Collection<string, TypeContract> $variables
+     * @return self
+     */
+    public function extend(Collection $variables): self
+    {
+        return self::create($this->variables->merge($variables));
+    }
+
     public function resolve(string $name): TypeContract|null
     {
         return $this->variables->get($name);

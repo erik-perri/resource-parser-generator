@@ -58,7 +58,7 @@ class VariableAssignmentParser
 
             $type = $this->expressionTypeConverter->convert(
                 $assignNode->expr,
-                ConverterContext::create($resolver),
+                ConverterContext::create($resolver->extendVariables($variables)),
             );
 
             if ($assignNode->getDocComment()) {
@@ -80,6 +80,8 @@ class VariableAssignmentParser
             }
 
             $variables->put($assignNode->var->name, $type);
+
+            $resolver = $resolver->extendVariables($variables);
         }
 
         return $variables;

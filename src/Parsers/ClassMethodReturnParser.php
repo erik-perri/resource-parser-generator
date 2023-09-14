@@ -16,7 +16,6 @@ use ResourceParserGenerator\Contracts\Parsers\ClassParserContract;
 use ResourceParserGenerator\Contracts\Types\TypeContract;
 use ResourceParserGenerator\Converters\EnumTypeConverter;
 use ResourceParserGenerator\Parsers\Data\ClassMethodScope;
-use ResourceParserGenerator\Resolvers\VariableResolver;
 use ResourceParserGenerator\Types;
 use RuntimeException;
 use Throwable;
@@ -54,11 +53,14 @@ class ClassMethodReturnParser implements ClassMethodReturnParserContract
             );
         }
 
-        $variables = $methodScope->parameters()
-            ->merge($this->variableAssignmentParser->parse($methodScope->node(), $classScope->resolver()));
+        // We need to extend the class scope's resolver with the method parameters, that way when we're parsing the
+        // assigned variables we know what variables are available in case the parameters are used in any of the
+        // variable assignments.
+        $parameterResolver = $classScope->resolver()->extendVariables($methodScope->parameters());
+        $variables = $this->variableAssignmentParser->parse($methodScope->node(), $parameterResolver);
 
-        $resolver = $classScope->resolver()
-            ->setVariableResolver(VariableResolver::create($variables));
+        // Add the new variables to the resolver.
+        $resolver = $parameterResolver->extendVariables($variables);
 
         /**
          * @var Return_[] $returnNodes

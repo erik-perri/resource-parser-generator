@@ -12,6 +12,10 @@ use ResourceParserGenerator\DataObjects\ResourceData;
 use ResourceParserGenerator\Types;
 use RuntimeException;
 
+/**
+ * This class parses any array returns in the specified class and method, returning a collection containing the resource
+ * for the specified method and any child resources referenced.
+ */
 class ResourceMethodParser implements ResourceMethodParserContract
 {
     public function __construct(

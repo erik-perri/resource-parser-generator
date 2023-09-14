@@ -16,6 +16,11 @@ use ResourceParserGenerator\Contracts\Resolvers\ResolverContract;
 use ResourceParserGenerator\Contracts\Types\TypeContract;
 use ResourceParserGenerator\Types;
 
+/**
+ * This class parses the specified statement, inspecting the various assign calls to determine what variables might
+ * exist and their types. It currently does not respect the scope of the variables, so it will assume if it is assigned
+ * in the statement it is available regardless of the actual scope.
+ */
 class VariableParser
 {
     public function __construct(

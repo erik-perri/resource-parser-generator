@@ -57,6 +57,18 @@ class ClassMethodReturnParserTest extends TestCase
                     'name' => 'string|undefined',
                 ],
             ],
+            'UserResource::variableHinted' => [
+                'method' => [UserResource::class, 'variableHinted'],
+                'expected' => [
+                    'variable' => 'string',
+                ],
+            ],
+            'UserResource::variableUnion' => [
+                'method' => [UserResource::class, 'variableUnion'],
+                'expected' => [
+                    'variable' => 'int|string',
+                ],
+            ],
             'UserResource::matchedValue' => [
                 'method' => [UserResource::class, 'matchedValue'],
                 'expected' => [

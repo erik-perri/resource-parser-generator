@@ -75,6 +75,29 @@ class UserResource extends JsonResource
         ];
     }
 
+    public function variableHinted(): array
+    {
+        /** @var string $variable Should be nullable, but not due to override */
+        $variable = $this->resource->created_at?->toIso8601ZuluString();
+
+        return [
+            'variable' => $variable,
+        ];
+    }
+
+    public function variableUnion(): array
+    {
+        if ($this->resource->created_at) {
+            $variable = 'string';
+        } else {
+            $variable = 1;
+        }
+
+        return [
+            'variable' => $variable,
+        ];
+    }
+
     public function matchedValue(): array
     {
         /** @noinspection PhpUnusedMatchConditionInspection PhpDuplicateMatchArmBodyInspection */
